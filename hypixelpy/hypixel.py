@@ -8,7 +8,7 @@ from random import choice
 from time import time
 import grequests
 
-import leveling
+from hypixelpy import leveling
 
 HYPIXEL_API_URL = 'https://api.hypixel.net/'
 UUIDResolverAPI = "https://sessionserver.mojang.com/session/minecraft/profile/"

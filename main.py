@@ -1,8 +1,7 @@
 import os
 import os.path
 import sys
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-import hypixel
+from hypixelpy import hypixel
 import time
 
 def main():
