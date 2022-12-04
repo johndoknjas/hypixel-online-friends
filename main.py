@@ -49,6 +49,7 @@ def main():
             online_friends.append(data)
     
     online_friends = sorted(online_friends, key=lambda d: d['FKDR'], reverse=True)
+    time.sleep(len(online_friends)) # Rate limiting, as about to do two API calls per element in list.
     online_friends = [d for d in online_friends if hypixel.Player(d['UUID']).isOnline()]
     print("\nDone - online friends:\n")
     print("\n".join([str(d) for d in online_friends]))
