@@ -24,8 +24,7 @@ def main():
     playerFriendsUUIDS = player.getUUIDsOfFriends()
     playerFriendsUUIDS = list(reversed(playerFriendsUUIDS))
     for i in range(2, len(sys.argv)):
-        playerSubtract = hypixel.Player(ign_uuid_pairs.get(sys.argv[i].lower(), sys.argv[i].lower()))
-        friendsExclude = playerSubtract.getUUIDsOfFriends()
+        friendsExclude = hypixel.Player(ign_uuid_pairs.get(sys.argv[i].lower(), sys.argv[i].lower())).getUUIDsOfFriends()
         playerFriendsUUIDS = [f for f in playerFriendsUUIDS if f not in friendsExclude]
 
     online_friends = []
@@ -43,10 +42,14 @@ def main():
             print("Processed " + str(i))
         friend = hypixel.Player(playerFriendsUUIDS[i])
         if friend.isOnline():
-            data = {"name:": friend.getName(), "UUID": friend.getUUID()}
+            fkdr = (friend.JSON['stats']['Bedwars']['final_kills_bedwars'] / 
+                    friend.JSON['stats']['Bedwars']['final_deaths_bedwars'])
+            data = {'name': friend.getName(), 'FKDR': fkdr, 'UUID': friend.getUUID()}
             print(str(data))
             online_friends.append(data)
-
+    
+    online_friends = sorted(online_friends, key=lambda d: d['FKDR'], reverse=True)
+    online_friends = [d for d in online_friends if hypixel.Player(d['UUID']).isOnline()]
     print("\nDone - online friends:\n")
     print("\n".join([str(d) for d in online_friends]))
 
