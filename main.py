@@ -4,6 +4,13 @@ import sys
 from hypixelpy import hypixel
 import time
 
+def sleep_for_rate_limiting(seconds):
+    print("Sleeping " + str(seconds) + " seconds for rate limiting...")
+    time.sleep(seconds)
+
+def fkdr_division(final_kills, final_deaths):
+    return final_kills / final_deaths if final_deaths else final_kills
+
 def main():
     API_KEYS = []
     with open('api-key.txt') as file:
@@ -39,24 +46,32 @@ def main():
         num_api_calls = i*2
         while num_api_calls > 100 and num_api_calls / time_passed > 1.8:
             # Almost at API default rate limit of 120 per min.
-            print("sleeping 5 seconds for rate limiting...")
-            time.sleep(5)
+            sleep_for_rate_limiting(5)
             time_passed = time.time() - time_started
         if i % 10 == 0:
             print("Processed " + str(i))
         friend = hypixel.Player(playerFriendsUUIDS[i])
         if not just_online_friends or friend.isOnline():
-            fkdr = (friend.JSON['stats']['Bedwars']['final_kills_bedwars'] / 
-                    friend.JSON['stats']['Bedwars']['final_deaths_bedwars'])
+            fkdr = (fkdr_division(friend.JSON['stats']['Bedwars']['final_kills_bedwars'], 
+                                  friend.JSON['stats']['Bedwars']['final_deaths_bedwars'])
+                    if ('final_kills_bedwars' in friend.JSON['stats']['Bedwars'] and
+                        'final_deaths_bedwars' in friend.JSON['stats']['Bedwars'])
+                    else 0
+                   )
             data = {'name': friend.getName(), 'FKDR': fkdr, 'UUID': friend.getUUID()}
             print(str(data))
             friends.append(data)
     
     friends = sorted(friends, key=lambda d: d['FKDR'], reverse=True)
     if just_online_friends:
-        print("sleeping " + str(len(friends)) + " seconds for rate limiting...")
-        time.sleep(len(friends)) # Rate limiting, as about to do two API calls per element in list.
-        friends = [d for d in friends if hypixel.Player(d['UUID']).isOnline()]
+        updated_friends = []
+        sleep_for_rate_limiting(5)
+        for i in range(len(friends)):
+            if i % 5 == 0:
+                sleep_for_rate_limiting(5)
+            if hypixel.Player(friends[i]['UUID']).isOnline():
+                updated_friends.append(friends[i])
+        friends = updated_friends
         print("\nDone - online friends:\n")
     else:
         print("\nDone - all friends:\n")
