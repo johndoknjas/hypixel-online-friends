@@ -16,3 +16,5 @@ Instructions for running:
   - python3 main.py luvonox sammygreen will output all online friends who are friends of luvonox, but not sammygreen.
 - If you know the UUIDs of any players in your command line arguments, make a textfile called 'uuids.txt', and on each line write the player's username, followed by a space, followed by their UUID.
   - This isn't required, but it may be helpful with calling the hypixel api if you'll be running this script multiple times in a short window.
+- You can also add an optional argument called 'all', if you'd like to get all friends (not just those currently online).
+  - E.g., python3 main.py luvonox all

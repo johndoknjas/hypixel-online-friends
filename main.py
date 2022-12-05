@@ -11,7 +11,11 @@ def main():
             API_KEYS.append(line.rstrip())
     hypixel.setKeys(API_KEYS) # This sets the API keys that are going to be used.
 
-    playerName = sys.argv[1].lower()
+    args = [arg.lower() for arg in sys.argv]
+    just_online_friends = 'all' not in args
+    args = [arg for arg in args if arg != 'all']
+
+    playerName = args[1]
     ign_uuid_pairs = {} # key ign, value uuid
     if os.path.isfile('uuids.txt'):
         with open('uuids.txt') as file:
@@ -23,12 +27,11 @@ def main():
 
     playerFriendsUUIDS = player.getUUIDsOfFriends()
     playerFriendsUUIDS = list(reversed(playerFriendsUUIDS))
-    for i in range(2, len(sys.argv)):
-        friendsExclude = hypixel.Player(ign_uuid_pairs.get(sys.argv[i].lower(), sys.argv[i].lower())).getUUIDsOfFriends()
+    for i in range(2, len(args)):
+        friendsExclude = hypixel.Player(ign_uuid_pairs.get(args[i], args[i])).getUUIDsOfFriends()
         playerFriendsUUIDS = [f for f in playerFriendsUUIDS if f not in friendsExclude]
 
-    online_friends = []
-    print("Figuring out which friends are online:")
+    friends = []
     time_started = time.time()
 
     for i in range(len(playerFriendsUUIDS)):
@@ -36,23 +39,28 @@ def main():
         num_api_calls = i*2
         while num_api_calls > 100 and num_api_calls / time_passed > 1.8:
             # Almost at API default rate limit of 120 per min.
+            print("sleeping 5 seconds for rate limiting...")
             time.sleep(5)
             time_passed = time.time() - time_started
         if i % 10 == 0:
             print("Processed " + str(i))
         friend = hypixel.Player(playerFriendsUUIDS[i])
-        if friend.isOnline():
+        if not just_online_friends or friend.isOnline():
             fkdr = (friend.JSON['stats']['Bedwars']['final_kills_bedwars'] / 
                     friend.JSON['stats']['Bedwars']['final_deaths_bedwars'])
             data = {'name': friend.getName(), 'FKDR': fkdr, 'UUID': friend.getUUID()}
             print(str(data))
-            online_friends.append(data)
+            friends.append(data)
     
-    online_friends = sorted(online_friends, key=lambda d: d['FKDR'], reverse=True)
-    time.sleep(len(online_friends)) # Rate limiting, as about to do two API calls per element in list.
-    online_friends = [d for d in online_friends if hypixel.Player(d['UUID']).isOnline()]
-    print("\nDone - online friends:\n")
-    print("\n".join([str(d) for d in online_friends]))
+    friends = sorted(friends, key=lambda d: d['FKDR'], reverse=True)
+    if just_online_friends:
+        print("sleeping " + str(len(friends)) + " seconds for rate limiting...")
+        time.sleep(len(friends)) # Rate limiting, as about to do two API calls per element in list.
+        friends = [d for d in friends if hypixel.Player(d['UUID']).isOnline()]
+        print("\nDone - online friends:\n")
+    else:
+        print("\nDone - all friends:\n")
+    print("\n".join([str(d) for d in friends]))
 
 if __name__ == '__main__':
     main()
