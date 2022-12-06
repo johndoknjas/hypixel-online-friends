@@ -5,11 +5,16 @@ from hypixelpy import hypixel
 import time
 
 def sleep_for_rate_limiting(seconds):
-    print("Sleeping " + str(seconds) + " seconds for rate limiting...")
+    if seconds > 15:
+        print("Sleeping " + str(round(seconds, 2)) + " seconds for rate limiting...")
     time.sleep(seconds)
 
 def fkdr_division(final_kills, final_deaths):
     return final_kills / final_deaths if final_deaths else final_kills
+
+def how_long_to_sleep(num_api_calls_made, time_passed):
+    goal_time_passed = num_api_calls_made / 1.8
+    return goal_time_passed - time_passed + 5
 
 def main():
     API_KEYS = []
@@ -44,9 +49,9 @@ def main():
     for i in range(len(playerFriendsUUIDS)):
         time_passed = time.time() - time_started
         num_api_calls = i*2
-        while num_api_calls > 100 and num_api_calls / time_passed > 1.8:
+        if num_api_calls > 100 and num_api_calls / time_passed > 1.8:
             # Almost at API default rate limit of 120 per min.
-            sleep_for_rate_limiting(5)
+            sleep_for_rate_limiting(how_long_to_sleep(num_api_calls, time_passed))
             time_passed = time.time() - time_started
         if i % 10 == 0:
             print("Processed " + str(i))
@@ -65,9 +70,9 @@ def main():
     friends = sorted(friends, key=lambda d: d['FKDR'], reverse=True)
     if just_online_friends:
         updated_friends = []
-        sleep_for_rate_limiting(5)
+        sleep_for_rate_limiting(10)
         for i in range(len(friends)):
-            if i % 5 == 0:
+            if i % 5 == 0 and i > 0:
                 sleep_for_rate_limiting(5)
             if hypixel.Player(friends[i]['UUID']).isOnline():
                 updated_friends.append(friends[i])
