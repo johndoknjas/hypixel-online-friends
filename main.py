@@ -13,6 +13,9 @@ def fkdr_division(final_kills, final_deaths):
     return final_kills / final_deaths if final_deaths else final_kills
 
 def how_long_to_sleep(num_api_calls_made, time_passed):
+    # Hypixel API default rate limit is 120 calls per min.
+    if num_api_calls_made < 100 or num_api_calls_made / time_passed < 1.8:
+        return 0
     goal_time_passed = num_api_calls_made / 1.8
     return goal_time_passed - time_passed + 5
 
@@ -47,12 +50,7 @@ def main():
     time_started = time.time()
 
     for i in range(len(playerFriendsUUIDS)):
-        time_passed = time.time() - time_started
-        num_api_calls = i*2
-        if num_api_calls > 100 and num_api_calls / time_passed > 1.8:
-            # Almost at API default rate limit of 120 per min.
-            sleep_for_rate_limiting(how_long_to_sleep(num_api_calls, time_passed))
-            time_passed = time.time() - time_started
+        sleep_for_rate_limiting(how_long_to_sleep(i*2, time.time() - time_started))
         if i % 10 == 0:
             print("Processed " + str(i))
         friend = hypixel.Player(playerFriendsUUIDS[i])
