@@ -1,0 +1,5 @@
+- Have an option to get all friends of each of your friends, and store all this data in a folder.
+
+- Have option to read a textfile of uuids (representing a player's friends). The name of the textfile would be entered instead of the player's ign.
+
+- Make your own overlay! Possible to use your uuid to get all uuids of people in your game.
