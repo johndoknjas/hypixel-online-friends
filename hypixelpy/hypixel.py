@@ -9,6 +9,7 @@ from time import time
 import grequests
 
 from hypixelpy import leveling
+import re
 
 HYPIXEL_API_URL = 'https://api.hypixel.net/'
 UUIDResolverAPI = "https://sessionserver.mojang.com/session/minecraft/profile/"
@@ -194,10 +195,17 @@ class Player:
                 pass
         return playerInfo
 
-    def getName(self):
+    def getName(self, extra_safety_check=True):
         """ Just return player's name. """
         JSON = self.JSON
-        return JSON['displayname']
+        if not extra_safety_check:
+            return JSON['displayname']
+        sanitized_name = re.sub("[^A-Za-z0-9_]", "", JSON['displayname'])
+        # Removes any leading whitespace, and only keeps alphanumerics and underscores.
+        if JSON['displayname'] != sanitized_name:
+            raise RuntimeError("Potentially unsafe character in ign - sanitized version is " + sanitized_name
+            + ". To disable this safety check, call this function with getName(extra_safety_check=False).")
+        return sanitized_name
 
     def getLevel(self):
         """ This function calls leveling.py to calculate a player's network level. """

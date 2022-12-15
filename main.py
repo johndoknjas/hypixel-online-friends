@@ -3,7 +3,9 @@ import os.path
 import sys
 from hypixelpy import hypixel
 import time
-from typing import List
+from typing import List, Union, Optional
+import json
+import os
 
 def sleep_for_rate_limiting(seconds) -> None:
     if seconds > 15:
@@ -46,8 +48,8 @@ def create_player_object(playerName) -> hypixel.Player:
     return hypixel.Player(ign_uuid_pairs.get(playerName, playerName))
 
 def calculate_fkdr(player: hypixel.Player) -> float:
-    if ('final_kills_bedwars' not in player.JSON['stats']['Bedwars'] or
-        'final_deaths_bedwars' not in player.JSON['stats']['Bedwars']):
+    if ('stats' not in player.JSON or 'Bedwars' not in player.JSON['stats'] or
+        'final_kills_bedwars' not in player.JSON['stats']['Bedwars']):
         return 0.0
     return fkdr_division(player.JSON['stats']['Bedwars']['final_kills_bedwars'], 
                          player.JSON['stats']['Bedwars']['final_deaths_bedwars'])
@@ -79,15 +81,23 @@ def remove_friends_who_logged_off(friends: List[dict]) -> List[dict]:
 def print_list_of_dicts(lst: List[dict]) -> None:
     print("\n".join([str(d) for d in lst]))
 
+def write_data_as_json_to_file(data: Union[dict, List], description: str = "") -> None:
+    filename = os.path.join("results", description + " - " + str(time.time_ns()) + ".txt")
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with open(filename, "w") as f:
+        f.write(json.dumps(data, indent=4))
+
 def main():
     set_api_keys()
 
     args = [arg.lower() for arg in sys.argv]
     just_online_friends = 'all' not in args
+    just_uuids = 'justuuids' in args
     find_friends_of_friends = 'friendsoffriends' in args
-    args = list_subtract(args, ['all', 'friendsoffriends'])
+    args = list_subtract(args, ['all', 'friendsoffriends', 'justuuids'])
 
     player = create_player_object(args[1])
+    playerName = player.getName()
     print("fyi, the uuid of the player you're getting friends of is " + player.getUUID())
 
     playerFriendsUUIDS = list(reversed(player.getUUIDsOfFriends()))
@@ -102,6 +112,15 @@ def main():
         print("\nDone - online friends:\n")
     else:
         print("\nDone - all friends:\n")
+        list_for_file_output = [
+            {
+                'name': playerName,
+                'uuid': player.getUUID(), 
+                'fkdr': calculate_fkdr(player),
+                'friends': friends_to_output
+            }
+        ]
+        write_data_as_json_to_file(list_for_file_output, "Stats of friends for " + playerName)
 
     print_list_of_dicts(friends_to_output)
 
