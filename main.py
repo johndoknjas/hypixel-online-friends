@@ -7,6 +7,12 @@ from typing import List, Union, Optional
 import json
 import os
 
+# CONTINUE HERE - todos:
+    # Ready to start work on friends of friends feature. The option to just get UUIDS, and also the
+    # JSON format for writing to files, will be helpful.
+
+    # After that, maybe do an overlay.
+
 def sleep_for_rate_limiting(seconds) -> None:
     if seconds > 15:
         print("Sleeping " + str(round(seconds, 2)) + " seconds for rate limiting...")
@@ -54,7 +60,15 @@ def calculate_fkdr(player: hypixel.Player) -> float:
     return fkdr_division(player.JSON['stats']['Bedwars']['final_kills_bedwars'], 
                          player.JSON['stats']['Bedwars']['final_deaths_bedwars'])
 
-def iterate_over_friends(playerFriendsUUIDS, just_online_friends: bool) -> List[dict]:
+def iterate_over_friends(playerFriendsUUIDS, just_online_friends: bool, just_uuids_of_friends: bool) -> List[dict]:
+    if just_uuids_of_friends and not just_online_friends:
+        # Caller only wants the uuids, and no work has to be done to check whether each friend is online.
+        # So, can just put the passed in uuids of friends into a List of dicts and return.
+        uuids = []
+        for uuid in playerFriendsUUIDS:
+            uuids.append({'UUID': uuid})
+        return uuids
+    
     friends_data = []
     time_started = time.time()
     for i in range(len(playerFriendsUUIDS)):
@@ -91,10 +105,10 @@ def main():
     set_api_keys()
 
     args = [arg.lower() for arg in sys.argv]
+    just_uuids_of_friends = 'justuuidsoffriends' in args
     just_online_friends = 'all' not in args
-    just_uuids = 'justuuids' in args
     find_friends_of_friends = 'friendsoffriends' in args
-    args = list_subtract(args, ['all', 'friendsoffriends', 'justuuids'])
+    args = list_subtract(args, ['all', 'friendsoffriends', 'justuuidsoffriends'])
 
     player = create_player_object(args[1])
     playerName = player.getName()
@@ -105,7 +119,7 @@ def main():
         friendsExclude = create_player_object(args[i]).getUUIDsOfFriends()
         playerFriendsUUIDS = list_subtract(playerFriendsUUIDS, friendsExclude)
 
-    friends_to_output = iterate_over_friends(playerFriendsUUIDS, just_online_friends)
+    friends_to_output = iterate_over_friends(playerFriendsUUIDS, just_online_friends, just_uuids_of_friends)
     if just_online_friends:
         sleep_for_rate_limiting(10)
         friends_to_output = remove_friends_who_logged_off(friends_to_output)
@@ -121,7 +135,6 @@ def main():
             }
         ]
         write_data_as_json_to_file(list_for_file_output, "Stats of friends for " + playerName)
-
     print_list_of_dicts(friends_to_output)
 
 if __name__ == '__main__':
