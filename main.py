@@ -137,5 +137,26 @@ def main():
         write_data_as_json_to_file(list_for_file_output, "Stats of friends for " + playerName)
     print_list_of_dicts(friends_to_output)
 
+    if find_friends_of_friends:
+        list_for_file_output = [] # Will be a list of many dicts
+        time_started = time.time()
+        for i, friend_uuid in enumerate(playerFriendsUUIDS):
+            # Get just the uuids for all of this friend's friends.
+            if i % 50 == 0 and i > 0:
+                print("Retrieved UUIDS of " + str(i) + " friends' friends")
+            sleep_for_rate_limiting(how_long_to_sleep(i*2, time.time() - time_started))
+            friend = hypixel.Player(friend_uuid)
+            friends_of_friend = iterate_over_friends(list(reversed(friend.getUUIDsOfFriends())), False, True)
+            list_for_file_output.append(
+                {
+                    'name': friend.getName(),
+                    'uuid': friend.getUUID(), 
+                    'fkdr': calculate_fkdr(friend),
+                    'friends': friends_of_friend
+                }
+            )
+        write_data_as_json_to_file(list_for_file_output, "Friends of friends of " + playerName)
+
+
 if __name__ == '__main__':
     main()
