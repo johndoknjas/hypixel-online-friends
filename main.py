@@ -8,25 +8,17 @@ import json
 import os
 
 # CONTINUE HERE - todos:
-    # Ready to start work on friends of friends feature. The option to just get UUIDS, and also the
-    # JSON format for writing to files, will be helpful.
+    # Refactor the main function a little bit to get rid of code duplication.
+
+    # use enumerate for for loops
+
+    # Refactor the calculate fkdr function to be a little more elegant - if final kills / final deaths not
+    # in DB, give 0 and pass to calculate_fkdr function.
 
     # After that, maybe do an overlay.
 
-def sleep_for_rate_limiting(seconds) -> None:
-    if seconds > 15:
-        print("Sleeping " + str(round(seconds, 2)) + " seconds for rate limiting...")
-    time.sleep(seconds)
-
 def fkdr_division(final_kills: int, final_deaths: int) -> float:
     return final_kills / final_deaths if final_deaths else float(final_kills)
-
-def how_long_to_sleep(num_api_calls_made: int, time_passed: float) -> float:
-    # Hypixel API default rate limit is 120 calls per min.
-    if num_api_calls_made < 100 or num_api_calls_made / time_passed < 1.8:
-        return 0
-    goal_time_passed = num_api_calls_made / 1.8
-    return goal_time_passed - time_passed + 5
 
 def set_api_keys() -> None:
     API_KEYS = []
@@ -70,11 +62,9 @@ def iterate_over_friends(playerFriendsUUIDS, just_online_friends: bool, just_uui
         return uuids
     
     friends_data = []
-    time_started = time.time()
     for i in range(len(playerFriendsUUIDS)):
         if i % 10 == 0:
             print("Processed " + str(i))
-        sleep_for_rate_limiting(how_long_to_sleep(i*2, time.time() - time_started))
         friend = hypixel.Player(playerFriendsUUIDS[i])
         if just_online_friends and not friend.isOnline():
             continue
@@ -86,8 +76,6 @@ def iterate_over_friends(playerFriendsUUIDS, just_online_friends: bool, just_uui
 def remove_friends_who_logged_off(friends: List[dict]) -> List[dict]:
     updated_friends = []
     for i in range(len(friends)):
-        if i % 5 == 0 and i > 0:
-            sleep_for_rate_limiting(5)
         if hypixel.Player(friends[i]['UUID']).isOnline():
             updated_friends.append(friends[i])
     return updated_friends
@@ -121,7 +109,6 @@ def main():
 
     friends_to_output = iterate_over_friends(playerFriendsUUIDS, just_online_friends, just_uuids_of_friends)
     if just_online_friends:
-        sleep_for_rate_limiting(10)
         friends_to_output = remove_friends_who_logged_off(friends_to_output)
         print("\nDone - online friends:\n")
     else:
@@ -144,7 +131,6 @@ def main():
             # Get just the uuids for all of this friend's friends.
             if i % 50 == 0 and i > 0:
                 print("Retrieved UUIDS of " + str(i) + " friends' friends")
-            sleep_for_rate_limiting(how_long_to_sleep(i*2, time.time() - time_started))
             friend = hypixel.Player(friend_uuid)
             friends_of_friend = iterate_over_friends(list(reversed(friend.getUUIDsOfFriends())), False, True)
             list_for_file_output.append(

@@ -5,7 +5,7 @@ __version__ = '0.8.0'
 # TODO: Add API-usage stat-tracking. Like a counter of the number of requests and how many per minute etc.
 
 from random import choice
-from time import time
+from time import time, sleep
 import grequests
 
 from hypixelpy import leveling
@@ -19,6 +19,9 @@ verified_api_keys = []
 
 requestCache = {}
 cacheTime = 60
+
+num_api_calls_made: int = 0
+TIME_STARTED: float = time()
 
 class PlayerNotFoundException(Exception):
     """ Simple exception if a player/UUID is not found. This exception can usually be ignored.
@@ -37,8 +40,21 @@ class HypixelAPIError(Exception):
     """ Simple exception if something's gone very wrong and the program can't continue. """
     pass
 
+def sleep_for_rate_limiting() -> None:
+    time_passed = time() - TIME_STARTED
+    if num_api_calls_made < 100 or num_api_calls_made / time_passed < 1.8:
+        return
+    goal_time_passed = num_api_calls_made / 1.8
+    sleep_duration = goal_time_passed - time_passed + 5
+    if sleep_duration > 15:
+        print("Sleeping " + str(round(sleep_duration, 2)) + " seconds for rate limiting...")
+    sleep(sleep_duration)
+
 def getJSON(typeOfRequest, **kwargs):
+    global num_api_calls_made
     """ This private function is used for getting JSON from Hypixel's Public API. """
+    num_api_calls_made += 1
+    sleep_for_rate_limiting()
     requestEnd = ''
     if typeOfRequest == 'key':
         api_key = kwargs['key']
