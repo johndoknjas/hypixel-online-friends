@@ -22,6 +22,7 @@ cacheTime = 60
 
 num_api_calls_made: int = 0
 TIME_STARTED: float = time()
+CHOSEN_API_RATE: float = 1.9
 
 class PlayerNotFoundException(Exception):
     """ Simple exception if a player/UUID is not found. This exception can usually be ignored.
@@ -42,9 +43,9 @@ class HypixelAPIError(Exception):
 
 def sleep_for_rate_limiting() -> None:
     time_passed = time() - TIME_STARTED
-    if num_api_calls_made < 100 or num_api_calls_made / time_passed < 1.8:
+    if num_api_calls_made < 100 or num_api_calls_made / time_passed < CHOSEN_API_RATE:
         return
-    goal_time_passed = num_api_calls_made / 1.8
+    goal_time_passed = num_api_calls_made / CHOSEN_API_RATE
     sleep_duration = goal_time_passed - time_passed + 5
     if sleep_duration > 15:
         print("Sleeping " + str(round(sleep_duration, 2)) + " seconds for rate limiting...")

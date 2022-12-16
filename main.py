@@ -10,12 +10,7 @@ import os
 # CONTINUE HERE - todos:
     # Refactor the main function a little bit to get rid of code duplication.
 
-    # use enumerate for for loops
-
-    # Refactor the calculate fkdr function to be a little more elegant - if final kills / final deaths not
-    # in DB, give 0 and pass to calculate_fkdr function.
-
-    # After that, maybe do an overlay.
+    # Maybe do an overlay.
 
 def fkdr_division(final_kills: int, final_deaths: int) -> float:
     return final_kills / final_deaths if final_deaths else float(final_kills)
@@ -46,11 +41,10 @@ def create_player_object(playerName) -> hypixel.Player:
     return hypixel.Player(ign_uuid_pairs.get(playerName, playerName))
 
 def calculate_fkdr(player: hypixel.Player) -> float:
-    if ('stats' not in player.JSON or 'Bedwars' not in player.JSON['stats'] or
-        'final_kills_bedwars' not in player.JSON['stats']['Bedwars']):
+    if 'stats' not in player.JSON or 'Bedwars' not in player.JSON['stats']:
         return 0.0
-    return fkdr_division(player.JSON['stats']['Bedwars']['final_kills_bedwars'], 
-                         player.JSON['stats']['Bedwars']['final_deaths_bedwars'])
+    return fkdr_division(player.JSON['stats']['Bedwars'].get('final_kills_bedwars', 0), 
+                         player.JSON['stats']['Bedwars'].get('final_deaths_bedwars', 0))
 
 def iterate_over_friends(playerFriendsUUIDS, just_online_friends: bool, just_uuids_of_friends: bool) -> List[dict]:
     if just_uuids_of_friends and not just_online_friends:
@@ -62,10 +56,10 @@ def iterate_over_friends(playerFriendsUUIDS, just_online_friends: bool, just_uui
         return uuids
     
     friends_data = []
-    for i in range(len(playerFriendsUUIDS)):
+    for i, uuid in enumerate(playerFriendsUUIDS):
         if i % 10 == 0:
             print("Processed " + str(i))
-        friend = hypixel.Player(playerFriendsUUIDS[i])
+        friend = hypixel.Player(uuid)
         if just_online_friends and not friend.isOnline():
             continue
         data = {'name': friend.getName(), 'FKDR': calculate_fkdr(friend), 'UUID': friend.getUUID()}
@@ -74,11 +68,7 @@ def iterate_over_friends(playerFriendsUUIDS, just_online_friends: bool, just_uui
     return sorted(friends_data, key=lambda d: d['FKDR'], reverse=True)
 
 def remove_friends_who_logged_off(friends: List[dict]) -> List[dict]:
-    updated_friends = []
-    for i in range(len(friends)):
-        if hypixel.Player(friends[i]['UUID']).isOnline():
-            updated_friends.append(friends[i])
-    return updated_friends
+    return [friend for friend in friends if hypixel.Player(friend['UUID']).isOnline()]
 
 def print_list_of_dicts(lst: List[dict]) -> None:
     print("\n".join([str(d) for d in lst]))
@@ -126,7 +116,6 @@ def main():
 
     if find_friends_of_friends:
         list_for_file_output = [] # Will be a list of many dicts
-        time_started = time.time()
         for i, friend_uuid in enumerate(playerFriendsUUIDS):
             # Get just the uuids for all of this friend's friends.
             if i % 50 == 0 and i > 0:
