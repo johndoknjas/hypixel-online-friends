@@ -83,7 +83,7 @@ def read_json_textfile(relative_filepath: str, username: str) -> dict:
     with open(relative_filepath, 'r') as f:
         list_of_dicts = json.loads(f.read())
     dict_for_player = next(d for d in list_of_dicts if d['name'].lower() == username)
-    return {'name': username, 'uuid': dict_for_player['uuid'],
+    return {'name': dict_for_player['name'], 'uuid': dict_for_player['uuid'],
             'friends_uuids': [d['UUID'] for d in dict_for_player['friends']]}
 
 def process_args(args: List[str]) -> List[dict]:
