@@ -79,22 +79,47 @@ def write_data_as_json_to_file(data: Union[dict, List], description: str = "") -
     with open(filename, "w") as f:
         f.write(json.dumps(data, indent=4))
 
+def process_args(args: List[str]) -> List[dict]:
+    """args must only contain at least 1 ign string, and 0 or more .txt filenames. For any .txt filenames, they
+    must come immediately after the ign they correspond to.
+    Will return a list of dicts, where each dict has info for each player referred to by args. """
+    info_of_players: List[dict] = []
+    for i, arg in enumerate(args):
+        if arg.endswith('.txt'):
+            continue
+        if i < len(args) - 1 and args[i+1].endswith('.txt'):
+            # Continue here - read textfile represented by args[i+1] for player represented by arg
+            # Make an entry for name, uuid, friend_uuis, add to info_of_players.
+            pass
+        else:
+            player = create_player_object(arg)
+            info_of_players.append(
+                {
+                    'name': player.getName(), 
+                    'uuid': player.getUUID(),
+                    'friend_uuids': list(reversed(player.getUUIDsOfFriends()))
+                }
+            )
+    return info_of_players
+
 def main():
     set_api_keys()
 
-    args = [arg.lower() for arg in sys.argv]
+    args = [arg if arg.endswith('.txt') else arg.lower() for arg in sys.argv]
     just_uuids_of_friends = 'justuuidsoffriends' in args
     just_online_friends = 'all' not in args
     find_friends_of_friends = 'friendsoffriends' in args
-    args = list_subtract(args, ['all', 'friendsoffriends', 'justuuidsoffriends'])
+    args = list_subtract(args[1:], ['all', 'friendsoffriends', 'justuuidsoffriends'])
 
-    player = create_player_object(args[1])
-    playerName = player.getName()
-    print("fyi, the uuid of the player you're getting friends of is " + player.getUUID())
+    info_on_players: List[dict] = process_args(args)
+    playerName = info_on_players[0]['name']
+    playerUUID = info_on_players[0]['uuid']
+    playerFriendsUUIDS = info_on_players[0]['friend_uuids']
 
-    playerFriendsUUIDS = list(reversed(player.getUUIDsOfFriends()))
-    for i in range(2, len(args)):
-        friendsExclude = create_player_object(args[i]).getUUIDsOfFriends()
+    print("fyi, the uuid of the player you're getting friends of is " + playerUUID)
+
+    for player_subtract in info_on_players[1:]:
+        friendsExclude = player_subtract['friend_uuids']
         playerFriendsUUIDS = list_subtract(playerFriendsUUIDS, friendsExclude)
 
     friends_to_output = iterate_over_friends(playerFriendsUUIDS, just_online_friends, just_uuids_of_friends)
@@ -106,8 +131,7 @@ def main():
         list_for_file_output = [
             {
                 'name': playerName,
-                'uuid': player.getUUID(), 
-                'fkdr': calculate_fkdr(player),
+                'uuid': playerUUID,
                 'friends': friends_to_output
             }
         ]
