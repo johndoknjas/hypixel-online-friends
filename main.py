@@ -79,6 +79,13 @@ def write_data_as_json_to_file(data: Union[dict, List], description: str = "") -
     with open(filename, "w") as f:
         f.write(json.dumps(data, indent=4))
 
+def read_json_textfile(relative_filepath: str, username: str) -> dict:
+    with open(relative_filepath, 'r') as f:
+        list_of_dicts = json.loads(f.read())
+    dict_for_player = next(d for d in list_of_dicts if d['name'].lower() == username)
+    return {'name': username, 'uuid': dict_for_player['uuid'],
+            'friends_uuids': [d['UUID'] for d in dict_for_player['friends']]}
+
 def process_args(args: List[str]) -> List[dict]:
     """args must only contain at least 1 ign string, and 0 or more .txt filenames. For any .txt filenames, they
     must come immediately after the ign they correspond to.
@@ -88,16 +95,14 @@ def process_args(args: List[str]) -> List[dict]:
         if arg.endswith('.txt'):
             continue
         if i < len(args) - 1 and args[i+1].endswith('.txt'):
-            # Continue here - read textfile represented by args[i+1] for player represented by arg
-            # Make an entry for name, uuid, friend_uuis, add to info_of_players.
-            pass
+            info_of_players.append(read_json_textfile(args[i+1], arg))
         else:
             player = create_player_object(arg)
             info_of_players.append(
                 {
                     'name': player.getName(), 
                     'uuid': player.getUUID(),
-                    'friend_uuids': list(reversed(player.getUUIDsOfFriends()))
+                    'friends_uuids': list(reversed(player.getUUIDsOfFriends()))
                 }
             )
     return info_of_players
@@ -114,12 +119,13 @@ def main():
     info_on_players: List[dict] = process_args(args)
     playerName = info_on_players[0]['name']
     playerUUID = info_on_players[0]['uuid']
-    playerFriendsUUIDS = info_on_players[0]['friend_uuids']
+    playerFriendsUUIDS = info_on_players[0]['friends_uuids']
 
     print("fyi, the uuid of the player you're getting friends of is " + playerUUID)
+    print("This player has " + str(len(playerFriendsUUIDS)) + " friends total.")
 
     for player_subtract in info_on_players[1:]:
-        friendsExclude = player_subtract['friend_uuids']
+        friendsExclude = player_subtract['friends_uuids']
         playerFriendsUUIDS = list_subtract(playerFriendsUUIDS, friendsExclude)
 
     friends_to_output = iterate_over_friends(playerFriendsUUIDS, just_online_friends, just_uuids_of_friends)
@@ -142,7 +148,7 @@ def main():
         list_for_file_output = [] # Will be a list of many dicts
         for i, friend_uuid in enumerate(playerFriendsUUIDS):
             # Get just the uuids for all of this friend's friends.
-            if i % 50 == 0 and i > 0:
+            if i % 20 == 0 and i > 0:
                 print("Retrieved UUIDS of " + str(i) + " friends' friends")
             friend = hypixel.Player(friend_uuid)
             friends_of_friend = iterate_over_friends(list(reversed(friend.getUUIDsOfFriends())), False, True)
@@ -155,7 +161,6 @@ def main():
                 }
             )
         write_data_as_json_to_file(list_for_file_output, "Friends of friends of " + playerName)
-
 
 if __name__ == '__main__':
     main()
