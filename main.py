@@ -46,29 +46,33 @@ def calculate_fkdr(player: hypixel.Player) -> float:
     return fkdr_division(player.JSON['stats']['Bedwars'].get('final_kills_bedwars', 0), 
                          player.JSON['stats']['Bedwars'].get('final_deaths_bedwars', 0))
 
-def iterate_over_friends(playerFriendsUUIDS, just_online_friends: bool, just_uuids_of_friends: bool) -> List[dict]:
-    if just_uuids_of_friends and not just_online_friends:
+def iterate_over_players(playerUUIDS, must_be_online: bool, just_get_uuids: bool) -> List[dict]:
+    """Iterates over the passed in playerUUIDS param, and returns a list of dictionaries that is ready
+    for being written to a file as a json."""
+
+    if just_get_uuids and not must_be_online:
         # Caller only wants the uuids, and no work has to be done to check whether each friend is online.
         # So, can just put the passed in uuids of friends into a List of dicts and return.
-        uuids = []
-        for uuid in playerFriendsUUIDS:
-            uuids.append({'UUID': uuid})
-        return uuids
+        return [{'UUID': uuid} for uuid in playerUUIDS]
     
-    friends_data = []
-    for i, uuid in enumerate(playerFriendsUUIDS):
+    players_data = []
+    for i, uuid in enumerate(playerUUIDS):
         if i % 10 == 0:
             print("Processed " + str(i))
-        friend = hypixel.Player(uuid)
-        if just_online_friends and not friend.isOnline():
+        player = hypixel.Player(uuid)
+        if must_be_online and not player.isOnline():
             continue
-        data = {'name': friend.getName(), 'FKDR': calculate_fkdr(friend), 'UUID': friend.getUUID()}
+        data = {'name': player.getName(), 'FKDR': calculate_fkdr(player), 'UUID': player.getUUID()}
         print(str(data))
-        friends_data.append(data)
-    return sorted(friends_data, key=lambda d: d['FKDR'], reverse=True)
+        players_data.append(data)
+    
+    players_data = sorted(players_data, key=lambda d: d['FKDR'], reverse=True)
+    if must_be_online:
+        players_data = remove_players_who_logged_off(players_data)
+    return players_data
 
-def remove_friends_who_logged_off(friends: List[dict]) -> List[dict]:
-    return [friend for friend in friends if hypixel.Player(friend['UUID']).isOnline()]
+def remove_players_who_logged_off(players: List[dict]) -> List[dict]:
+    return [p for p in players if hypixel.Player(p['UUID']).isOnline()]
 
 def print_list_of_dicts(lst: List[dict]) -> None:
     print("\n".join([str(d) for d in lst]))
@@ -128,9 +132,8 @@ def main():
         friendsExclude = player_subtract['friends_uuids']
         playerFriendsUUIDS = list_subtract(playerFriendsUUIDS, friendsExclude)
 
-    friends_to_output = iterate_over_friends(playerFriendsUUIDS, just_online_friends, just_uuids_of_friends)
+    friends_to_output = iterate_over_players(playerFriendsUUIDS, just_online_friends, just_uuids_of_friends)
     if just_online_friends:
-        friends_to_output = remove_friends_who_logged_off(friends_to_output)
         print("\nDone - online friends:\n")
     else:
         print("\nDone - all friends:\n")
@@ -151,7 +154,7 @@ def main():
             if i % 20 == 0 and i > 0:
                 print("Retrieved UUIDS of " + str(i) + " friends' friends")
             friend = hypixel.Player(friend_uuid)
-            friends_of_friend = iterate_over_friends(list(reversed(friend.getUUIDsOfFriends())), False, True)
+            friends_of_friend = iterate_over_players(list(reversed(friend.getUUIDsOfFriends())), False, True)
             list_for_file_output.append(
                 {
                     'name': friend.getName(),
