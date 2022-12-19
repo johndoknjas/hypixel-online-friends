@@ -22,7 +22,7 @@ cacheTime = 60
 
 num_api_calls_made: int = 0
 TIME_STARTED: float = time()
-CHOSEN_API_RATE: float = 1.9
+CHOSEN_API_RATE: float = 1.8
 
 class PlayerNotFoundException(Exception):
     """ Simple exception if a player/UUID is not found. This exception can usually be ignored.

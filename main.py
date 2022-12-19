@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 import os.path
 import sys
@@ -5,12 +6,20 @@ from hypixelpy import hypixel
 import time
 from typing import List, Union, Optional
 import json
-import os
 
 # CONTINUE HERE - todos:
     # Refactor the main function a little bit to get rid of code duplication.
 
     # Maybe do an overlay.
+
+# This class represents specifications that a caller has when it calls the create_dictionary_report_for_player
+# function.
+class Specs:
+    def __init__(self, include_players_name_and_fkdr: bool, player_must_be_online: bool, 
+                 friends_specs: Optional[Specs]):
+        self.include_players_name_and_fkdr = include_players_name_and_fkdr
+        self.player_must_be_online = player_must_be_online
+        self.friends_specs = friends_specs
 
 def fkdr_division(final_kills: int, final_deaths: int) -> float:
     return final_kills / final_deaths if final_deaths else float(final_kills)
@@ -46,33 +55,51 @@ def calculate_fkdr(player: hypixel.Player) -> float:
     return fkdr_division(player.JSON['stats']['Bedwars'].get('final_kills_bedwars', 0), 
                          player.JSON['stats']['Bedwars'].get('final_deaths_bedwars', 0))
 
-def iterate_over_players(playerUUIDS, must_be_online: bool, just_get_uuids: bool) -> List[dict]:
-    """Iterates over the passed in playerUUIDS param, and returns a list of dictionaries that is ready
-    for being written to a file as a json."""
+def create_dictionary_report_for_player(playerUUID: str, specs_player: Specs, degrees_from_original_player: int,
+                                        print_friends_to_screen: bool,
+                                        friendsUUIDs: Optional[List[str]] = None) -> dict:
+    """Creates a dictionary representing info for a player. This dictionary will be ready to be written to a
+    file as a json."""
+    if (specs_player.include_players_name_and_fkdr or specs_player.player_must_be_online or
+        (specs_player.friends_specs and not friendsUUIDs)):
+        player = hypixel.Player(playerUUID)
+    if specs_player.player_must_be_online and not player.isOnline():
+        return {}
 
-    if just_get_uuids and not must_be_online:
-        # Caller only wants the uuids, and no work has to be done to check whether each friend is online.
-        # So, can just put the passed in uuids of friends into a List of dicts and return.
-        return [{'UUID': uuid} for uuid in playerUUIDS]
-    
-    players_data = []
-    for i, uuid in enumerate(playerUUIDS):
-        if i % 10 == 0:
+    player_data = {}
+    if specs_player.include_players_name_and_fkdr:
+        player_data['name'] = player.getName()
+        player_data['fkdr'] = calculate_fkdr(player)
+    player_data['uuid'] = playerUUID
+    if degrees_from_original_player == 1 and print_friends_to_screen:
+        print(str(player_data))
+
+    if not specs_player.friends_specs:
+        return player_data
+    # Now to use recursion to make a list of dictionaries for the player's friends, which will be the value
+    # of this 'friends' key in the player's dictionary:
+    friendsUUIDs = friendsUUIDs or player.getUUIDsOfFriends()
+    player_data['friends'] = []
+    for i, friendUUID in enumerate(friendsUUIDs):
+        if degrees_from_original_player == 0 and i % 20 == 0:
             print("Processed " + str(i))
-        player = hypixel.Player(uuid)
-        if must_be_online and not player.isOnline():
-            continue
-        data = {'name': player.getName(), 'FKDR': calculate_fkdr(player), 'UUID': player.getUUID()}
-        print(str(data))
-        players_data.append(data)
+        if report := create_dictionary_report_for_player(friendUUID, specs_player.friends_specs, 
+                                                         degrees_from_original_player + 1, print_friends_to_screen):
+            player_data['friends'].append(report)
     
-    players_data = sorted(players_data, key=lambda d: d['FKDR'], reverse=True)
-    if must_be_online:
-        players_data = remove_players_who_logged_off(players_data)
-    return players_data
+    # Do some final polishing if the current player is the original player:
+    if degrees_from_original_player == 0:
+        if 'friends' in player_data and all('fkdr' in d for d in player_data['friends']):
+            player_data['friends'] = sorted(player_data['friends'], key=lambda d: d['fkdr'], reverse=True)
+        if specs_player.friends_specs and specs_player.friends_specs.player_must_be_online:
+            player_data['friends'] = remove_players_who_logged_off(player_data['friends'])
+        if print_friends_to_screen:
+            print_list_of_dicts(player_data['friends'])
+
+    return player_data
 
 def remove_players_who_logged_off(players: List[dict]) -> List[dict]:
-    return [p for p in players if hypixel.Player(p['UUID']).isOnline()]
+    return [p for p in players if hypixel.Player(p['uuid']).isOnline()]
 
 def print_list_of_dicts(lst: List[dict]) -> None:
     print("\n".join([str(d) for d in lst]))
@@ -83,12 +110,27 @@ def write_data_as_json_to_file(data: Union[dict, List], description: str = "") -
     with open(filename, "w") as f:
         f.write(json.dumps(data, indent=4))
 
+def find_dict_for_given_username(d: dict, username: str) -> dict:
+    # d will be a dictionary read from a file in json format - it will have a uuid key, and possibly
+    # a name, fkdr, and friends key. The friends key would have a value that is a list of dictionaries,
+    # recursively following the same dictionary requirements.
+    if 'name' in d and d['name'].lower() == username.lower():
+        return d
+    elif 'friends' in d:
+        for friend_dict in d['friends']:
+            if result := find_dict_for_given_username(friend_dict, username):
+                return result
+    else:
+        return None
+
 def read_json_textfile(relative_filepath: str, username: str) -> dict:
     with open(relative_filepath, 'r') as f:
-        list_of_dicts = json.loads(f.read())
-    dict_for_player = next(d for d in list_of_dicts if d['name'].lower() == username)
-    return {'name': dict_for_player['name'], 'uuid': dict_for_player['uuid'],
-            'friends_uuids': [d['UUID'] for d in dict_for_player['friends']]}
+        dict_from_file = json.loads(f.read())
+    dict_for_player = find_dict_for_given_username(dict_from_file, username)
+    assert dict_for_player
+    dict_for_player['friends'] = [d['uuid'] for d in dict_for_player['friends']]
+    dict_for_player['friends_uuids'] = dict_for_player.pop('friends')
+    return dict_for_player
 
 def process_args(args: List[str]) -> List[dict]:
     """args must only contain at least 1 ign string, and 0 or more .txt filenames. For any .txt filenames, they
@@ -116,8 +158,8 @@ def main():
 
     args = [arg if arg.endswith('.txt') else arg.lower() for arg in sys.argv]
     just_uuids_of_friends = 'justuuidsoffriends' in args
-    just_online_friends = 'all' not in args
     find_friends_of_friends = 'friendsoffriends' in args
+    just_online_friends = 'all' not in args and not find_friends_of_friends
     args = list_subtract(args[1:], ['all', 'friendsoffriends', 'justuuidsoffriends'])
 
     info_on_players: List[dict] = process_args(args)
@@ -131,39 +173,14 @@ def main():
     for player_subtract in info_on_players[1:]:
         friendsExclude = player_subtract['friends_uuids']
         playerFriendsUUIDS = list_subtract(playerFriendsUUIDS, friendsExclude)
-
-    friends_to_output = iterate_over_players(playerFriendsUUIDS, just_online_friends, just_uuids_of_friends)
-    if just_online_friends:
-        print("\nDone - online friends:\n")
-    else:
-        print("\nDone - all friends:\n")
-        list_for_file_output = [
-            {
-                'name': playerName,
-                'uuid': playerUUID,
-                'friends': friends_to_output
-            }
-        ]
-        write_data_as_json_to_file(list_for_file_output, "Stats of friends for " + playerName)
-    print_list_of_dicts(friends_to_output)
-
-    if find_friends_of_friends:
-        list_for_file_output = [] # Will be a list of many dicts
-        for i, friend_uuid in enumerate(playerFriendsUUIDS):
-            # Get just the uuids for all of this friend's friends.
-            if i % 20 == 0 and i > 0:
-                print("Retrieved UUIDS of " + str(i) + " friends' friends")
-            friend = hypixel.Player(friend_uuid)
-            friends_of_friend = iterate_over_players(list(reversed(friend.getUUIDsOfFriends())), False, True)
-            list_for_file_output.append(
-                {
-                    'name': friend.getName(),
-                    'uuid': friend.getUUID(), 
-                    'fkdr': calculate_fkdr(friend),
-                    'friends': friends_of_friend
-                }
-            )
-        write_data_as_json_to_file(list_for_file_output, "Friends of friends of " + playerName)
+    
+    friendsfriendsSpecs = Specs(False, False, None) if find_friends_of_friends else None
+    friendsSpecs = Specs(not just_uuids_of_friends, just_online_friends, friendsfriendsSpecs)
+    playerSpecs = Specs(True, False, friendsSpecs)
+    report = create_dictionary_report_for_player(playerUUID, playerSpecs, 0, not find_friends_of_friends,
+                                                 playerFriendsUUIDS)
+    filename = "Friends of " + ("friends of " if find_friends_of_friends else "") + playerName
+    write_data_as_json_to_file(report, filename)
 
 if __name__ == '__main__':
     main()
