@@ -8,7 +8,6 @@ from typing import List, Union, Optional
 import json
 
 # CONTINUE HERE - todos:
-    # Refactor the main function a little bit to get rid of code duplication.
 
     # Maybe do an overlay.
 
@@ -55,6 +54,16 @@ def calculate_fkdr(player: hypixel.Player) -> float:
     return fkdr_division(player.JSON['stats']['Bedwars'].get('final_kills_bedwars', 0), 
                          player.JSON['stats']['Bedwars'].get('final_deaths_bedwars', 0))
 
+def polish_dictionary_report(report: dict, friends_specs: Specs, print_friends_to_screen) -> dict:
+    if 'friends' in report and all('fkdr' in d for d in report['friends']):
+        report['friends'] = sorted(report['friends'], key=lambda d: d['fkdr'], reverse=True)
+    if friends_specs and friends_specs.player_must_be_online:
+        report['friends'] = remove_players_who_logged_off(report['friends'])
+    if print_friends_to_screen:
+        print('\n\n')
+        print_list_of_dicts(report['friends'])
+    return report
+
 def create_dictionary_report_for_player(playerUUID: str, specs_player: Specs, degrees_from_original_player: int,
                                         print_friends_to_screen: bool,
                                         friendsUUIDs: Optional[List[str]] = None) -> dict:
@@ -86,15 +95,9 @@ def create_dictionary_report_for_player(playerUUID: str, specs_player: Specs, de
         if report := create_dictionary_report_for_player(friendUUID, specs_player.friends_specs, 
                                                          degrees_from_original_player + 1, print_friends_to_screen):
             player_data['friends'].append(report)
-    
-    # Do some final polishing if the current player is the original player:
+
     if degrees_from_original_player == 0:
-        if 'friends' in player_data and all('fkdr' in d for d in player_data['friends']):
-            player_data['friends'] = sorted(player_data['friends'], key=lambda d: d['fkdr'], reverse=True)
-        if specs_player.friends_specs and specs_player.friends_specs.player_must_be_online:
-            player_data['friends'] = remove_players_who_logged_off(player_data['friends'])
-        if print_friends_to_screen:
-            print_list_of_dicts(player_data['friends'])
+        player_data = polish_dictionary_report(player_data, specs_player.friends_specs, True)
 
     return player_data
 
