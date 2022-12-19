@@ -54,7 +54,7 @@ def calculate_fkdr(player: hypixel.Player) -> float:
     return fkdr_division(player.JSON['stats']['Bedwars'].get('final_kills_bedwars', 0), 
                          player.JSON['stats']['Bedwars'].get('final_deaths_bedwars', 0))
 
-def polish_dictionary_report(report: dict, friends_specs: Specs, print_friends_to_screen) -> dict:
+def polish_dictionary_report(report: dict, friends_specs: Specs, print_friends_to_screen: bool) -> dict:
     if 'friends' in report and all('fkdr' in d for d in report['friends']):
         report['friends'] = sorted(report['friends'], key=lambda d: d['fkdr'], reverse=True)
     if friends_specs and friends_specs.player_must_be_online:
@@ -97,7 +97,7 @@ def create_dictionary_report_for_player(playerUUID: str, specs_player: Specs, de
             player_data['friends'].append(report)
 
     if degrees_from_original_player == 0:
-        player_data = polish_dictionary_report(player_data, specs_player.friends_specs, True)
+        player_data = polish_dictionary_report(player_data, specs_player.friends_specs, print_friends_to_screen)
 
     return player_data
 
