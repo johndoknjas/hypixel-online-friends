@@ -11,6 +11,14 @@ import json
 
     # Maybe do an overlay.
 
+    # Add a feature to just get friends over a certain fkdr.
+        # When this is implemented you could then run the program and save this list a file, and then 
+        # just go through this file when looking for people to party online.
+    
+    # Add a feature to just get friends who were added since a given date or more recently.
+
+    # Add a feature to get friends of 2+ accounts/textfile lists.
+
 # This class represents specifications that a caller has when it calls the create_dictionary_report_for_player
 # function.
 class Specs:
