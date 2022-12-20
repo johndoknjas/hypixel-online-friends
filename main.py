@@ -19,6 +19,9 @@ import json
 
     # Add a feature to get friends of 2+ accounts/textfile lists.
 
+    # Add a feature where if 'avg' is a command line argument, the average size will be calculated for
+    # all friends lists the program comes across.
+
 # This class represents specifications that a caller has when it calls the create_dictionary_report_for_player
 # function.
 class Specs:
