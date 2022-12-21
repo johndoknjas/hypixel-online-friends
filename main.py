@@ -10,7 +10,9 @@ from collections import OrderedDict
 
 # CONTINUE HERE - todos:
 
-    # Maybe do an overlay.
+    # Feature to count the total number of (unique) players for whom you have friends lists of
+    # in the results folder. So parse through all .txt files starting with "Friends of".
+        # Also a feature that returns whether a given player has their f list in the results folder.
 
     # Add a feature to just get friends over a certain fkdr.
         # When this is implemented you could then run the program and save this list a file, and then 
@@ -23,11 +25,15 @@ from collections import OrderedDict
     # number of (unique) friends in all f lists processed.
 
     # Add a feature that aims to backup the friends lists of most of the (active part?) of the hypixel server.
-        # Only challenge in doing this is to select the ~5,000-10,000 ppl to get f lists of.
-        # To do this, maybe select your most recent (or highest fkdr) n friends, select their top n friends,
-        # and keep going down the 'tree' until reaching a pool of 5,000 to 10,000.
-        # If you select most recently added though, this could create a bubble where you only backup the f lists
-        # of ppl who logged on in say the last few weeks / month. Which may be good or bad.
+        # A good way to do this is use the hypixel api to get players on the daily bedwars leaderboard.
+        # This will update every day, and the people on the leaderboard are obviously active players who
+        # probably are friends with other active players.
+
+        # So could go through each daily leaderboard, pick the top 10, get their 10 most recently added friends,
+        # get their 10 most recently added friends, etc until something like 1000-10,000. You can backup these
+        # many friends lists then.
+            # Important that before continuing down this "tree" at a given player, you check that their
+            # f list is not already backed up in the results folder.
 
 # This class represents specifications that a caller has when it calls the create_dictionary_report_for_player
 # function.
@@ -204,6 +210,9 @@ def get_players_info_from_args(args: List[str]) -> dict:
 
 def main():
     set_api_keys()
+
+    #write_data_as_json_to_file(hypixel.getJSON('counts'), "test online hypixel player count")
+    #write_data_as_json_to_file(hypixel.getJSON('leaderboards'), "test leaderboards")
 
     args = [arg if arg.endswith('.txt') else arg.lower() for arg in sys.argv]
     just_uuids_of_friends = 'justuuidsoffriends' in args
