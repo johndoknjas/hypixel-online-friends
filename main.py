@@ -20,7 +20,15 @@ import json
     # Add a feature to get friends of 2+ accounts/textfile lists.
 
     # Add a feature where if 'avg' is a command line argument, the average size will be calculated for
-    # all friends lists the program comes across.
+    # all friends lists the program comes across. Could also make a 'total' arg, that displays the total
+    # number of (unique) friends in all f lists processed.
+
+    # Add a feature that aims to backup the friends lists of most of the (active part?) of the hypixel server.
+        # Only challenge in doing this is to select the ~5,000-10,000 ppl to get f lists of.
+        # To do this, maybe select your most recent (or highest fkdr) n friends, select their top n friends,
+        # and keep going down the 'tree' until reaching a pool of 5,000 to 10,000.
+        # If you select most recently added though, this could create a bubble where you only backup the f lists
+        # of ppl who logged on in say the last few weeks / month. Which may be good or bad.
 
 # This class represents specifications that a caller has when it calls the create_dictionary_report_for_player
 # function.
