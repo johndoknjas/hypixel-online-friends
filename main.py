@@ -152,9 +152,13 @@ def find_dict_for_given_username(d: dict, username: str) -> Optional[dict]:
                 return result
     return None
 
-def read_json_textfile(relative_filepath: str, username: str) -> dict:
+def read_json_textfile(relative_filepath: str) -> dict:
     with open(relative_filepath, 'r') as f:
         dict_from_file = json.loads(f.read())
+    return dict_from_file
+
+def get_player_json_from_textfile(relative_filepath: str, username: str) -> dict:
+    dict_from_file = read_json_textfile(relative_filepath)
     dict_for_player = find_dict_for_given_username(dict_from_file, username)
     assert dict_for_player
     dict_for_player['friends'] = [d['uuid'] for d in dict_for_player['friends']]
@@ -175,7 +179,7 @@ def process_args(args: List[str]) -> List[dict]:
             continue
 
         if i < len(args) - 1 and args[i+1].endswith('.txt'):
-            player_info = read_json_textfile(args[i+1], arg)
+            player_info = get_player_json_from_textfile(args[i+1], arg)
         else:
             player = create_player_object(arg)
             player_info = {'name': player.getName(), 'uuid': player.getUUID(),
