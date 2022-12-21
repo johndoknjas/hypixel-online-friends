@@ -18,8 +18,6 @@ from collections import OrderedDict
     
     # Add a feature to just get friends who were added since a given date or more recently.
 
-    # Add a feature to get friends of 2+ accounts/textfile lists.
-
     # Add a feature where if 'avg' is a command line argument, the average size will be calculated for
     # all friends lists the program comes across. Could also make a 'total' arg, that displays the total
     # number of (unique) friends in all f lists processed.
@@ -183,6 +181,28 @@ def process_args(args: List[str]) -> List[dict]:
 
     return info_of_players
 
+def get_players_info_from_args(args: List[str]) -> dict:
+    info_on_players: List[dict] = process_args(args)
+    playerNameForFileOutput = info_on_players[0]['name']
+    playerUUID = info_on_players[0]['uuid']
+    playerFriendsUUIDs: List = info_on_players[0]['friends_uuids']
+
+    print("fyi, the uuid of the player you're getting friends of is " + playerUUID)
+    print("This player has " + str(len(playerFriendsUUIDs)) + " friends total.")
+
+    exclude_uuids = []
+    for player in info_on_players[1:]:
+        if player['exclude']:
+            exclude_uuids.extend(player['friends_uuids'])
+            playerNameForFileOutput += (' minus ' + player['name'])
+        else:
+            playerFriendsUUIDs.extend(player['friends_uuids'])
+            playerNameForFileOutput += (' plus ' + player['name'])
+    playerFriendsUUIDs = list_subtract(remove_duplicates(playerFriendsUUIDs), exclude_uuids)
+
+    return {'playerUUID': playerUUID, 'playerFriendsUUIDs': playerFriendsUUIDs,
+            'playerNameForFileOutput': playerNameForFileOutput}
+
 def main():
     set_api_keys()
 
@@ -191,32 +211,18 @@ def main():
     find_friends_of_friends = 'friendsoffriends' in args
     just_online_friends = 'all' not in args and not find_friends_of_friends
     args = list_subtract(args[1:], ['all', 'friendsoffriends', 'justuuidsoffriends'])
-
-    info_on_players: List[dict] = process_args(args)
-    playerName = info_on_players[0]['name']
-    playerUUID = info_on_players[0]['uuid']
-    playerFriendsUUIDS: List = info_on_players[0]['friends_uuids']
-
-    print("fyi, the uuid of the player you're getting friends of is " + playerUUID)
-    print("This player has " + str(len(playerFriendsUUIDS)) + " friends total.")
-
-    exclude_uuids = []
-    for player in info_on_players[1:]:
-        if player['exclude']:
-            exclude_uuids.extend(player['friends_uuids'])
-            playerName += (' minus ' + player['name'])
-        else:
-            playerFriendsUUIDS.extend(player['friends_uuids'])
-            playerName += (' plus ' + player['name'])
-    playerFriendsUUIDS = list_subtract(remove_duplicates(playerFriendsUUIDS), exclude_uuids)
+    player_info: dict = get_players_info_from_args(args)
     
     friendsfriendsSpecs = Specs(False, False, None) if find_friends_of_friends else None
     friendsSpecs = Specs(not just_uuids_of_friends, just_online_friends, friendsfriendsSpecs)
     playerSpecs = Specs(True, False, friendsSpecs)
-    report = create_dictionary_report_for_player(playerUUID, playerSpecs, 0, not find_friends_of_friends,
-                                                 playerFriendsUUIDS)
+    report = create_dictionary_report_for_player(player_info['playerUUID'], playerSpecs, 
+                                                 0, not find_friends_of_friends,
+                                                 player_info['playerFriendsUUIDs'])
+
     if not just_online_friends:
-        filename = "Friends of " + ("friends of " if find_friends_of_friends else "") + playerName
+        filename = ("Friends of " + ("friends of " if find_friends_of_friends else "") 
+                    + player_info['playerNameForFileOutput'])
         write_data_as_json_to_file(report, filename)
 
 if __name__ == '__main__':
