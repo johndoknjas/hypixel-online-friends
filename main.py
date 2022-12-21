@@ -70,7 +70,7 @@ def create_player_object(playerName) -> hypixel.Player:
     return hypixel.Player(ign_uuid_pairs.get(playerName, playerName))
 
 def calculate_fkdr(player: hypixel.Player) -> float:
-    if 'stats' not in player.JSON or 'Bedwars' not in player.JSON['stats']:
+    if not player.JSON or 'stats' not in player.JSON or 'Bedwars' not in player.JSON['stats']:
         return 0.0
     return fkdr_division(player.JSON['stats']['Bedwars'].get('final_kills_bedwars', 0), 
                          player.JSON['stats']['Bedwars'].get('final_deaths_bedwars', 0))
@@ -134,7 +134,7 @@ def write_data_as_json_to_file(data: Union[dict, List], description: str = "") -
     with open(filename, "w") as f:
         f.write(json.dumps(data, indent=4))
 
-def find_dict_for_given_username(d: dict, username: str) -> dict:
+def find_dict_for_given_username(d: dict, username: str) -> Optional[dict]:
     # d will be a dictionary read from a file in json format - it will have a uuid key, and possibly
     # a name, fkdr, and friends key. The friends key would have a value that is a list of dictionaries,
     # recursively following the same dictionary requirements.
@@ -144,8 +144,7 @@ def find_dict_for_given_username(d: dict, username: str) -> dict:
         for friend_dict in d['friends']:
             if result := find_dict_for_given_username(friend_dict, username):
                 return result
-    else:
-        return None
+    return None
 
 def read_json_textfile(relative_filepath: str, username: str) -> dict:
     with open(relative_filepath, 'r') as f:
