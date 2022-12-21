@@ -6,6 +6,7 @@ from hypixelpy import hypixel
 import time
 from typing import List, Union, Optional
 import json
+from collections import OrderedDict
 
 # CONTINUE HERE - todos:
 
@@ -51,6 +52,9 @@ def set_api_keys() -> None:
 
 def list_subtract(main_list: List, subtract_list: List) -> List:
     return [x for x in main_list if x not in subtract_list]
+
+def remove_duplicates(lst: List) -> List:
+    return list(OrderedDict.fromkeys(lst)) # regular dict works to maintain order for python >= 3.7
 
 def get_ign_uuid_pairs() -> dict:
     if not os.path.isfile('uuids.txt'):
@@ -159,20 +163,24 @@ def process_args(args: List[str]) -> List[dict]:
     must come immediately after the ign they correspond to.
     Will return a list of dicts, where each dict has info for each player referred to by args. """
     info_of_players: List[dict] = []
+    encountered_minus_symbol = False
     for i, arg in enumerate(args):
         if arg.endswith('.txt'):
             continue
+        if arg == '-':
+            encountered_minus_symbol = True
+            continue
+
         if i < len(args) - 1 and args[i+1].endswith('.txt'):
-            info_of_players.append(read_json_textfile(args[i+1], arg))
+            player_info = read_json_textfile(args[i+1], arg)
         else:
             player = create_player_object(arg)
-            info_of_players.append(
-                {
-                    'name': player.getName(), 
-                    'uuid': player.getUUID(),
-                    'friends_uuids': list(reversed(player.getUUIDsOfFriends()))
-                }
-            )
+            player_info = {'name': player.getName(), 'uuid': player.getUUID(),
+                           'friends_uuids': list(reversed(player.getUUIDsOfFriends()))
+                          }
+        player_info['exclude'] = encountered_minus_symbol
+        info_of_players.append(player_info)
+
     return info_of_players
 
 def main():
@@ -187,22 +195,29 @@ def main():
     info_on_players: List[dict] = process_args(args)
     playerName = info_on_players[0]['name']
     playerUUID = info_on_players[0]['uuid']
-    playerFriendsUUIDS = info_on_players[0]['friends_uuids']
+    playerFriendsUUIDS: List = info_on_players[0]['friends_uuids']
 
     print("fyi, the uuid of the player you're getting friends of is " + playerUUID)
     print("This player has " + str(len(playerFriendsUUIDS)) + " friends total.")
 
-    for player_subtract in info_on_players[1:]:
-        friendsExclude = player_subtract['friends_uuids']
-        playerFriendsUUIDS = list_subtract(playerFriendsUUIDS, friendsExclude)
+    exclude_uuids = []
+    for player in info_on_players[1:]:
+        if player['exclude']:
+            exclude_uuids.extend(player['friends_uuids'])
+            playerName += (' minus ' + player['name'])
+        else:
+            playerFriendsUUIDS.extend(player['friends_uuids'])
+            playerName += (' plus ' + player['name'])
+    playerFriendsUUIDS = list_subtract(remove_duplicates(playerFriendsUUIDS), exclude_uuids)
     
     friendsfriendsSpecs = Specs(False, False, None) if find_friends_of_friends else None
     friendsSpecs = Specs(not just_uuids_of_friends, just_online_friends, friendsfriendsSpecs)
     playerSpecs = Specs(True, False, friendsSpecs)
     report = create_dictionary_report_for_player(playerUUID, playerSpecs, 0, not find_friends_of_friends,
                                                  playerFriendsUUIDS)
-    filename = "Friends of " + ("friends of " if find_friends_of_friends else "") + playerName
-    write_data_as_json_to_file(report, filename)
+    if not just_online_friends:
+        filename = "Friends of " + ("friends of " if find_friends_of_friends else "") + playerName
+        write_data_as_json_to_file(report, filename)
 
 if __name__ == '__main__':
     main()
