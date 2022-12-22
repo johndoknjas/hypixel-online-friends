@@ -10,10 +10,6 @@ from collections import OrderedDict
 
 # CONTINUE HERE - todos:
 
-    # Feature to count the total number of (unique) players for whom you have friends lists of
-    # in the results folder. So parse through all .txt files starting with "Friends of".
-        # Also a feature that returns whether a given player has their f list in the results folder.
-
     # Add a feature to just get friends over a certain fkdr.
         # When this is implemented you could then run the program and save this list a file, and then 
         # just go through this file when looking for people to party online.
@@ -34,6 +30,12 @@ from collections import OrderedDict
         # many friends lists then.
             # Important that before continuing down this "tree" at a given player, you check that their
             # f list is not already backed up in the results folder.
+                # When doing this, can also record how many of these players already have their f lists
+                # recorded in the results folder. This
+                # can give you an idea as time goes on of approx. what percentage of f lists of active bw
+                # players you've backed up.
+                    # At the time of writing this percentage should be pretty low though, since it's under 10,000
+                    # players' f lists recorded in results.
 
 # This class represents specifications that a caller has when it calls the create_dictionary_report_for_player
 # function.
@@ -152,6 +154,42 @@ def find_dict_for_given_username(d: dict, username: str) -> Optional[dict]:
                 return result
     return None
 
+def get_all_jsons_in_results() -> list[dict]:
+    """Returns a list of dicts, where each dict represents the json each textfile stores."""
+    all_jsons: list[dict] = []
+    all_files = os.listdir('results')
+    all_files = [f for f in all_files if f.startswith('Friends of') and f.endswith('.txt')]
+    for f in all_files:
+        filename = os.path.join('results', f)
+        all_jsons.append(read_json_textfile(filename))
+    return all_jsons
+
+def is_players_friend_list_in_results(username: str) -> bool:
+    """Returns a bool representing if the player's friend list is stored in the results folder, whether
+    it be with the player as the main subject of a textfile, or if the player's f list is shown in
+    a 'friends of friends' textfile."""
+    all_jsons: list[dict] = get_all_jsons_in_results()
+    return any(find_dict_for_given_username(json, username) for json in all_jsons)
+
+def get_all_players_with_f_list_in_dict(d: dict) -> list[str]:
+    """Returns the uuids of all players who have their f list represented in the dict. The dict is in the
+    json format that the textfiles use, so it may be recursive and store multiple f lists."""
+    if 'friends' in d:
+        list_of_players: list[str] = [d['uuid']]
+        for friend_dict in d['friends']:
+            list_of_players.extend(get_all_players_with_f_list_in_dict(friend_dict))
+        return list_of_players
+    else:
+        return []
+
+def num_players_with_f_lists_in_results() -> int:
+    """Returns the number of unique players who have their f lists stored in the results folder."""
+    all_jsons: list[dict] = get_all_jsons_in_results()
+    all_players_with_f_list_in_results: list[str] = []
+    for json in all_jsons:
+        all_players_with_f_list_in_results.extend(get_all_players_with_f_list_in_dict(json))
+    return len(remove_duplicates(all_players_with_f_list_in_results))
+
 def read_json_textfile(relative_filepath: str) -> dict:
     with open(relative_filepath, 'r') as f:
         dict_from_file = json.loads(f.read())
@@ -219,11 +257,16 @@ def main():
     #write_data_as_json_to_file(hypixel.getJSON('leaderboards'), "test leaderboards")
 
     args = [arg if arg.endswith('.txt') else arg.lower() for arg in sys.argv]
-    just_uuids_of_friends = 'justuuidsoffriends' in args
+    just_uuids_of_friends = 'justuuids' in args
     find_friends_of_friends = 'friendsoffriends' in args
     just_online_friends = 'all' not in args and not find_friends_of_friends
-    args = list_subtract(args[1:], ['all', 'friendsoffriends', 'justuuidsoffriends'])
+    check_results = 'checkresults' in args
+    args = list_subtract(args[1:], ['all', 'friendsoffriends', 'justuuids', 'checkresults'])
     player_info: dict = get_players_info_from_args(args)
+    if check_results:
+        print("There are " + str(num_players_with_f_lists_in_results()) + " players with their f list in results.")
+        print("It's " + str(is_players_friend_list_in_results(player_info['playerNameForFileOutput'])).lower()
+              + " that " + player_info['playerNameForFileOutput'] + "'s friends list is in the results folder.")
     
     friendsfriendsSpecs = Specs(False, False, None) if find_friends_of_friends else None
     friendsSpecs = Specs(not just_uuids_of_friends, just_online_friends, friendsfriendsSpecs)
