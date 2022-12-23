@@ -280,7 +280,7 @@ class Player:
             session = None
         return session
     
-    def getUUIDsOfFriends(self, include_date = False) -> list[Union[str,dict]]:
+    def getUUIDsOfFriends(self, include_date = True) -> Union[list[dict], list[str]]:
         """ This function returns a list of the UUIDs of all the player's friends. If the include_date
         optional argument is given a value of True, the list returned will instead be a list of dictionaries, where
         each dict stores a friend's uuid and the time they were friended. """

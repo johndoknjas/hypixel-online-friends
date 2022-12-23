@@ -93,16 +93,23 @@ def polish_dictionary_report(report: dict, friends_specs: Specs, print_friends_t
         print_list_of_dicts(report['friends'])
     return report
 
-def create_dictionary_report_for_player(playerUUID: str, specs_player: Specs, degrees_from_original_player: int,
+def create_dictionary_report_for_player(playerUUID: Union[str,dict], specs_player: Specs, 
+                                        degrees_from_original_player: int,
                                         print_friends_to_screen: bool,
                                         friendsUUIDs: Optional[List[str]] = None) -> dict:
     """Creates a dictionary representing info for a player. This dictionary will be ready to be written to a
     file as a json.
     If a value is given for the friendsUUIDs argument, then it will be used for player, rather than
-    calling the API to get friends. This can be done if the caller wants to exclude some friends. """
+    calling the API to get friends. This can be done if the caller wants to exclude some friends.
+    playerUUID will either be a string representing the player's UUID (if root player), or
+    a dict representing both the UUID and the time the player was added to
+    the player from the parent call of this function."""
+
+    assert (degrees_from_original_player == 0) == isinstance(playerUUID, str)
+
     if (specs_player.include_players_name_and_fkdr or specs_player.player_must_be_online or
         (specs_player.friends_specs and not friendsUUIDs)):
-        player = hypixel.Player(playerUUID)
+        player = hypixel.Player(playerUUID if isinstance(playerUUID, str) else playerUUID['uuid'])
     if specs_player.player_must_be_online and not player.isOnline():
         return {}
 
@@ -110,7 +117,11 @@ def create_dictionary_report_for_player(playerUUID: str, specs_player: Specs, de
     if specs_player.include_players_name_and_fkdr:
         player_data['name'] = player.getName()
         player_data['fkdr'] = calculate_fkdr(player)
-    player_data['uuid'] = playerUUID
+    if isinstance(playerUUID, str):
+        player_data['uuid'] = playerUUID
+    else:
+        player_data['uuid'] = playerUUID['uuid']
+        player_data['time'] = playerUUID['time']
     if degrees_from_original_player == 1 and print_friends_to_screen:
         print(str(player_data))
 
@@ -118,7 +129,7 @@ def create_dictionary_report_for_player(playerUUID: str, specs_player: Specs, de
         return player_data
     # Now to use recursion to make a list of dictionaries for the player's friends, which will be the value
     # of this 'friends' key in the player's dictionary:
-    friendsUUIDs = friendsUUIDs or player.getUUIDsOfFriends()
+    friendsUUIDs = friendsUUIDs or player.getUUIDsOfFriends(True)
     player_data['friends'] = []
     for i, friendUUID in enumerate(friendsUUIDs):
         if degrees_from_original_player == 0 and i % 20 == 0:
@@ -201,7 +212,8 @@ def get_player_json_from_textfile(relative_filepath: str, username: str) -> dict
     dict_from_file = read_json_textfile(relative_filepath)
     dict_for_player = find_dict_for_given_username(dict_from_file, username)
     assert dict_for_player
-    dict_for_player['friends_uuids'] = [d['uuid'] for d in dict_for_player.pop('friends')]
+    dict_for_player['friends_uuids'] = [{'uuid': d['uuid'], 'time': d.get('time', 0)}
+                                        for d in dict_for_player.pop('friends')]
     return dict_for_player
 
 def process_args(args: List[str]) -> List[dict]:
@@ -222,31 +234,39 @@ def process_args(args: List[str]) -> List[dict]:
         else:
             player = create_player_object(arg)
             player_info = {'name': player.getName(), 'uuid': player.getUUID(),
-                           'friends_uuids': list(reversed(player.getUUIDsOfFriends()))
+                           'friends_uuids': list(reversed(player.getUUIDsOfFriends(True)))
                           }
         player_info['exclude'] = encountered_minus_symbol
         info_of_players.append(player_info)
 
     return info_of_players
 
+def sort_friends_and_remove_duplicates(friends: List[dict]) -> List[dict]:
+    """Each dict in friends should have two key-value pairs, representing a friend's uuid 
+       and the time they were added. The dicts in the list will be sorted by date, and the same friend
+       appearing (so two dicts with the same uuid key-value pair) will be removed. """
+    
+    friends = sorted(friends, key=lambda d: d.get('time', 0), reverse=True)
+    return [d for i, d in enumerate(friends) if d['uuid'] not in [newer_d['uuid'] for newer_d in friends[:i]]]
+
 def get_players_info_from_args(args: List[str]) -> dict:
     info_on_players: List[dict] = process_args(args)
     playerNameForFileOutput = info_on_players[0]['name']
     playerUUID = info_on_players[0]['uuid']
-    playerFriendsUUIDs: List = info_on_players[0]['friends_uuids']
+    playerFriendsUUIDs: List[dict] = info_on_players[0]['friends_uuids']
 
     print("fyi, the uuid of the player you're getting friends of is " + playerUUID)
     print("This player has " + str(len(playerFriendsUUIDs)) + " friends total.")
 
-    exclude_uuids = []
+    exclude_uuids: List[str] = []
     for player in info_on_players[1:]:
         if player['exclude']:
-            exclude_uuids.extend(player['friends_uuids'])
+            exclude_uuids.extend(player['friends_uuids']['uuid'])
             playerNameForFileOutput += (' minus ' + player['name'])
         else:
             playerFriendsUUIDs.extend(player['friends_uuids'])
             playerNameForFileOutput += (' plus ' + player['name'])
-    playerFriendsUUIDs = list_subtract(remove_duplicates(playerFriendsUUIDs), exclude_uuids)
+    playerFriendsUUIDs = list_subtract(sort_friends_and_remove_duplicates(playerFriendsUUIDs), exclude_uuids)
 
     return {'playerUUID': playerUUID, 'playerFriendsUUIDs': playerFriendsUUIDs,
             'playerNameForFileOutput': playerNameForFileOutput}
