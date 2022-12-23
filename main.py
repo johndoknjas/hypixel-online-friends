@@ -7,14 +7,13 @@ import time
 from typing import List, Union, Optional
 import json
 from collections import OrderedDict
+import datetime
 
 # CONTINUE HERE - todos:
 
     # Add a feature to just get friends over a certain fkdr.
         # When this is implemented you could then run the program and save this list a file, and then 
         # just go through this file when looking for people to party online.
-    
-    # Add a feature to just get friends who were added since a given date or more recently.
 
     # Add a feature where if 'avg' is a command line argument, the average size will be calculated for
     # all friends lists the program comes across. Could also make a 'total' arg, that displays the total
@@ -108,7 +107,7 @@ def create_dictionary_report_for_player(playerUUID: Union[str,dict], specs_playe
     assert (degrees_from_original_player == 0) == isinstance(playerUUID, str)
 
     if (specs_player.include_players_name_and_fkdr or specs_player.player_must_be_online or
-        (specs_player.friends_specs and not friendsUUIDs)):
+        (specs_player.friends_specs and friendsUUIDs is None)):
         player = hypixel.Player(playerUUID if isinstance(playerUUID, str) else playerUUID['uuid'])
     if specs_player.player_must_be_online and not player.isOnline():
         return {}
@@ -129,7 +128,8 @@ def create_dictionary_report_for_player(playerUUID: Union[str,dict], specs_playe
         return player_data
     # Now to use recursion to make a list of dictionaries for the player's friends, which will be the value
     # of this 'friends' key in the player's dictionary:
-    friendsUUIDs = friendsUUIDs or player.getUUIDsOfFriends(True)
+    if friendsUUIDs is None:
+        friendsUUIDs = player.getUUIDsOfFriends(True)
     player_data['friends'] = []
     for i, friendUUID in enumerate(friendsUUIDs):
         if degrees_from_original_player == 0 and i % 20 == 0:
@@ -217,9 +217,8 @@ def get_player_json_from_textfile(relative_filepath: str, username: str) -> dict
     return dict_for_player
 
 def process_args(args: List[str]) -> List[dict]:
-    """args must only contain at least 1 ign string, and 0 or more .txt filenames. For any .txt filenames, they
-    must come immediately after the ign they correspond to.
-    Will return a list of dicts, where each dict has info for each player referred to by args. """
+    """Will return a list of dicts, where each dict has info for each player referred to by args. """
+    args = remove_arguments_no_longer_needed(args)
     info_of_players: List[dict] = []
     encountered_minus_symbol = False
     for i, arg in enumerate(args):
@@ -261,15 +260,39 @@ def get_players_info_from_args(args: List[str]) -> dict:
     exclude_uuids: List[str] = []
     for player in info_on_players[1:]:
         if player['exclude']:
-            exclude_uuids.extend(player['friends_uuids']['uuid'])
+            exclude_uuids.extend([d['uuid'] for d in player['friends_uuids']])
             playerNameForFileOutput += (' minus ' + player['name'])
         else:
             playerFriendsUUIDs.extend(player['friends_uuids'])
             playerNameForFileOutput += (' plus ' + player['name'])
-    playerFriendsUUIDs = list_subtract(sort_friends_and_remove_duplicates(playerFriendsUUIDs), exclude_uuids)
+    playerFriendsUUIDs = sort_friends_and_remove_duplicates(playerFriendsUUIDs)
+    playerFriendsUUIDs = [d for d in playerFriendsUUIDs if d['uuid'] not in exclude_uuids]
+    if unix_time_bound_for_add_friend := get_date_if_exists(args):
+        playerFriendsUUIDs = [d for d in playerFriendsUUIDs if d['time'] >= unix_time_bound_for_add_friend]
+    
+    print("Now " + str(len(playerFriendsUUIDs)) + " friends after adjustments specified in args.")
 
     return {'playerUUID': playerUUID, 'playerFriendsUUIDs': playerFriendsUUIDs,
             'playerNameForFileOutput': playerNameForFileOutput}
+
+def remove_date_strings(lst: List[str]) -> None:
+    return [x for x in lst if not get_date_if_exists(x)]
+
+def get_date_if_exists(args: Union(List[str], str)) -> Optional[float]:
+    """If no date strings found, return None. Otherwise, convert the first date string found into 
+    unix epoch time (milliseconds), and return it."""
+    if isinstance(args, str):
+        args = [args]
+    for arg in args:
+        try:
+            date = datetime.datetime.strptime(arg, '%Y-%m-%d')
+        except ValueError:
+            continue
+        return time.mktime(date.timetuple()) * 1000
+    return None
+
+def remove_arguments_no_longer_needed(args: List[str]) -> List[str]:
+    return list_subtract(remove_date_strings(args[1:]), ['all', 'friendsoffriends', 'justuuids', 'checkresults'])
 
 def main():
     set_api_keys()
@@ -282,7 +305,6 @@ def main():
     find_friends_of_friends = 'friendsoffriends' in args
     just_online_friends = 'all' not in args and not find_friends_of_friends
     check_results = 'checkresults' in args
-    args = list_subtract(args[1:], ['all', 'friendsoffriends', 'justuuids', 'checkresults'])
     player_info: dict = get_players_info_from_args(args)
     if check_results:
         print("There are " + str(num_players_with_f_lists_in_results()) + " players with their f list in results.")
