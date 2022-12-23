@@ -201,8 +201,7 @@ def get_player_json_from_textfile(relative_filepath: str, username: str) -> dict
     dict_from_file = read_json_textfile(relative_filepath)
     dict_for_player = find_dict_for_given_username(dict_from_file, username)
     assert dict_for_player
-    dict_for_player['friends'] = [d['uuid'] for d in dict_for_player['friends']]
-    dict_for_player['friends_uuids'] = dict_for_player.pop('friends')
+    dict_for_player['friends_uuids'] = [d['uuid'] for d in dict_for_player.pop('friends')]
     return dict_for_player
 
 def process_args(args: List[str]) -> List[dict]:
