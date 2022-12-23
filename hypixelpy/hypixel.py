@@ -11,6 +11,8 @@ import grequests
 from hypixelpy import leveling
 import re
 
+from typing import Union
+
 HYPIXEL_API_URL = 'https://api.hypixel.net/'
 UUIDResolverAPI = "https://sessionserver.mojang.com/session/minecraft/profile/"
 
@@ -278,12 +280,15 @@ class Player:
             session = None
         return session
     
-    def getUUIDsOfFriends(self):
-        """ This function returns a list of the UUIDs of all the player's friends. """
+    def getUUIDsOfFriends(self, include_date = False) -> list[Union[str,dict]]:
+        """ This function returns a list of the UUIDs of all the player's friends. If the include_date
+        optional argument is given a value of True, the list returned will instead be a list of dictionaries, where
+        each dict stores a friend's uuid and the time they were friended. """
         friendsInfo = getJSON('friends', uuid=self.UUID)
         friendsUUIDS = []
         for friend in friendsInfo['records']:
-            friendsUUIDS.extend(uuid for uuid in [friend["uuidReceiver"], friend["uuidSender"]] if uuid != self.UUID)
+            friend_uuid = friend["uuidReceiver"] if friend["uuidReceiver"] != self.UUID else friend["uuidSender"]
+            friendsUUIDS.append({'uuid': friend_uuid, 'time': friend['started']} if include_date else friend_uuid)
         return friendsUUIDS
     
     def isOnline(self):

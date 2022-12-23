@@ -97,7 +97,9 @@ def create_dictionary_report_for_player(playerUUID: str, specs_player: Specs, de
                                         print_friends_to_screen: bool,
                                         friendsUUIDs: Optional[List[str]] = None) -> dict:
     """Creates a dictionary representing info for a player. This dictionary will be ready to be written to a
-    file as a json."""
+    file as a json.
+    If a value is given for the friendsUUIDs argument, then it will be used for player, rather than
+    calling the API to get friends. This can be done if the caller wants to exclude some friends. """
     if (specs_player.include_players_name_and_fkdr or specs_player.player_must_be_online or
         (specs_player.friends_specs and not friendsUUIDs)):
         player = hypixel.Player(playerUUID)
