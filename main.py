@@ -42,9 +42,18 @@ import datetime
 class Specs:
     def __init__(self, include_players_name_and_fkdr: bool, player_must_be_online: bool, 
                  friends_specs: Optional[Specs]):
-        self.include_players_name_and_fkdr = include_players_name_and_fkdr
-        self.player_must_be_online = player_must_be_online
-        self.friends_specs = friends_specs
+        self._include_players_name_and_fkdr = include_players_name_and_fkdr
+        self._player_must_be_online = player_must_be_online
+        self._friends_specs = friends_specs
+    
+    def include_name_fkdr(self) -> bool:
+        return self._include_players_name_and_fkdr
+    
+    def required_online(self) -> bool:
+        return self._player_must_be_online
+    
+    def specs_for_friends(self) -> Optional[Specs]:
+        return self._friends_specs
 
 def fkdr_division(final_kills: int, final_deaths: int) -> float:
     return final_kills / final_deaths if final_deaths else float(final_kills)
@@ -86,7 +95,7 @@ def calculate_fkdr(player: hypixel.Player) -> float:
 def polish_dictionary_report(report: dict, friends_specs: Specs, print_friends_to_screen: bool) -> dict:
     if 'friends' in report and all('fkdr' in d for d in report['friends']):
         report['friends'] = sorted(report['friends'], key=lambda d: d['fkdr'], reverse=True)
-    if friends_specs and friends_specs.player_must_be_online:
+    if friends_specs and friends_specs.required_online():
         report['friends'] = remove_players_who_logged_off(report['friends'])
     if print_friends_to_screen:
         print('\n\n')
@@ -108,14 +117,14 @@ def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Spec
     if degrees_from_original_player == 0:
         assert player_info.no_time()
 
-    if (specs.include_players_name_and_fkdr or specs.player_must_be_online or
-        (specs.friends_specs and friends is None)):
+    if (specs.include_name_fkdr() or specs.required_online() or
+        (specs.specs_for_friends() and friends is None)):
         player = hypixel.Player(player_info.uuid())
-    if specs.player_must_be_online and not player.isOnline():
+    if specs.required_online() and not player.isOnline():
         return {}
 
     player_report = {}
-    if specs.include_players_name_and_fkdr:
+    if specs.include_name_fkdr():
         player_report.update({'name': player.getName(), 'fkdr': calculate_fkdr(player)})
     player_report['uuid'] = player_info.uuid()
     if not player_info.no_time():
@@ -123,7 +132,7 @@ def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Spec
     if degrees_from_original_player == 1 and print_friends_to_screen:
         print(str(player_report))
 
-    if not specs.friends_specs:
+    if not specs.specs_for_friends():
         return player_report
     # Now to use recursion to make a list of dictionaries for the player's friends, which will be the value
     # of this 'friends' key in the player's dictionary:
@@ -133,12 +142,12 @@ def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Spec
     for i, friend in enumerate(friends):
         if degrees_from_original_player == 0 and i % 20 == 0:
             print("Processed " + str(i))
-        if report := create_dictionary_report_for_player(friend, specs.friends_specs, 
+        if report := create_dictionary_report_for_player(friend, specs.specs_for_friends(), 
                                                          degrees_from_original_player + 1, print_friends_to_screen):
             player_report['friends'].append(report)
 
     if degrees_from_original_player == 0:
-        player_report = polish_dictionary_report(player_report, specs.friends_specs, print_friends_to_screen)
+        player_report = polish_dictionary_report(player_report, specs.specs_for_friends(), print_friends_to_screen)
 
     return player_report
 
