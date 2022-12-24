@@ -37,14 +37,34 @@ import datetime
                     # At the time of writing this percentage should be pretty low though, since it's under 10,000
                     # players' f lists recorded in results.
 
-# This class represents specifications that a caller has when it calls the create_dictionary_report_for_player
-# function.
+
 class Specs:
-    def __init__(self, include_players_name_and_fkdr: bool, player_must_be_online: bool, 
-                 friends_specs: Optional[Specs]):
+    """This class represents specifications that a caller has when it calls the 
+       create_dictionary_report_for_player function."""
+
+    _common_specs: dict = {'print player data': None, 'set flag': False}
+    
+    @classmethod
+    def set_common_specs(cls, print_player_data: bool) -> None:
+        assert not cls._common_specs['set flag']
+        cls._common_specs['print player data'] = print_player_data
+        cls._common_specs['set flag'] = True
+    
+    @classmethod
+    def is_common_specs_initialized(cls) -> bool:
+        return cls._common_specs['set flag']
+    
+    @classmethod
+    def does_program_print_player_data(cls) -> bool:
+        return cls._common_specs['print player data']
+
+    def __init__(self, include_players_name_and_fkdr: bool, player_must_be_online: bool,
+                 friends_specs: Optional[Specs], degrees_from_original_player: int):
+        assert Specs._common_specs['set flag']
         self._include_players_name_and_fkdr = include_players_name_and_fkdr
         self._player_must_be_online = player_must_be_online
         self._friends_specs = friends_specs
+        self._degrees_from_original_player = degrees_from_original_player
     
     def include_name_fkdr(self) -> bool:
         return self._include_players_name_and_fkdr
@@ -54,6 +74,21 @@ class Specs:
     
     def specs_for_friends(self) -> Optional[Specs]:
         return self._friends_specs
+    
+    def degrees_from_root_player(self) -> int:
+        return self._degrees_from_original_player
+    
+    def root_player(self) -> bool:
+        return self._degrees_from_original_player == 0
+    
+    def friend_of_root_player(self) -> bool:
+        return self._degrees_from_original_player == 1
+    
+    def print_player_data_exclude_friends(self) -> bool:
+        return Specs._common_specs['print player data'] and self.friend_of_root_player()
+    
+    def print_only_players_friends(self) -> bool:
+        return Specs._common_specs['print player data'] and self.root_player()
 
 def fkdr_division(final_kills: int, final_deaths: int) -> float:
     return final_kills / final_deaths if final_deaths else float(final_kills)
@@ -92,19 +127,17 @@ def calculate_fkdr(player: hypixel.Player) -> float:
     return fkdr_division(player.JSON['stats']['Bedwars'].get('final_kills_bedwars', 0), 
                          player.JSON['stats']['Bedwars'].get('final_deaths_bedwars', 0))
 
-def polish_dictionary_report(report: dict, friends_specs: Specs, print_friends_to_screen: bool) -> dict:
+def polish_dictionary_report(report: dict, specs: Specs) -> dict:
     if 'friends' in report and all('fkdr' in d for d in report['friends']):
         report['friends'] = sorted(report['friends'], key=lambda d: d['fkdr'], reverse=True)
-    if friends_specs and friends_specs.required_online():
+    if specs.specs_for_friends() and specs.specs_for_friends().required_online():
         report['friends'] = remove_players_who_logged_off(report['friends'])
-    if print_friends_to_screen:
+    if specs.print_only_players_friends():
         print('\n\n')
         print_list_of_dicts(report['friends'])
     return report
 
-def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Specs, 
-                                        degrees_from_original_player: int,
-                                        print_friends_to_screen: bool,
+def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Specs,
                                         friends: Optional[List[UUID_Plus_Time]] = None) -> dict:
     """Creates a dictionary representing info for a player. This dictionary will be ready to be written to a
     file as a json.
@@ -114,7 +147,7 @@ def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Spec
     this function call became friends). If player is the root player, then there will be no time represented,
     since there's no parent player. """
 
-    if degrees_from_original_player == 0:
+    if specs.root_player():
         assert player_info.no_time()
 
     if (specs.include_name_fkdr() or specs.required_online() or
@@ -129,7 +162,7 @@ def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Spec
     player_report['uuid'] = player_info.uuid()
     if not player_info.no_time():
         player_report['time'] = player_info.time_epoch_in_milliseconds()
-    if degrees_from_original_player == 1 and print_friends_to_screen:
+    if specs.print_player_data_exclude_friends():
         print(str(player_report))
 
     if not specs.specs_for_friends():
@@ -140,14 +173,13 @@ def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Spec
         friends = player.getFriends()
     player_report['friends'] = []
     for i, friend in enumerate(friends):
-        if degrees_from_original_player == 0 and i % 20 == 0:
+        if specs.root_player() and i % 20 == 0:
             print("Processed " + str(i))
-        if report := create_dictionary_report_for_player(friend, specs.specs_for_friends(), 
-                                                         degrees_from_original_player + 1, print_friends_to_screen):
+        if report := create_dictionary_report_for_player(friend, specs.specs_for_friends()):
             player_report['friends'].append(report)
 
-    if degrees_from_original_player == 0:
-        player_report = polish_dictionary_report(player_report, specs.specs_for_friends(), print_friends_to_screen)
+    if specs.root_player():
+        player_report = polish_dictionary_report(player_report, specs)
 
     return player_report
 
@@ -302,11 +334,13 @@ def get_date_if_exists(args: Union(List[str], str)) -> Optional[float]:
 def remove_arguments_no_longer_needed(args: List[str]) -> List[str]:
     return list_subtract(remove_date_strings(args[1:]), ['all', 'friendsoffriends', 'justuuids', 'checkresults'])
 
-def make_Specs_object(find_friends_of_friends: bool, just_uuids_of_friends: 
-                      bool, just_online_friends: bool) -> Specs:
-    friendsfriendsSpecs = Specs(False, False, None) if find_friends_of_friends else None
-    friendsSpecs = Specs(not just_uuids_of_friends, just_online_friends, friendsfriendsSpecs)
-    playerSpecs = Specs(True, False, friendsSpecs)
+def make_Specs_object(find_friends_of_friends: bool, just_uuids_of_friends: bool, 
+                      just_online_friends: bool) -> Specs:
+    if not Specs.is_common_specs_initialized():
+        Specs.set_common_specs(not find_friends_of_friends)
+    friendsfriendsSpecs = Specs(False, False, None, 2) if find_friends_of_friends else None
+    friendsSpecs = Specs(not just_uuids_of_friends, just_online_friends, friendsfriendsSpecs, 1)
+    playerSpecs = Specs(True, False, friendsSpecs, 0)
     return playerSpecs
 
 def main():
@@ -328,7 +362,6 @@ def main():
     
     playerSpecs = make_Specs_object(find_friends_of_friends, just_uuids_of_friends, just_online_friends)
     report = create_dictionary_report_for_player(UUID_Plus_Time(player_info['playerUUID']), playerSpecs, 
-                                                 0, not find_friends_of_friends,
                                                  player_info['playerFriends'])
 
     if not just_online_friends:
