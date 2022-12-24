@@ -1,14 +1,14 @@
-from __future__ import annotations
 import os
 import os.path
 import sys
-from hypixelpy import hypixel
-from hypixelpy.hypixel import UUID_Plus_Time
 import time
-from typing import List, Union, Optional
+import datetime
 import json
 from collections import OrderedDict
-import datetime
+from typing import List, Union, Optional
+
+import hypixel
+from MyClasses import UUID_Plus_Time, Specs
 
 # CONTINUE HERE - todos:
 
@@ -36,59 +36,6 @@ import datetime
                 # players you've backed up.
                     # At the time of writing this percentage should be pretty low though, since it's under 10,000
                     # players' f lists recorded in results.
-
-
-class Specs:
-    """This class represents specifications that a caller has when it calls the 
-       create_dictionary_report_for_player function."""
-
-    _common_specs: dict = {'print player data': None, 'set flag': False}
-    
-    @classmethod
-    def set_common_specs(cls, print_player_data: bool) -> None:
-        assert not cls._common_specs['set flag']
-        cls._common_specs['print player data'] = print_player_data
-        cls._common_specs['set flag'] = True
-    
-    @classmethod
-    def is_common_specs_initialized(cls) -> bool:
-        return cls._common_specs['set flag']
-    
-    @classmethod
-    def does_program_print_player_data(cls) -> bool:
-        return cls._common_specs['print player data']
-
-    def __init__(self, include_players_name_and_fkdr: bool, player_must_be_online: bool,
-                 friends_specs: Optional[Specs], degrees_from_original_player: int):
-        assert Specs._common_specs['set flag']
-        self._include_players_name_and_fkdr = include_players_name_and_fkdr
-        self._player_must_be_online = player_must_be_online
-        self._friends_specs = friends_specs
-        self._degrees_from_original_player = degrees_from_original_player
-    
-    def include_name_fkdr(self) -> bool:
-        return self._include_players_name_and_fkdr
-    
-    def required_online(self) -> bool:
-        return self._player_must_be_online
-    
-    def specs_for_friends(self) -> Optional[Specs]:
-        return self._friends_specs
-    
-    def degrees_from_root_player(self) -> int:
-        return self._degrees_from_original_player
-    
-    def root_player(self) -> bool:
-        return self._degrees_from_original_player == 0
-    
-    def friend_of_root_player(self) -> bool:
-        return self._degrees_from_original_player == 1
-    
-    def print_player_data_exclude_friends(self) -> bool:
-        return Specs._common_specs['print player data'] and self.friend_of_root_player()
-    
-    def print_only_players_friends(self) -> bool:
-        return Specs._common_specs['print player data'] and self.root_player()
 
 def fkdr_division(final_kills: int, final_deaths: int) -> float:
     return final_kills / final_deaths if final_deaths else float(final_kills)
@@ -318,7 +265,7 @@ def get_players_info_from_args(args: List[str]) -> dict:
 def remove_date_strings(lst: List[str]) -> None:
     return [x for x in lst if not get_date_if_exists(x)]
 
-def get_date_if_exists(args: Union(List[str], str)) -> Optional[float]:
+def get_date_if_exists(args: Union[List[str], str]) -> Optional[float]:
     """If no date strings found, return None. Otherwise, convert the first date string found into 
     unix epoch time (milliseconds), and return it."""
     if isinstance(args, str):
