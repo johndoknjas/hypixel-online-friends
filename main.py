@@ -3,6 +3,7 @@ import os
 import os.path
 import sys
 from hypixelpy import hypixel
+from hypixelpy.hypixel import UUID_Plus_Time
 import time
 from typing import List, Union, Optional
 import json
@@ -72,7 +73,7 @@ def get_ign_uuid_pairs() -> dict:
     return ign_uuid_pairs
 
 def create_player_object(playerName) -> hypixel.Player:
-    # Use this function if you're using the player's ign, rather than the uuid.
+    """Use this function if you're using the player's ign, rather than the uuid."""
     ign_uuid_pairs = get_ign_uuid_pairs() # dict where the key is a player's ign, value is uuid
     return hypixel.Player(ign_uuid_pairs.get(playerName, playerName))
 
@@ -92,56 +93,54 @@ def polish_dictionary_report(report: dict, friends_specs: Specs, print_friends_t
         print_list_of_dicts(report['friends'])
     return report
 
-def create_dictionary_report_for_player(playerUUID: Union[str,dict], specs_player: Specs, 
+def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Specs, 
                                         degrees_from_original_player: int,
                                         print_friends_to_screen: bool,
-                                        friendsUUIDs: Optional[List[str]] = None) -> dict:
+                                        friends: Optional[List[UUID_Plus_Time]] = None) -> dict:
     """Creates a dictionary representing info for a player. This dictionary will be ready to be written to a
     file as a json.
-    If a value is given for the friendsUUIDs argument, then it will be used for player, rather than
-    calling the API to get friends. This can be done if the caller wants to exclude some friends.
-    playerUUID will either be a string representing the player's UUID (if root player), or
-    a dict representing both the UUID and the time the player was added to
-    the player from the parent call of this function."""
-
-    assert (degrees_from_original_player == 0) == isinstance(playerUUID, str)
-
-    if (specs_player.include_players_name_and_fkdr or specs_player.player_must_be_online or
-        (specs_player.friends_specs and friendsUUIDs is None)):
-        player = hypixel.Player(playerUUID if isinstance(playerUUID, str) else playerUUID['uuid'])
-    if specs_player.player_must_be_online and not player.isOnline():
-        return {}
-
-    player_data = {}
-    if specs_player.include_players_name_and_fkdr:
-        player_data['name'] = player.getName()
-        player_data['fkdr'] = calculate_fkdr(player)
-    if isinstance(playerUUID, str):
-        player_data['uuid'] = playerUUID
-    else:
-        player_data['uuid'] = playerUUID['uuid']
-        player_data['time'] = playerUUID['time']
-    if degrees_from_original_player == 1 and print_friends_to_screen:
-        print(str(player_data))
-
-    if not specs_player.friends_specs:
-        return player_data
-    # Now to use recursion to make a list of dictionaries for the player's friends, which will be the value
-    # of this 'friends' key in the player's dictionary:
-    if friendsUUIDs is None:
-        friendsUUIDs = player.getUUIDsOfFriends(True)
-    player_data['friends'] = []
-    for i, friendUUID in enumerate(friendsUUIDs):
-        if degrees_from_original_player == 0 and i % 20 == 0:
-            print("Processed " + str(i))
-        if report := create_dictionary_report_for_player(friendUUID, specs_player.friends_specs, 
-                                                         degrees_from_original_player + 1, print_friends_to_screen):
-            player_data['friends'].append(report)
+    If a value is given for the friends argument, then it will be used, rather than
+    calling the API to get player's friends. This can be done if the caller wants to exclude some friends.
+    'player' will represent the player's uuid, and possibly a time (for when the player and parent player of
+    this function call became friends). If player is the root player, then there will be no time represented,
+    since there's no parent player. """
 
     if degrees_from_original_player == 0:
-        player_data = polish_dictionary_report(player_data, specs_player.friends_specs, print_friends_to_screen)
+        assert player_info.no_time()
 
-    return player_data
+    if (specs.include_players_name_and_fkdr or specs.player_must_be_online or
+        (specs.friends_specs and friends is None)):
+        player = hypixel.Player(player_info.uuid())
+    if specs.player_must_be_online and not player.isOnline():
+        return {}
+
+    player_report = {}
+    if specs.include_players_name_and_fkdr:
+        player_report.update({'name': player.getName(), 'fkdr': calculate_fkdr(player)})
+    player_report['uuid'] = player_info.uuid()
+    if not player_info.no_time():
+        player_report['time'] = player_info.time_epoch_in_milliseconds()
+    if degrees_from_original_player == 1 and print_friends_to_screen:
+        print(str(player_report))
+
+    if not specs.friends_specs:
+        return player_report
+    # Now to use recursion to make a list of dictionaries for the player's friends, which will be the value
+    # of this 'friends' key in the player's dictionary:
+    if friends is None:
+        friends = player.getFriends()
+    player_report['friends'] = []
+    for i, friend in enumerate(friends):
+        if degrees_from_original_player == 0 and i % 20 == 0:
+            print("Processed " + str(i))
+        if report := create_dictionary_report_for_player(friend, specs.friends_specs, 
+                                                         degrees_from_original_player + 1, print_friends_to_screen):
+            player_report['friends'].append(report)
+
+    if degrees_from_original_player == 0:
+        player_report = polish_dictionary_report(player_report, specs.friends_specs, print_friends_to_screen)
+
+    return player_report
 
 def remove_players_who_logged_off(players: List[dict]) -> List[dict]:
     return [p for p in players if hypixel.Player(p['uuid']).isOnline()]
@@ -149,7 +148,7 @@ def remove_players_who_logged_off(players: List[dict]) -> List[dict]:
 def print_list_of_dicts(lst: List[dict]) -> None:
     print("\n".join([str(d) for d in lst]))
 
-def write_data_as_json_to_file(data: Union[dict, List], description: str = "") -> None:
+def write_data_as_json_to_file(data: dict, description: str = "") -> None:
     filename = os.path.join("results", description + " - " + str(time.time_ns()) + ".txt")
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, "w") as f:
@@ -212,8 +211,8 @@ def get_player_json_from_textfile(relative_filepath: str, username: str) -> dict
     dict_from_file = read_json_textfile(relative_filepath)
     dict_for_player = find_dict_for_given_username(dict_from_file, username)
     assert dict_for_player
-    dict_for_player['friends_uuids'] = [{'uuid': d['uuid'], 'time': d.get('time', 0)}
-                                        for d in dict_for_player.pop('friends')]
+    dict_for_player['friends'] = [UUID_Plus_Time(d['uuid'], unix_epoch_milliseconds=d.get('time', None))
+                                  for d in dict_for_player.pop('friends')]
     return dict_for_player
 
 def process_args(args: List[str]) -> List[dict]:
@@ -233,46 +232,46 @@ def process_args(args: List[str]) -> List[dict]:
         else:
             player = create_player_object(arg)
             player_info = {'name': player.getName(), 'uuid': player.getUUID(),
-                           'friends_uuids': list(reversed(player.getUUIDsOfFriends(True)))
+                           'friends': list(reversed(player.getFriends()))
                           }
         player_info['exclude'] = encountered_minus_symbol
         info_of_players.append(player_info)
 
     return info_of_players
 
-def sort_friends_and_remove_duplicates(friends: List[dict]) -> List[dict]:
+def sort_friends_and_remove_duplicates(friends: List[UUID_Plus_Time]) -> List[UUID_Plus_Time]:
     """Each dict in friends should have two key-value pairs, representing a friend's uuid 
        and the time they were added. The dicts in the list will be sorted by date, and the same friend
        appearing (so two dicts with the same uuid key-value pair) will be removed. """
     
-    friends = sorted(friends, key=lambda d: d.get('time', 0), reverse=True)
-    return [d for i, d in enumerate(friends) if d['uuid'] not in [newer_d['uuid'] for newer_d in friends[:i]]]
+    friends = sorted(friends, key=lambda f: f.sort_key(), reverse=True)
+    return [f for i, f in enumerate(friends) if not any(f.same_person(other) for other in friends[:i])]
 
 def get_players_info_from_args(args: List[str]) -> dict:
     info_on_players: List[dict] = process_args(args)
     playerNameForFileOutput = info_on_players[0]['name']
     playerUUID = info_on_players[0]['uuid']
-    playerFriendsUUIDs: List[dict] = info_on_players[0]['friends_uuids']
+    playerFriends: List[UUID_Plus_Time] = info_on_players[0]['friends']
 
     print("fyi, the uuid of the player you're getting friends of is " + playerUUID)
-    print("This player has " + str(len(playerFriendsUUIDs)) + " friends total.")
+    print("This player has " + str(len(playerFriends)) + " friends total.")
 
-    exclude_uuids: List[str] = []
+    exclude_friends: List[UUID_Plus_Time] = []
     for player in info_on_players[1:]:
         if player['exclude']:
-            exclude_uuids.extend([d['uuid'] for d in player['friends_uuids']])
+            exclude_friends.extend(player['friends'])
             playerNameForFileOutput += (' minus ' + player['name'])
         else:
-            playerFriendsUUIDs.extend(player['friends_uuids'])
+            playerFriends.extend(player['friends'])
             playerNameForFileOutput += (' plus ' + player['name'])
-    playerFriendsUUIDs = sort_friends_and_remove_duplicates(playerFriendsUUIDs)
-    playerFriendsUUIDs = [d for d in playerFriendsUUIDs if d['uuid'] not in exclude_uuids]
-    if unix_time_bound_for_add_friend := get_date_if_exists(args):
-        playerFriendsUUIDs = [d for d in playerFriendsUUIDs if d['time'] >= unix_time_bound_for_add_friend]
-    
-    print("Now " + str(len(playerFriendsUUIDs)) + " friends after adjustments specified in args.")
+    playerFriends = sort_friends_and_remove_duplicates(playerFriends)
+    playerFriends = [f for f in playerFriends if not any(f.same_person(e) for e in exclude_friends)]
+    if friend_add_time_cutoff := get_date_if_exists(args):
+        playerFriends = [f for f in playerFriends if f.time_epoch_in_milliseconds() >= friend_add_time_cutoff]
 
-    return {'playerUUID': playerUUID, 'playerFriendsUUIDs': playerFriendsUUIDs,
+    print("Now " + str(len(playerFriends)) + " friends after adjustments specified in args.")
+
+    return {'playerUUID': playerUUID, 'playerFriends': playerFriends,
             'playerNameForFileOutput': playerNameForFileOutput}
 
 def remove_date_strings(lst: List[str]) -> None:
@@ -294,6 +293,13 @@ def get_date_if_exists(args: Union(List[str], str)) -> Optional[float]:
 def remove_arguments_no_longer_needed(args: List[str]) -> List[str]:
     return list_subtract(remove_date_strings(args[1:]), ['all', 'friendsoffriends', 'justuuids', 'checkresults'])
 
+def make_Specs_object(find_friends_of_friends: bool, just_uuids_of_friends: 
+                      bool, just_online_friends: bool) -> Specs:
+    friendsfriendsSpecs = Specs(False, False, None) if find_friends_of_friends else None
+    friendsSpecs = Specs(not just_uuids_of_friends, just_online_friends, friendsfriendsSpecs)
+    playerSpecs = Specs(True, False, friendsSpecs)
+    return playerSpecs
+
 def main():
     set_api_keys()
 
@@ -311,12 +317,10 @@ def main():
         print("It's " + str(is_players_friend_list_in_results(player_info['playerNameForFileOutput'])).lower()
               + " that " + player_info['playerNameForFileOutput'] + "'s friends list is in the results folder.")
     
-    friendsfriendsSpecs = Specs(False, False, None) if find_friends_of_friends else None
-    friendsSpecs = Specs(not just_uuids_of_friends, just_online_friends, friendsfriendsSpecs)
-    playerSpecs = Specs(True, False, friendsSpecs)
-    report = create_dictionary_report_for_player(player_info['playerUUID'], playerSpecs, 
+    playerSpecs = make_Specs_object(find_friends_of_friends, just_uuids_of_friends, just_online_friends)
+    report = create_dictionary_report_for_player(UUID_Plus_Time(player_info['playerUUID']), playerSpecs, 
                                                  0, not find_friends_of_friends,
-                                                 player_info['playerFriendsUUIDs'])
+                                                 player_info['playerFriends'])
 
     if not just_online_friends:
         filename = ("Friends of " + ("friends of " if find_friends_of_friends else "") 

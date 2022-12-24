@@ -11,7 +11,8 @@ import grequests
 from hypixelpy import leveling
 import re
 
-from typing import Union
+from typing import Union, Optional
+import datetime
 
 HYPIXEL_API_URL = 'https://api.hypixel.net/'
 UUIDResolverAPI = "https://sessionserver.mojang.com/session/minecraft/profile/"
@@ -42,6 +43,51 @@ class GuildIDNotValid(Exception):
 class HypixelAPIError(Exception):
     """ Simple exception if something's gone very wrong and the program can't continue. """
     pass
+
+class UUID_Plus_Time:
+    """This class encapsulates a UUID and a time (unix epoch), likely representing when
+    they were added to another player."""
+    def __init__(self, uuid: str, unix_epoch_milliseconds: Optional[float] = None, 
+                 unix_epoch_seconds: Optional[float] = None, date_string: Optional[str] = None):
+        assert 1 >= sum([unix_epoch_milliseconds is not None, unix_epoch_seconds is not None, date_string is not None])
+        self._uuid = uuid
+        if unix_epoch_milliseconds is not None:
+            self._unix_epoch_seconds = unix_epoch_milliseconds / 1000
+        elif unix_epoch_seconds is not None:
+            self._unix_epoch_seconds = unix_epoch_seconds
+        elif date_string is not None:
+            self._unix_epoch_seconds = time.mktime(datetime.datetime.strptime(date_string, '%Y-%m-%d').timetuple())
+        else:
+            self._unix_epoch_seconds = None
+    
+    def uuid(self) -> str:
+        return self._uuid
+
+    def time_epoch_in_seconds(self) -> Optional[float]:
+        return self._unix_epoch_seconds
+    
+    def time_epoch_in_milliseconds(self) -> Optional[float]:
+        """Returns the time as a float representing the unix epoch time in milliseconds"""
+        if self._unix_epoch_seconds is None:
+            return None
+        return self._unix_epoch_seconds * 1000
+    
+    def date_string(self) -> Optional[str]:
+        """Returns the time as a YYYY-MM-DD date string"""
+        if self._unix_epoch_seconds is None:
+            return None
+        return datetime.datetime.utcfromtimestamp(self._unix_epoch_seconds).strftime('%Y-%m-%d')
+    
+    def no_time(self) -> bool:
+        return self._unix_epoch_seconds is None
+    
+    def sort_key(self) -> float:
+        if self.no_time():
+            return 0
+        return self.time_epoch_in_milliseconds()
+    
+    def same_person(self, other: "UUID_Plus_Time") -> bool:
+        return self._uuid == other.uuid()
 
 def sleep_for_rate_limiting() -> None:
     time_passed = time() - TIME_STARTED
@@ -280,16 +326,15 @@ class Player:
             session = None
         return session
     
-    def getUUIDsOfFriends(self, include_date = True) -> Union[list[dict], list[str]]:
+    def getFriends(self) -> list[UUID_Plus_Time]:
         """ This function returns a list of the UUIDs of all the player's friends. If the include_date
         optional argument is given a value of True, the list returned will instead be a list of dictionaries, where
         each dict stores a friend's uuid and the time they were friended. """
-        friendsInfo = getJSON('friends', uuid=self.UUID)
-        friendsUUIDS = []
-        for friend in friendsInfo['records']:
+        friends = []
+        for friend in getJSON('friends', uuid=self.UUID)['records']:
             friend_uuid = friend["uuidReceiver"] if friend["uuidReceiver"] != self.UUID else friend["uuidSender"]
-            friendsUUIDS.append({'uuid': friend_uuid, 'time': friend['started']} if include_date else friend_uuid)
-        return friendsUUIDS
+            friends.append(UUID_Plus_Time(friend_uuid, unix_epoch_milliseconds=friend['started']))
+        return friends
     
     def isOnline(self):
         """ This function returns a bool representing whether the player is online. """
