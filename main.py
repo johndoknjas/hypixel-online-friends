@@ -136,8 +136,11 @@ def remove_players_who_logged_off(players: List[dict]) -> List[dict]:
 def print_list_of_dicts(lst: List[dict]) -> None:
     print("\n".join([str(d) for d in lst]))
 
+def trim_if_needed(text: str, limit: int = 200) -> str:
+    return (text[:limit] + '.....') if len(text) > limit else text
+
 def write_data_as_json_to_file(data: dict, description: str = "") -> None:
-    filename = os.path.join("results", description + " - " + str(time.time_ns()) + ".txt")
+    filename = os.path.join("results", trim_if_needed(description) + " - " + str(time.time_ns()) + ".txt")
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, "w") as f:
         f.write(json.dumps(data, indent=4))
