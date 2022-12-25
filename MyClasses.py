@@ -10,41 +10,40 @@ class UUID_Plus_Time:
     def __init__(self, uuid: str, unix_epoch_milliseconds: Optional[float] = None, 
                  unix_epoch_seconds: Optional[float] = None, date_string: Optional[str] = None):
         assert 1 >= sum([unix_epoch_milliseconds is not None, unix_epoch_seconds is not None, date_string is not None])
-        self._uuid = uuid
+        self._uuid: str = uuid
+        self._unix_epoch_milliseconds: Optional[float] = None # This line just to satisfy mypy
         if unix_epoch_milliseconds is not None:
-            self._unix_epoch_seconds = unix_epoch_milliseconds / 1000
+            self._unix_epoch_milliseconds = unix_epoch_milliseconds
         elif unix_epoch_seconds is not None:
-            self._unix_epoch_seconds = unix_epoch_seconds
+            self._unix_epoch_milliseconds = unix_epoch_seconds * 1000
         elif date_string is not None:
-            self._unix_epoch_seconds = time.mktime(datetime.datetime.strptime(date_string, '%Y-%m-%d').timetuple())
+            self._unix_epoch_milliseconds = 1000 * time.mktime(datetime.datetime.strptime(date_string, '%Y-%m-%d').timetuple())
         else:
-            self._unix_epoch_seconds = None
+            self._unix_epoch_milliseconds = None
     
     def uuid(self) -> str:
         return self._uuid
 
     def time_epoch_in_seconds(self) -> Optional[float]:
-        return self._unix_epoch_seconds
+        return self._unix_epoch_milliseconds / 1000 if self._unix_epoch_milliseconds is not None else None
     
     def time_epoch_in_milliseconds(self) -> Optional[float]:
         """Returns the time as a float representing the unix epoch time in milliseconds"""
-        if self._unix_epoch_seconds is None:
-            return None
-        return self._unix_epoch_seconds * 1000
+        return self._unix_epoch_milliseconds
     
     def date_string(self) -> Optional[str]:
         """Returns the time as a YYYY-MM-DD date string"""
-        if self._unix_epoch_seconds is None:
+        if self._unix_epoch_milliseconds is None:
             return None
-        return datetime.datetime.utcfromtimestamp(self._unix_epoch_seconds).strftime('%Y-%m-%d')
+        return datetime.datetime.utcfromtimestamp(self._unix_epoch_milliseconds / 1000).strftime('%Y-%m-%d')
     
     def no_time(self) -> bool:
-        return self._unix_epoch_seconds is None
+        return self._unix_epoch_milliseconds is None
     
     def sort_key(self) -> float:
-        if self.no_time():
+        if self._unix_epoch_milliseconds is None:
             return 0
-        return self.time_epoch_in_milliseconds()
+        return self._unix_epoch_milliseconds
     
     def same_person(self, other: "UUID_Plus_Time") -> bool:
         return self._uuid == other.uuid()

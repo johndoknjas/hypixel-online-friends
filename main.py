@@ -77,7 +77,7 @@ def calculate_fkdr(player: hypixel.Player) -> float:
 def polish_dictionary_report(report: dict, specs: Specs) -> dict:
     if 'friends' in report and all('fkdr' in d for d in report['friends']):
         report['friends'] = sorted(report['friends'], key=lambda d: d['fkdr'], reverse=True)
-    if specs.specs_for_friends() and specs.specs_for_friends().required_online():
+    if (friends_specs := specs.specs_for_friends()) and friends_specs.required_online():
         report['friends'] = remove_players_who_logged_off(report['friends'])
     if specs.print_only_players_friends():
         print('\n\n')
@@ -112,7 +112,7 @@ def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Spec
     if specs.print_player_data_exclude_friends():
         print(str(player_report))
 
-    if not specs.specs_for_friends():
+    if not (specs_for_friends := specs.specs_for_friends()):
         return player_report
     # Now to use recursion to make a list of dictionaries for the player's friends, which will be the value
     # of this 'friends' key in the player's dictionary:
@@ -122,7 +122,7 @@ def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Spec
     for i, friend in enumerate(friends):
         if specs.root_player() and i % 20 == 0:
             print("Processed " + str(i))
-        if report := create_dictionary_report_for_player(friend, specs.specs_for_friends()):
+        if report := create_dictionary_report_for_player(friend, specs_for_friends):
             player_report['friends'].append(report)
 
     if specs.root_player():
@@ -255,14 +255,15 @@ def get_players_info_from_args(args: List[str]) -> dict:
     playerFriends = sort_friends_and_remove_duplicates(playerFriends)
     playerFriends = [f for f in playerFriends if not any(f.same_person(e) for e in exclude_friends)]
     if friend_add_time_cutoff := get_date_if_exists(args):
-        playerFriends = [f for f in playerFriends if f.time_epoch_in_milliseconds() >= friend_add_time_cutoff]
+        playerFriends = [f for f in playerFriends if 
+                         (time_added := f.time_epoch_in_milliseconds()) and time_added >= friend_add_time_cutoff]
 
     print("Now " + str(len(playerFriends)) + " friends after adjustments specified in args.")
 
     return {'playerUUID': playerUUID, 'playerFriends': playerFriends,
             'playerNameForFileOutput': playerNameForFileOutput}
 
-def remove_date_strings(lst: List[str]) -> None:
+def remove_date_strings(lst: List[str]) -> List[str]:
     return [x for x in lst if not get_date_if_exists(x)]
 
 def get_date_if_exists(args: Union[List[str], str]) -> Optional[float]:
@@ -301,7 +302,7 @@ def main():
     find_friends_of_friends = 'friendsoffriends' in args
     just_online_friends = 'all' not in args and not find_friends_of_friends
     check_results = 'checkresults' in args
-    player_info: dict = get_players_info_from_args(args)
+    player_info = get_players_info_from_args(args)
     if check_results:
         print("There are " + str(num_players_with_f_lists_in_results()) + " players with their f list in results.")
         print("It's " + str(is_players_friend_list_in_results(player_info['playerNameForFileOutput'])).lower()
