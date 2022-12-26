@@ -2,13 +2,13 @@ import os
 import os.path
 import sys
 import time
-import datetime
 import json
 from collections import OrderedDict
-from typing import List, Union, Optional
+from typing import List, Optional
 
 import hypixel
 from MyClasses import UUID_Plus_Time, Specs
+import Utils
 
 # CONTINUE HERE - todos:
 
@@ -108,7 +108,9 @@ def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Spec
         player_report.update({'name': player.getName(), 'fkdr': calculate_fkdr(player)})
     player_report['uuid'] = player_info.uuid()
     if not player_info.no_time():
-        player_report['time'] = player_info.time_epoch_in_milliseconds()
+        player_report['time'] = (player_info.time_epoch_in_milliseconds() 
+                                 if Specs.does_program_display_time_as_unix_epoch() 
+                                 else player_info.date_string())
     if specs.print_player_data_exclude_friends():
         print(str(player_report))
 
@@ -202,13 +204,13 @@ def get_player_json_from_textfile(relative_filepath: str, username: str) -> dict
     dict_from_file = read_json_textfile(relative_filepath)
     dict_for_player = find_dict_for_given_username(dict_from_file, username)
     assert dict_for_player
-    dict_for_player['friends'] = [UUID_Plus_Time(d['uuid'], unix_epoch_milliseconds=d.get('time', None))
+    dict_for_player['friends'] = [UUID_Plus_Time(d['uuid'], d.get('time', None))
                                   for d in dict_for_player.pop('friends')]
     return dict_for_player
 
 def process_args(args: List[str]) -> List[dict]:
     """Will return a list of dicts, where each dict has info for each player referred to by args. """
-    args = remove_arguments_not_needed(args)
+    args = remove_date_strings(args)
     info_of_players: List[dict] = []
     encountered_minus_symbol = False
     for i, arg in enumerate(args):
@@ -256,27 +258,16 @@ def get_players_info_from_args(args: List[str]) -> dict:
             'playerNameForFileOutput': playerNameForFileOutput}
 
 def remove_date_strings(lst: List[str]) -> List[str]:
-    return [x for x in lst if not is_date_string(x)]
-
-def is_date_string(text: str) -> bool:
-    try:
-        datetime.datetime.strptime(text, '%Y-%m-%d')
-    except ValueError:
-        return False
-    else:
-        return True
+    return [x for x in lst if not Utils.is_date_string(x)]
 
 def get_date_string_if_exists(lst: List[str]) -> Optional[str]:
     """If no date strings found, return None."""
-    return next((x for x in lst if is_date_string(x)), None)
-
-def remove_arguments_not_needed(args: List[str]) -> List[str]:
-    return list_subtract(remove_date_strings(args[1:]), ['all', 'friendsoffriends', 'justuuids', 'checkresults'])
+    return next((x for x in lst if Utils.is_date_string(x)), None)
 
 def make_Specs_object(find_friends_of_friends: bool, just_uuids_of_friends: bool, 
-                      just_online_friends: bool) -> Specs:
+                      just_online_friends: bool, display_time_as_unix_epoch: bool) -> Specs:
     if not Specs.is_common_specs_initialized():
-        Specs.set_common_specs(not find_friends_of_friends)
+        Specs.set_common_specs(not find_friends_of_friends, display_time_as_unix_epoch)
     friendsfriendsSpecs = Specs(False, False, None, 2) if find_friends_of_friends else None
     friendsSpecs = Specs(not just_uuids_of_friends, just_online_friends, friendsfriendsSpecs, 1)
     playerSpecs = Specs(True, False, friendsSpecs, 0)
@@ -288,19 +279,22 @@ def main():
     #write_data_as_json_to_file(hypixel.getJSON('counts'), "test online hypixel player count")
     #write_data_as_json_to_file(hypixel.getJSON('leaderboards'), "test leaderboards")
 
-    args = [arg if arg.endswith('.txt') else arg.lower() for arg in sys.argv]
-    just_uuids_of_friends = 'justuuids' in args
+    args = [arg if arg.endswith('.txt') else arg.lower() for arg in sys.argv][1:]
     find_friends_of_friends = 'friendsoffriends' in args
     just_online_friends = 'all' not in args and not find_friends_of_friends
     check_results = 'checkresults' in args
+
+    playerSpecs = make_Specs_object(find_friends_of_friends, 'justuuids' in args, just_online_friends, 
+                                    'epoch' in args)
+    
+    args = list_subtract(args, ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch'])
+
     player_info = get_players_info_from_args(args)
     if check_results:
         print("There are " + str(num_players_with_f_lists_in_results()) + " players with their f list in results.")
         print("It's " + str(is_players_friend_list_in_results(player_info['playerNameForFileOutput'])).lower()
               + " that " + player_info['playerNameForFileOutput'] + "'s friends list is in the results folder.")
-    
-    playerSpecs = make_Specs_object(find_friends_of_friends, just_uuids_of_friends, just_online_friends)
-    report = create_dictionary_report_for_player(UUID_Plus_Time(player_info['playerUUID']), playerSpecs, 
+    report = create_dictionary_report_for_player(UUID_Plus_Time(player_info['playerUUID'], None), playerSpecs, 
                                                  player_info['playerFriends'])
 
     if not just_online_friends:

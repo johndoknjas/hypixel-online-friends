@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import datetime
 import time
-from typing import Optional, List
+from typing import Optional, List, Union
+import Utils
 
 class UUID_Plus_Time:
     """This class encapsulates a UUID and a time (unix epoch), likely representing when
@@ -50,19 +51,19 @@ class UUID_Plus_Time:
         players = UUID_Plus_Time.exclude_players(players, exclude_players)
         return UUID_Plus_Time.remove_players_before_date(players, date_cutoff)
 
-    def __init__(self, uuid: str, unix_epoch_milliseconds: Optional[float] = None, 
-                 unix_epoch_seconds: Optional[float] = None, date_string: Optional[str] = None):
-        assert 1 >= sum([unix_epoch_milliseconds is not None, unix_epoch_seconds is not None, date_string is not None])
+    def __init__(self, uuid: str, time_val: Union[str, float, int, None]):
+        """time_val must be either a date string, or the unix epoch time in either seconds or milliseconds"""
         self._uuid: str = uuid
-        self._unix_epoch_milliseconds: Optional[float] = None # This line just to satisfy mypy
-        if unix_epoch_milliseconds is not None:
-            self._unix_epoch_milliseconds = unix_epoch_milliseconds
-        elif unix_epoch_seconds is not None:
-            self._unix_epoch_milliseconds = unix_epoch_seconds * 1000
-        elif date_string is not None:
-            self._unix_epoch_milliseconds = 1000 * time.mktime(datetime.datetime.strptime(date_string, '%Y-%m-%d').timetuple())
-        else:
-            self._unix_epoch_milliseconds = None
+        self._unix_epoch_milliseconds: Optional[float] = None
+        if isinstance(time_val, str):
+            assert Utils.is_date_string(time_val)
+            self._unix_epoch_milliseconds = 1000 * time.mktime(datetime.datetime.strptime(
+                                                               time_val, '%Y-%m-%d').timetuple())
+        elif isinstance(time_val, float) or isinstance(time_val, int):
+            if time_val > 10000000000: # If greater than 10 billion, must already be in ms
+                self._unix_epoch_milliseconds = time_val
+            else:
+                self._unix_epoch_milliseconds = time_val * 1000
     
     def uuid(self) -> str:
         return self._uuid
@@ -95,21 +96,31 @@ class Specs:
     """This class represents specifications that a caller has when it calls the 
        create_dictionary_report_for_player function."""
 
-    _common_specs: dict = {'print player data': None, 'set flag': False}
+    _common_specs: dict = {'print player data': None, 'display time as unix epoch': None, 'set flag': False}
     
     @classmethod
-    def set_common_specs(cls, print_player_data: bool) -> None:
+    def set_common_specs(cls, print_player_data: bool, display_time_as_unix_epoch: bool) -> None:
         assert not cls._common_specs['set flag']
         cls._common_specs['print player data'] = print_player_data
+        cls._common_specs['display time as unix epoch'] = display_time_as_unix_epoch
         cls._common_specs['set flag'] = True
     
     @classmethod
+    def _get_value_for_key(cls, key: str) -> bool:
+        assert key in cls._common_specs and cls._common_specs[key] is not None
+        return cls._common_specs[key]
+    
+    @classmethod
     def is_common_specs_initialized(cls) -> bool:
-        return cls._common_specs['set flag']
+        return cls._get_value_for_key('set flag')
     
     @classmethod
     def does_program_print_player_data(cls) -> bool:
-        return cls._common_specs['print player data']
+        return cls._get_value_for_key('print player data')
+    
+    @classmethod
+    def does_program_display_time_as_unix_epoch(cls) -> bool:
+        return cls._get_value_for_key('display time as unix epoch')
 
     def __init__(self, include_players_name_and_fkdr: bool, player_must_be_online: bool,
                  friends_specs: Optional[Specs], degrees_from_original_player: int):

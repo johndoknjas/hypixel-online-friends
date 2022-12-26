@@ -286,7 +286,7 @@ class Player:
         friends = []
         for friend in getJSON('friends', uuid=self.UUID)['records']:
             friend_uuid = friend["uuidReceiver"] if friend["uuidReceiver"] != self.UUID else friend["uuidSender"]
-            friends.append(UUID_Plus_Time(friend_uuid, unix_epoch_milliseconds=friend['started']))
+            friends.append(UUID_Plus_Time(friend_uuid, friend['started']))
         return friends
     
     def isOnline(self):
