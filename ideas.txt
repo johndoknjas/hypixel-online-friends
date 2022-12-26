@@ -1,5 +1,26 @@
-- Have an option to get all friends of each of your friends, and store all this data in a folder.
+# CONTINUE HERE - todos:
 
-- Have option to read a textfile of uuids (representing a player's friends). The name of the textfile would be entered instead of the player's ign.
+    # Add a feature to just get friends over a certain fkdr.
+        # When this is implemented you could then run the program and save this list a file, and then 
+        # just go through this file when looking for people to party online.
 
-- Make your own overlay! Possible to use your uuid to get all uuids of people in your game.
+    # Add a feature where if 'avg' is a command line argument, the average size will be calculated for
+    # all friends lists the program comes across. Could also make a 'total' arg, that displays the total
+    # number of (unique) friends in all f lists processed.
+
+    # Add a feature that aims to backup the friends lists of most of the (active part?) of the hypixel server.
+        # A good way to do this is use the hypixel api to get players on the daily bedwars leaderboard.
+        # This will update every day, and the people on the leaderboard are obviously active players who
+        # probably are friends with other active players.
+
+        # So could go through each daily leaderboard, pick the top 10, get their 10 most recently added friends,
+        # get their 10 most recently added friends, etc until something like 1000-10,000. You can backup these
+        # many friends lists then.
+            # Important that before continuing down this "tree" at a given player, you check that their
+            # f list is not already backed up in the results folder.
+                # When doing this, can also record how many of these players already have their f lists
+                # recorded in the results folder. This
+                # can give you an idea as time goes on of approx. what percentage of f lists of active bw
+                # players you've backed up.
+                    # At the time of writing this percentage should be pretty low though, since it's under 10,000
+                    # players' f lists recorded in results.

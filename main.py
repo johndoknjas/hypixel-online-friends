@@ -1,44 +1,10 @@
-import os
-import os.path
 import sys
-import time
-import json
-from collections import OrderedDict
 from typing import List, Optional
 
 import hypixel
 from MyClasses import UUID_Plus_Time, Specs
 import Utils
-
-# CONTINUE HERE - todos:
-
-    # Add a feature to just get friends over a certain fkdr.
-        # When this is implemented you could then run the program and save this list a file, and then 
-        # just go through this file when looking for people to party online.
-
-    # Add a feature where if 'avg' is a command line argument, the average size will be calculated for
-    # all friends lists the program comes across. Could also make a 'total' arg, that displays the total
-    # number of (unique) friends in all f lists processed.
-
-    # Add a feature that aims to backup the friends lists of most of the (active part?) of the hypixel server.
-        # A good way to do this is use the hypixel api to get players on the daily bedwars leaderboard.
-        # This will update every day, and the people on the leaderboard are obviously active players who
-        # probably are friends with other active players.
-
-        # So could go through each daily leaderboard, pick the top 10, get their 10 most recently added friends,
-        # get their 10 most recently added friends, etc until something like 1000-10,000. You can backup these
-        # many friends lists then.
-            # Important that before continuing down this "tree" at a given player, you check that their
-            # f list is not already backed up in the results folder.
-                # When doing this, can also record how many of these players already have their f lists
-                # recorded in the results folder. This
-                # can give you an idea as time goes on of approx. what percentage of f lists of active bw
-                # players you've backed up.
-                    # At the time of writing this percentage should be pretty low though, since it's under 10,000
-                    # players' f lists recorded in results.
-
-def fkdr_division(final_kills: int, final_deaths: int) -> float:
-    return final_kills / final_deaths if final_deaths else float(final_kills)
+import Files
 
 def set_api_keys() -> None:
     API_KEYS = []
@@ -47,32 +13,16 @@ def set_api_keys() -> None:
             API_KEYS.append(line.rstrip())
     hypixel.setKeys(API_KEYS)
 
-def list_subtract(main_list: List, subtract_list: List) -> List:
-    return [x for x in main_list if x not in subtract_list]
-
-def remove_duplicates(lst: List) -> List:
-    return list(OrderedDict.fromkeys(lst)) # regular dict works to maintain order for python >= 3.7
-
-def get_ign_uuid_pairs() -> dict:
-    if not os.path.isfile('uuids.txt'):
-        return {}
-    ign_uuid_pairs = {} # key ign, value uuid
-    with open('uuids.txt') as file:
-        for line in file:
-            words = line.rstrip().split()
-            ign_uuid_pairs[words[0].lower()] = words[1]
-    return ign_uuid_pairs
-
 def create_player_object(playerName) -> hypixel.Player:
     """Use this function if you're using the player's ign, rather than the uuid."""
-    ign_uuid_pairs = get_ign_uuid_pairs() # dict where the key is a player's ign, value is uuid
+    ign_uuid_pairs = Files.get_ign_uuid_pairs() # dict where the key is a player's ign, value is uuid
     return hypixel.Player(ign_uuid_pairs.get(playerName, playerName))
 
 def calculate_fkdr(player: hypixel.Player) -> float:
     if not player.JSON or 'stats' not in player.JSON or 'Bedwars' not in player.JSON['stats']:
         return 0.0
-    return fkdr_division(player.JSON['stats']['Bedwars'].get('final_kills_bedwars', 0), 
-                         player.JSON['stats']['Bedwars'].get('final_deaths_bedwars', 0))
+    return Utils.fkdr_division(player.JSON['stats']['Bedwars'].get('final_kills_bedwars', 0), 
+                               player.JSON['stats']['Bedwars'].get('final_deaths_bedwars', 0))
 
 def polish_dictionary_report(report: dict, specs: Specs) -> dict:
     if 'friends' in report and all('fkdr' in d for d in report['friends']):
@@ -81,7 +31,7 @@ def polish_dictionary_report(report: dict, specs: Specs) -> dict:
         report['friends'] = remove_players_who_logged_off(report['friends'])
     if specs.print_only_players_friends():
         print('\n\n')
-        print_list_of_dicts(report['friends'])
+        Utils.print_list_of_dicts(report['friends'])
     return report
 
 def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Specs,
@@ -135,18 +85,6 @@ def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Spec
 def remove_players_who_logged_off(players: List[dict]) -> List[dict]:
     return [p for p in players if hypixel.Player(p['uuid']).isOnline()]
 
-def print_list_of_dicts(lst: List[dict]) -> None:
-    print("\n".join([str(d) for d in lst]))
-
-def trim_if_needed(text: str, limit: int = 200) -> str:
-    return (text[:limit] + '.....') if len(text) > limit else text
-
-def write_data_as_json_to_file(data: dict, description: str = "") -> None:
-    filename = os.path.join("results", trim_if_needed(description) + " - " + str(time.time_ns()) + ".txt")
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-    with open(filename, "w") as f:
-        f.write(json.dumps(data, indent=4))
-
 def find_dict_for_given_username(d: dict, username: str) -> Optional[dict]:
     # d will be a dictionary read from a file in json format - it will have a uuid key, and possibly
     # a name, fkdr, and friends key. The friends key would have a value that is a list of dictionaries,
@@ -159,21 +97,11 @@ def find_dict_for_given_username(d: dict, username: str) -> Optional[dict]:
                 return result
     return None
 
-def get_all_jsons_in_results() -> list[dict]:
-    """Returns a list of dicts, where each dict represents the json each textfile stores."""
-    all_jsons: list[dict] = []
-    all_files = os.listdir('results')
-    all_files = [f for f in all_files if f.startswith('Friends of') and f.endswith('.txt')]
-    for f in all_files:
-        filename = os.path.join('results', f)
-        all_jsons.append(read_json_textfile(filename))
-    return all_jsons
-
 def is_players_friend_list_in_results(username: str) -> bool:
     """Returns a bool representing if the player's friend list is stored in the results folder, whether
     it be with the player as the main subject of a textfile, or if the player's f list is shown in
     a 'friends of friends' textfile."""
-    all_jsons: list[dict] = get_all_jsons_in_results()
+    all_jsons: list[dict] = Files.get_all_jsons_in_results()
     return any(find_dict_for_given_username(json, username) for json in all_jsons)
 
 def get_all_players_with_f_list_in_dict(d: dict) -> list[str]:
@@ -189,19 +117,14 @@ def get_all_players_with_f_list_in_dict(d: dict) -> list[str]:
 
 def num_players_with_f_lists_in_results() -> int:
     """Returns the number of unique players who have their f lists stored in the results folder."""
-    all_jsons: list[dict] = get_all_jsons_in_results()
+    all_jsons: list[dict] = Files.get_all_jsons_in_results()
     all_players_with_f_list_in_results: list[str] = []
     for json in all_jsons:
         all_players_with_f_list_in_results.extend(get_all_players_with_f_list_in_dict(json))
-    return len(remove_duplicates(all_players_with_f_list_in_results))
-
-def read_json_textfile(relative_filepath: str) -> dict:
-    with open(relative_filepath, 'r') as f:
-        dict_from_file = json.loads(f.read())
-    return dict_from_file
+    return len(Utils.remove_duplicates(all_players_with_f_list_in_results))
 
 def get_player_json_from_textfile(relative_filepath: str, username: str) -> dict:
-    dict_from_file = read_json_textfile(relative_filepath)
+    dict_from_file = Files.read_json_textfile(relative_filepath)
     dict_for_player = find_dict_for_given_username(dict_from_file, username)
     assert dict_for_player
     dict_for_player['friends'] = [UUID_Plus_Time(d['uuid'], d.get('time', None))
@@ -210,7 +133,7 @@ def get_player_json_from_textfile(relative_filepath: str, username: str) -> dict
 
 def process_args(args: List[str]) -> List[dict]:
     """Will return a list of dicts, where each dict has info for each player referred to by args. """
-    args = remove_date_strings(args)
+    args = Utils.remove_date_strings(args)
     info_of_players: List[dict] = []
     encountered_minus_symbol = False
     for i, arg in enumerate(args):
@@ -250,24 +173,15 @@ def get_players_info_from_args(args: List[str]) -> dict:
             playerFriends.extend(player['friends'])
             playerNameForFileOutput += (' plus ' + player['name'])
     playerFriends = UUID_Plus_Time.prepare_list_for_processing(
-        playerFriends, date_cutoff=get_date_string_if_exists(args), exclude_players=exclude_friends)
+        playerFriends, date_cutoff=Utils.get_date_string_if_exists(args), exclude_players=exclude_friends)
 
     print("Now " + str(len(playerFriends)) + " friends after adjustments specified in args.")
 
     return {'playerUUID': playerUUID, 'playerFriends': playerFriends,
             'playerNameForFileOutput': playerNameForFileOutput}
 
-def remove_date_strings(lst: List[str]) -> List[str]:
-    return [x for x in lst if not Utils.is_date_string(x)]
-
-def get_date_string_if_exists(lst: List[str]) -> Optional[str]:
-    """If no date strings found, return None."""
-    return next((x for x in lst if Utils.is_date_string(x)), None)
-
 def make_Specs_object(find_friends_of_friends: bool, just_uuids_of_friends: bool, 
-                      just_online_friends: bool, display_time_as_unix_epoch: bool) -> Specs:
-    if not Specs.is_common_specs_initialized():
-        Specs.set_common_specs(not find_friends_of_friends, display_time_as_unix_epoch)
+                      just_online_friends: bool) -> Specs:
     friendsfriendsSpecs = Specs(False, False, None, 2) if find_friends_of_friends else None
     friendsSpecs = Specs(not just_uuids_of_friends, just_online_friends, friendsfriendsSpecs, 1)
     playerSpecs = Specs(True, False, friendsSpecs, 0)
@@ -276,18 +190,18 @@ def make_Specs_object(find_friends_of_friends: bool, just_uuids_of_friends: bool
 def main():
     set_api_keys()
 
-    #write_data_as_json_to_file(hypixel.getJSON('counts'), "test online hypixel player count")
-    #write_data_as_json_to_file(hypixel.getJSON('leaderboards'), "test leaderboards")
+    #Files.write_data_as_json_to_file(hypixel.getJSON('counts'), "test online hypixel player count")
+    #Files.write_data_as_json_to_file(hypixel.getJSON('leaderboards'), "test leaderboards")
 
     args = [arg if arg.endswith('.txt') else arg.lower() for arg in sys.argv][1:]
     find_friends_of_friends = 'friendsoffriends' in args
     just_online_friends = 'all' not in args and not find_friends_of_friends
     check_results = 'checkresults' in args
 
-    playerSpecs = make_Specs_object(find_friends_of_friends, 'justuuids' in args, just_online_friends, 
-                                    'epoch' in args)
+    Specs.set_common_specs(not find_friends_of_friends, 'epoch' in args)
+    playerSpecs = make_Specs_object(find_friends_of_friends, 'justuuids' in args, just_online_friends)
     
-    args = list_subtract(args, ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch'])
+    args = Utils.list_subtract(args, ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch'])
 
     player_info = get_players_info_from_args(args)
     if check_results:
@@ -300,7 +214,7 @@ def main():
     if not just_online_friends:
         filename = ("Friends of " + ("friends of " if find_friends_of_friends else "") 
                     + player_info['playerNameForFileOutput'])
-        write_data_as_json_to_file(report, filename)
+        Files.write_data_as_json_to_file(report, filename)
 
 if __name__ == '__main__':
     main()
