@@ -208,7 +208,7 @@ def get_player_json_from_textfile(relative_filepath: str, username: str) -> dict
 
 def process_args(args: List[str]) -> List[dict]:
     """Will return a list of dicts, where each dict has info for each player referred to by args. """
-    args = remove_arguments_no_longer_needed(args)
+    args = remove_arguments_not_needed(args)
     info_of_players: List[dict] = []
     encountered_minus_symbol = False
     for i, arg in enumerate(args):
@@ -230,14 +230,6 @@ def process_args(args: List[str]) -> List[dict]:
 
     return info_of_players
 
-def sort_friends_and_remove_duplicates(friends: List[UUID_Plus_Time]) -> List[UUID_Plus_Time]:
-    """Each dict in friends should have two key-value pairs, representing a friend's uuid 
-       and the time they were added. The dicts in the list will be sorted by date, and the same friend
-       appearing (so two dicts with the same uuid key-value pair) will be removed. """
-    
-    friends = sorted(friends, key=lambda f: f.sort_key(), reverse=True)
-    return [f for i, f in enumerate(friends) if not any(f.same_person(other) for other in friends[:i])]
-
 def get_players_info_from_args(args: List[str]) -> dict:
     info_on_players: List[dict] = process_args(args)
     playerNameForFileOutput = info_on_players[0]['name']
@@ -255,11 +247,8 @@ def get_players_info_from_args(args: List[str]) -> dict:
         else:
             playerFriends.extend(player['friends'])
             playerNameForFileOutput += (' plus ' + player['name'])
-    playerFriends = sort_friends_and_remove_duplicates(playerFriends)
-    playerFriends = [f for f in playerFriends if not any(f.same_person(e) for e in exclude_friends)]
-    if friend_add_time_cutoff := get_date_if_exists(args):
-        playerFriends = [f for f in playerFriends if 
-                         (time_added := f.time_epoch_in_milliseconds()) and time_added >= friend_add_time_cutoff]
+    playerFriends = UUID_Plus_Time.prepare_list_for_processing(
+        playerFriends, date_cutoff=get_date_string_if_exists(args), exclude_players=exclude_friends)
 
     print("Now " + str(len(playerFriends)) + " friends after adjustments specified in args.")
 
@@ -267,22 +256,21 @@ def get_players_info_from_args(args: List[str]) -> dict:
             'playerNameForFileOutput': playerNameForFileOutput}
 
 def remove_date_strings(lst: List[str]) -> List[str]:
-    return [x for x in lst if not get_date_if_exists(x)]
+    return [x for x in lst if not is_date_string(x)]
 
-def get_date_if_exists(args: Union[List[str], str]) -> Optional[float]:
-    """If no date strings found, return None. Otherwise, convert the first date string found into 
-    unix epoch time (milliseconds), and return it."""
-    if isinstance(args, str):
-        args = [args]
-    for arg in args:
-        try:
-            date = datetime.datetime.strptime(arg, '%Y-%m-%d')
-        except ValueError:
-            continue
-        return time.mktime(date.timetuple()) * 1000
-    return None
+def is_date_string(text: str) -> bool:
+    try:
+        datetime.datetime.strptime(text, '%Y-%m-%d')
+    except ValueError:
+        return False
+    else:
+        return True
 
-def remove_arguments_no_longer_needed(args: List[str]) -> List[str]:
+def get_date_string_if_exists(lst: List[str]) -> Optional[str]:
+    """If no date strings found, return None."""
+    return next((x for x in lst if is_date_string(x)), None)
+
+def remove_arguments_not_needed(args: List[str]) -> List[str]:
     return list_subtract(remove_date_strings(args[1:]), ['all', 'friendsoffriends', 'justuuids', 'checkresults'])
 
 def make_Specs_object(find_friends_of_friends: bool, just_uuids_of_friends: bool, 
