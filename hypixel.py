@@ -8,6 +8,7 @@ from random import choice
 from time import time, sleep
 import grequests
 from MyClasses import UUID_Plus_Time
+import Files
 
 import leveling
 import re
@@ -160,11 +161,6 @@ class Player:
     """ This class represents a player on Hypixel as a single object.
         A player has a UUID, a username, statistics etc.
 
-        Raises
-        ------
-        PlayerNotFoundException
-            If the player cannot be found, this will be raised.
-
         Parameters
         -----------
         Username/UUID : string
@@ -174,33 +170,17 @@ class Player:
         -----------
         JSON : string
             The raw JSON receieved from the Hypixel API.
-
-        UUID : string
-            The player's UUID.
     """
 
-    JSON = None
-    UUID = None
-
-    def __init__(self, UUID):
-        """ This is called whenever someone uses hypixel.Player('Snuggle').
-            Get player's UUID, if it's a username. Get Hypixel-API data. """
-        self.UUID = UUID
-        if len(UUID) <= 16: # If the UUID isn't actually a UUID... *rolls eyes* Lazy people.
-            self.JSON = getJSON('player', uuid=UUID) # Get player's Hypixel-API JSON information.
-            JSON = self.JSON
-            self.UUID = JSON['uuid'] # Pretend that nothing happened and get the UUID from the API.
-        elif len(UUID) in (32, 36): # If it's actually a UUID, with/without hyphens...
-            self.JSON = getJSON('player', uuid=UUID)
-        else:
-            raise PlayerNotFoundException(UUID)
-
+    def __init__(self, UUID_or_ign: str):
+        assert len(UUID_or_ign) <= 16 or len(UUID_or_ign) in (32, 36)
+        self.JSON = getJSON('player', uuid=Files.get_uuid(UUID_or_ign))
 
     def getPlayerInfo(self):
         """ This is a simple function to return a bunch of common data about a player. """
         JSON = self.JSON
         playerInfo = {}
-        playerInfo['uuid'] = self.UUID
+        playerInfo['uuid'] = self.getUUID()
         playerInfo['displayName'] = Player.getName(self)
         playerInfo['rank'] = Player.getRank(self)
         playerInfo['networkLevel'] = Player.getLevel(self)
@@ -238,8 +218,7 @@ class Player:
     
     def getUUID(self):
         """ This function returns a player's UUID. """
-        JSON = self.JSON
-        return JSON['uuid']
+        return self.JSON['uuid']
         
     def getRank(self):
         """ This function returns a player's rank, from their data. """
@@ -266,15 +245,13 @@ class Player:
 
     def getGuildID(self):
         """ This function is used to get a GuildID from a player. """
-        UUID = self.UUID
-        GuildID = getJSON('findGuild', byUuid=UUID)
+        GuildID = getJSON('findGuild', byUuid=self.getUUID())
         return GuildID['guild']
 
     def getSession(self):
         """ This function is used to get a player's session information. """
-        UUID = self.UUID
         try:
-            session = getJSON('session', uuid=UUID)
+            session = getJSON('session', uuid=self.getUUID())
         except HypixelAPIError:
             session = None
         return session
@@ -284,14 +261,14 @@ class Player:
         optional argument is given a value of True, the list returned will instead be a list of dictionaries, where
         each dict stores a friend's uuid and the time they were friended. """
         friends = []
-        for friend in getJSON('friends', uuid=self.UUID)['records']:
-            friend_uuid = friend["uuidReceiver"] if friend["uuidReceiver"] != self.UUID else friend["uuidSender"]
+        for friend in getJSON('friends', uuid=self.getUUID())['records']:
+            friend_uuid = friend["uuidReceiver"] if friend["uuidReceiver"] != self.getUUID() else friend["uuidSender"]
             friends.append(UUID_Plus_Time(friend_uuid, friend['started']))
         return friends
     
     def isOnline(self):
         """ This function returns a bool representing whether the player is online. """
-        onlineStatus = getJSON('status', uuid=self.UUID)
+        onlineStatus = getJSON('status', uuid=self.getUUID())
         return onlineStatus['session']['online']
 
 class Guild:

@@ -13,11 +13,6 @@ def set_api_keys() -> None:
             API_KEYS.append(line.rstrip())
     hypixel.setKeys(API_KEYS)
 
-def create_player_object(playerName) -> hypixel.Player:
-    """Use this function if you're using the player's ign, rather than the uuid."""
-    ign_uuid_pairs = Files.get_ign_uuid_pairs() # dict where the key is a player's ign, value is uuid
-    return hypixel.Player(ign_uuid_pairs.get(playerName, playerName))
-
 def calculate_fkdr(player: hypixel.Player) -> float:
     if not player.JSON or 'stats' not in player.JSON or 'Bedwars' not in player.JSON['stats']:
         return 0.0
@@ -146,7 +141,7 @@ def process_args(args: List[str]) -> List[dict]:
         if i < len(args) - 1 and args[i+1].endswith('.txt'):
             player_info = get_player_json_from_textfile(args[i+1], arg)
         else:
-            player = create_player_object(arg)
+            player = hypixel.Player(arg)
             player_info = {'name': player.getName(), 'uuid': player.getUUID(),
                            'friends': list(reversed(player.getFriends()))
                           }

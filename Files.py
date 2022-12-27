@@ -6,6 +6,9 @@ import os.path
 import json
 import time
 import Utils
+from typing import Optional
+
+_IGN_UUID_PAIRS: Optional[dict] = None
 
 def write_data_as_json_to_file(data: dict, description: str = "") -> None:
     filename = os.path.join("results", Utils.trim_if_needed(description) + " - " + str(time.time_ns()) + ".txt")
@@ -13,15 +16,25 @@ def write_data_as_json_to_file(data: dict, description: str = "") -> None:
     with open(filename, "w") as f:
         f.write(json.dumps(data, indent=4))
 
-def get_ign_uuid_pairs() -> dict:
+def ign_uuid_pairs() -> dict:
+    """Retrieves pairs stored in the uuids.txt file as a dict - key ign, value uuid"""
+    global _IGN_UUID_PAIRS
+    if _IGN_UUID_PAIRS is not None:
+        return _IGN_UUID_PAIRS
+    _IGN_UUID_PAIRS = {} # key ign, value uuid
+
     if not os.path.isfile('uuids.txt'):
-        return {}
-    ign_uuid_pairs = {} # key ign, value uuid
+        return _IGN_UUID_PAIRS
     with open('uuids.txt') as file:
         for line in file:
             words = line.rstrip().split()
-            ign_uuid_pairs[words[0].lower()] = words[1]
-    return ign_uuid_pairs
+            _IGN_UUID_PAIRS[words[0].lower()] = words[1]
+    return _IGN_UUID_PAIRS
+
+def get_uuid(uuid_or_ign) -> str:
+    """If a uuid is passed in, it'll simply be returned. Otherwise if it's an ign, a uuid will be returned if
+    a pair for it exists. Otherwise, the ign just gets returned."""
+    return ign_uuid_pairs().get(uuid_or_ign, uuid_or_ign)
 
 def read_json_textfile(relative_filepath: str) -> dict:
     with open(relative_filepath, 'r') as f:
