@@ -6,9 +6,11 @@ __version__ = '0.8.0'
 
 from random import choice
 from time import time, sleep
+from copy import deepcopy
 import grequests
 from MyClasses import UUID_Plus_Time
 import Files
+import Utils
 
 import leveling
 import re
@@ -131,7 +133,7 @@ def setCacheTime(seconds):
     except ValueError as chainedException:
         raise HypixelAPIError("Invalid cache time \"{}\"".format(seconds)) from chainedException
 
-def setKeys(api_keys):
+def set_api_keys() -> None:
     """ This function is used to set your Hypixel API keys.
         It also checks that they are valid/working.
 
@@ -147,6 +149,12 @@ def setKeys(api_keys):
 
             Example: ``['740b8cf8-8aba-f2ed-f7b10119d28']``.
     """
+
+    api_keys = []
+    with open('api-key.txt') as file:
+        for line in file:
+            api_keys.append(line.rstrip())
+
     for api_key in api_keys:
         if len(api_key) == HYPIXEL_API_KEY_LENGTH:
             response = getJSON('key', key=api_key)
@@ -178,7 +186,6 @@ class Player:
 
     def getPlayerInfo(self):
         """ This is a simple function to return a bunch of common data about a player. """
-        JSON = self.JSON
         playerInfo = {}
         playerInfo['uuid'] = self.getUUID()
         playerInfo['displayName'] = Player.getName(self)
@@ -188,29 +195,27 @@ class Player:
                     'mcVersionRp', 'networkExp', 'socialMedia', 'prefix']
         for item in JSONKeys:
             try:
-                playerInfo[item] = JSON[item]
+                playerInfo[item] = deepcopy(self.JSON[item])
             except KeyError:
                 pass
         return playerInfo
 
     def getName(self, extra_safety_check=True):
         """ Just return player's name. """
-        JSON = self.JSON
         if not extra_safety_check:
-            return JSON['displayname']
-        sanitized_name = re.sub("[^A-Za-z0-9_]", "", JSON['displayname'])
+            return self.JSON['displayname']
+        sanitized_name = re.sub("[^A-Za-z0-9_]", "", self.JSON['displayname'])
         # Removes any leading whitespace, and only keeps alphanumerics and underscores.
-        if JSON['displayname'] != sanitized_name:
+        if self.JSON['displayname'] != sanitized_name:
             raise RuntimeError("Potentially unsafe character in ign - sanitized version is " + sanitized_name
             + ". To disable this safety check, call this function with getName(extra_safety_check=False).")
         return sanitized_name
 
     def getLevel(self):
         """ This function calls leveling.py to calculate a player's network level. """
-        JSON = self.JSON
         
-        networkExp = JSON.get('networkExp', 0)        
-        networkLevel = JSON.get('networkLevel', 0)
+        networkExp = self.JSON.get('networkExp', 0)        
+        networkLevel = self.JSON.get('networkLevel', 0)
         
         exp = leveling.getExperience(networkExp, networkLevel)
         myoutput = leveling.getExactLevel(exp)
@@ -222,20 +227,19 @@ class Player:
         
     def getRank(self):
         """ This function returns a player's rank, from their data. """
-        JSON = self.JSON
         playerRank = {} # Creating dictionary.
         playerRank['wasStaff'] = False
         possibleRankLocations = ['packageRank', 'newPackageRank', 'monthlyPackageRank', 'rank']
         # May need to add support for multiple monthlyPackageRank's in future.
 
         for Location in possibleRankLocations:
-            if Location in JSON:
-                if Location == 'rank' and JSON[Location] == 'NORMAL':
+            if Location in self.JSON:
+                if Location == 'rank' and self.JSON[Location] == 'NORMAL':
                     playerRank['wasStaff'] = True
                 else:
-                    if JSON[Location] == "NONE": # If monthlyPackageRank expired, ignore "NONE". See: https://github.com/Snuggle/hypixel.py/issues/9
+                    if self.JSON[Location] == "NONE": # If monthlyPackageRank expired, ignore "NONE". See: https://github.com/Snuggle/hypixel.py/issues/9
                         continue
-                    dirtyRank = JSON[Location].upper().replace("_", " ").replace(" Plus", "+")
+                    dirtyRank = self.JSON[Location].upper().replace("_", " ").replace(" Plus", "+")
                     playerRank['rank'] = dirtyRank.replace("Superstar", "MVP++").replace("Youtuber", "YouTube")
 
         if 'rank' not in playerRank:
@@ -270,6 +274,12 @@ class Player:
         """ This function returns a bool representing whether the player is online. """
         onlineStatus = getJSON('status', uuid=self.getUUID())
         return onlineStatus['session']['online']
+    
+    def getFKDR(self) -> float:
+        if not self.JSON or 'stats' not in self.JSON or 'Bedwars' not in self.JSON['stats']:
+            return 0.0
+        return Utils.fkdr_division(self.JSON['stats']['Bedwars'].get('final_kills_bedwars', 0), 
+                                   self.JSON['stats']['Bedwars'].get('final_deaths_bedwars', 0))
 
 class Guild:
     """ This class represents a guild on Hypixel as a single object.
@@ -343,7 +353,7 @@ class Guild:
             except KeyError:
                 member = {'role': roleOrder[i], 'name': 'Unknown'}
             memberList.append(member)
-            i = i + 1
+            i += 1
         for member in memberList:
             roleList = allGuildMembers[member['role']]
             roleList.append(member['name'])

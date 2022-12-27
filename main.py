@@ -6,19 +6,6 @@ from MyClasses import UUID_Plus_Time, Specs
 import Utils
 import Files
 
-def set_api_keys() -> None:
-    API_KEYS = []
-    with open('api-key.txt') as file:
-        for line in file:
-            API_KEYS.append(line.rstrip())
-    hypixel.setKeys(API_KEYS)
-
-def calculate_fkdr(player: hypixel.Player) -> float:
-    if not player.JSON or 'stats' not in player.JSON or 'Bedwars' not in player.JSON['stats']:
-        return 0.0
-    return Utils.fkdr_division(player.JSON['stats']['Bedwars'].get('final_kills_bedwars', 0), 
-                               player.JSON['stats']['Bedwars'].get('final_deaths_bedwars', 0))
-
 def polish_dictionary_report(report: dict, specs: Specs) -> dict:
     if 'friends' in report and all('fkdr' in d for d in report['friends']):
         report['friends'] = sorted(report['friends'], key=lambda d: d['fkdr'], reverse=True)
@@ -50,7 +37,7 @@ def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Spec
 
     player_report = {}
     if specs.include_name_fkdr():
-        player_report.update({'name': player.getName(), 'fkdr': calculate_fkdr(player)})
+        player_report.update({'name': player.getName(), 'fkdr': player.getFKDR()})
     player_report['uuid'] = player_info.uuid()
     if not player_info.no_time():
         player_report['time'] = (player_info.time_epoch_in_milliseconds() 
@@ -183,7 +170,7 @@ def make_Specs_object(find_friends_of_friends: bool, just_uuids_of_friends: bool
     return playerSpecs
 
 def main():
-    set_api_keys()
+    hypixel.set_api_keys()
 
     #Files.write_data_as_json_to_file(hypixel.getJSON('counts'), "test online hypixel player count")
     #Files.write_data_as_json_to_file(hypixel.getJSON('leaderboards'), "test leaderboards")
