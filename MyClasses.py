@@ -11,48 +11,6 @@ class UUID_Plus_Time:
     """This class encapsulates a UUID and a time (unix epoch), likely representing when
     they were added to another player."""
 
-    @classmethod
-    def sort_players_by_time(cls, players: List[UUID_Plus_Time], 
-                             more_recent_first: bool = True) -> List[UUID_Plus_Time]:
-        """Returns a sorted version of the list, does not modify original."""
-        return sorted(players, key=lambda f: f.sort_key(), reverse=more_recent_first)
-    
-    @classmethod
-    def remove_duplicate_players(cls, players: List[UUID_Plus_Time]) -> List[UUID_Plus_Time]:
-        """Removes elements with a UUID of an earlier element in the list. Returns this revised version
-        of the list, does not modify original."""
-        return [f for i, f in enumerate(players) if not any(f.refers_to_same_person(other) for other in players[:i])]
-    
-    @classmethod
-    def exclude_players(cls, players: List[UUID_Plus_Time], 
-                        players_to_exclude: Optional[List[UUID_Plus_Time]]) -> List[UUID_Plus_Time]:
-        """Removes elements with a UUID appearing in 'players_to_exclude', and returns the new list. Does
-        not modify originals of parameters."""
-        if not players_to_exclude:
-            return players
-        return [f for f in players if not any(f.refers_to_same_person(e) for e in players_to_exclude)]
-    
-    @classmethod
-    def remove_players_before_date(cls, players: List[UUID_Plus_Time], 
-                                   date_cutoff: Optional[str]) -> List[UUID_Plus_Time]:
-        """Removes elements in players with a time value older/less than date_cutoff, 
-        and then returns the new list. Does not modify originals of parameters"""
-
-        if not date_cutoff:
-            return players
-        return [f for f in players if (time_added := f.time_epoch_in_seconds()) and 
-                time_added >= time.mktime(datetime.datetime.strptime(date_cutoff, '%Y-%m-%d').timetuple())]
-    
-    @classmethod
-    def prepare_list_for_processing(cls, players: List[UUID_Plus_Time], 
-                                    date_cutoff: Optional[str] = None,
-                                    exclude_players: Optional[List[UUID_Plus_Time]] = None,
-                                    sort_players_by_time: bool = True) -> List[UUID_Plus_Time]:
-        players = UUID_Plus_Time.sort_players_by_time(players) if sort_players_by_time else players
-        players = UUID_Plus_Time.remove_duplicate_players(players)
-        players = UUID_Plus_Time.exclude_players(players, exclude_players)
-        return UUID_Plus_Time.remove_players_before_date(players, date_cutoff)
-
     def __init__(self, uuid: str, time_val: Union[str, float, int, None]):
         """time_val must be either a date string, or the unix epoch time in either seconds or milliseconds"""
         self._uuid: str = uuid

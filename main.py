@@ -5,86 +5,28 @@ import hypixel
 from MyClasses import UUID_Plus_Time, Specs
 import Utils
 import Files
+from Player import Player
 
-def polish_dictionary_report(report: dict, specs: Specs) -> dict:
-    if 'friends' in report and all('fkdr' in d for d in report['friends']):
-        report['friends'] = sorted(report['friends'], key=lambda d: d['fkdr'], reverse=True)
-    if (friends_specs := specs.specs_for_friends()) and friends_specs.required_online():
-        report['friends'] = remove_players_who_logged_off(report['friends'])
-    if specs.print_only_players_friends():
-        print('\n\n')
-        Utils.print_list_of_dicts(report['friends'])
-    return report
-
-def create_dictionary_report_for_player(player_info: UUID_Plus_Time, specs: Specs,
-                                        friends: Optional[List[UUID_Plus_Time]] = None) -> dict:
-    """Creates a dictionary representing info for a player. This dictionary will be ready to be written to a
-    file as a json.
-    If a value is given for the friends argument, then it will be used, rather than
-    calling the API to get player's friends. This can be done if the caller wants to exclude some friends.
-    'player' will represent the player's uuid, and possibly a time (for when the player and parent player of
-    this function call became friends). If player is the root player, then there will be no time represented,
-    since there's no parent player. """
-
-    if specs.root_player():
-        assert player_info.no_time()
-
-    if (specs.include_name_fkdr() or specs.required_online() or
-        (specs.specs_for_friends() and friends is None)):
-        player = hypixel.Player(player_info.uuid())
-    if specs.required_online() and not player.isOnline():
-        return {}
-
-    player_report = {}
-    if specs.include_name_fkdr():
-        player_report.update({'name': player.getName(), 'fkdr': player.getFKDR()})
-    player_report['uuid'] = player_info.uuid()
-    if not player_info.no_time():
-        player_report['time'] = (player_info.time_epoch_in_milliseconds() 
-                                 if Specs.does_program_display_time_as_unix_epoch() 
-                                 else player_info.date_string())
-    if specs.print_player_data_exclude_friends():
-        print(str(player_report))
-
-    if not (specs_for_friends := specs.specs_for_friends()):
-        return player_report
-    # Now to use recursion to make a list of dictionaries for the player's friends, which will be the value
-    # of this 'friends' key in the player's dictionary:
-    if friends is None:
-        friends = player.getFriends()
-    player_report['friends'] = []
-    for i, friend in enumerate(friends):
-        if specs.root_player() and i % 20 == 0:
-            print("Processed " + str(i))
-        if report := create_dictionary_report_for_player(friend, specs_for_friends):
-            player_report['friends'].append(report)
-
-    if specs.root_player():
-        player_report = polish_dictionary_report(player_report, specs)
-
-    return player_report
-
-def remove_players_who_logged_off(players: List[dict]) -> List[dict]:
-    return [p for p in players if hypixel.Player(p['uuid']).isOnline()]
-
-def find_dict_for_given_username(d: dict, username: str) -> Optional[dict]:
+def find_dict_for_given_username(d: dict, username: str, uuid: str = None) -> Optional[dict]:
     # d will be a dictionary read from a file in json format - it will have a uuid key, and possibly
     # a name, fkdr, and friends key. The friends key would have a value that is a list of dictionaries,
     # recursively following the same dictionary requirements.
+    if uuid and d['uuid'] == uuid:
+        return d
     if 'name' in d and d['name'].lower() == username.lower():
         return d
     elif 'friends' in d:
         for friend_dict in d['friends']:
-            if result := find_dict_for_given_username(friend_dict, username):
+            if result := find_dict_for_given_username(friend_dict, username, uuid=uuid):
                 return result
     return None
 
-def is_players_friend_list_in_results(username: str) -> bool:
+def is_players_friend_list_in_results(player: Player) -> bool:
     """Returns a bool representing if the player's friend list is stored in the results folder, whether
     it be with the player as the main subject of a textfile, or if the player's f list is shown in
     a 'friends of friends' textfile."""
     all_jsons: list[dict] = Files.get_all_jsons_in_results()
-    return any(find_dict_for_given_username(json, username) for json in all_jsons)
+    return any(find_dict_for_given_username(json, player.name(), uuid=player.uuid()) for json in all_jsons)
 
 def get_all_players_with_f_list_in_dict(d: dict) -> list[str]:
     """Returns the uuids of all players who have their f list represented in the dict. The dict is in the
@@ -105,18 +47,21 @@ def num_players_with_f_lists_in_results() -> int:
         all_players_with_f_list_in_results.extend(get_all_players_with_f_list_in_dict(json))
     return len(Utils.remove_duplicates(all_players_with_f_list_in_results))
 
-def get_player_json_from_textfile(relative_filepath: str, username: str) -> dict:
+def make_player_from_textfile_json(relative_filepath: str, username: str) -> Player:
     dict_from_file = Files.read_json_textfile(relative_filepath)
     dict_for_player = find_dict_for_given_username(dict_from_file, username)
     assert dict_for_player
-    dict_for_player['friends'] = [UUID_Plus_Time(d['uuid'], d.get('time', None))
-                                  for d in dict_for_player.pop('friends')]
-    return dict_for_player
+    return Player(uuid=dict_for_player['uuid'], 
+                  friends=[
+                            UUID_Plus_Time(d['uuid'], d.get('time', None))
+                            for d in dict_for_player.pop('friends')
+                          ]
+                 )
 
-def process_args(args: List[str]) -> List[dict]:
-    """Will return a list of dicts, where each dict has info for each player referred to by args. """
+def process_args(args: List[str], specs: Specs) -> List[Player]:
+    """Will return a list of Players, where each Player represents each player referred to by args. """
     args = Utils.remove_date_strings(args)
-    info_of_players: List[dict] = []
+    info_on_players: List[Player] = []
     encountered_minus_symbol = False
     for i, arg in enumerate(args):
         if arg.endswith('.txt'):
@@ -126,41 +71,39 @@ def process_args(args: List[str]) -> List[dict]:
             continue
 
         if i < len(args) - 1 and args[i+1].endswith('.txt'):
-            player_info = get_player_json_from_textfile(args[i+1], arg)
+            player = make_player_from_textfile_json(args[i+1], arg)
         else:
-            player = hypixel.Player(arg)
-            player_info = {'name': player.getName(), 'uuid': player.getUUID(),
-                           'friends': list(reversed(player.getFriends()))
-                          }
-        player_info['exclude'] = encountered_minus_symbol
-        info_of_players.append(player_info)
+            player = Player(hypixel.Player(arg).getUUID())
+        player.set_exclude_friends(encountered_minus_symbol)
+        player.set_specs(specs)
+        info_on_players.append(player)
 
-    return info_of_players
+    return info_on_players
 
-def get_players_info_from_args(args: List[str]) -> dict:
-    info_on_players: List[dict] = process_args(args)
-    playerNameForFileOutput = info_on_players[0]['name']
-    playerUUID = info_on_players[0]['uuid']
-    playerFriends: List[UUID_Plus_Time] = info_on_players[0]['friends']
+def get_players_info_from_args(args: List[str], specs: Specs) -> Player:
+    info_on_players: List[Player] = process_args(args, specs)
+    playerNameForFileOutput = info_on_players[0].name()
+    playerUUID = info_on_players[0].uuid()
+    playerFriends: List[Player] = info_on_players[0].friends()
+    playerSpecs = info_on_players[0].specs()
 
     print("fyi, the uuid of the player you're getting friends of is " + playerUUID)
     print("This player has " + str(len(playerFriends)) + " friends total.")
 
-    exclude_friends: List[UUID_Plus_Time] = []
+    exclude_friends: List[Player] = []
     for player in info_on_players[1:]:
-        if player['exclude']:
-            exclude_friends.extend(player['friends'])
-            playerNameForFileOutput += (' minus ' + player['name'])
+        if player.exclude_friends():
+            exclude_friends.extend(player.friends())
+            playerNameForFileOutput += (' minus ' + player.name())
         else:
-            playerFriends.extend(player['friends'])
-            playerNameForFileOutput += (' plus ' + player['name'])
-    playerFriends = UUID_Plus_Time.prepare_list_for_processing(
-        playerFriends, date_cutoff=Utils.get_date_string_if_exists(args), exclude_players=exclude_friends)
+            playerFriends.extend(player.friends())
+            playerNameForFileOutput += (' plus ' + player.name())
 
-    print("Now " + str(len(playerFriends)) + " friends after adjustments specified in args.")
-
-    return {'playerUUID': playerUUID, 'playerFriends': playerFriends,
-            'playerNameForFileOutput': playerNameForFileOutput}
+    player = Player(playerUUID, friends=playerFriends, name_for_file_output=playerNameForFileOutput,
+                    specs=playerSpecs)
+    player.polish_friends_list(Utils.get_date_string_if_exists(args), exclude_friends)
+    print("Now " + str(len(player.friends())) + " friends after adjustments specified in args.")
+    return player
 
 def make_Specs_object(find_friends_of_friends: bool, just_uuids_of_friends: bool, 
                       just_online_friends: bool) -> Specs:
@@ -185,17 +128,16 @@ def main():
     
     args = Utils.list_subtract(args, ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch'])
 
-    player_info = get_players_info_from_args(args)
+    player = get_players_info_from_args(args, playerSpecs)
     if check_results:
         print("There are " + str(num_players_with_f_lists_in_results()) + " players with their f list in results.")
-        print("It's " + str(is_players_friend_list_in_results(player_info['playerNameForFileOutput'])).lower()
-              + " that " + player_info['playerNameForFileOutput'] + "'s friends list is in the results folder.")
-    report = create_dictionary_report_for_player(UUID_Plus_Time(player_info['playerUUID'], None), playerSpecs, 
-                                                 player_info['playerFriends'])
+        print("It's " + str(is_players_friend_list_in_results(player)).lower()
+              + " that " + player.name() + "'s friends list is in the results folder.")
+    report = player.create_dictionary_report()
 
     if not just_online_friends:
         filename = ("Friends of " + ("friends of " if find_friends_of_friends else "") 
-                    + player_info['playerNameForFileOutput'])
+                    + player.name_for_file_output())
         Files.write_data_as_json_to_file(report, filename)
 
 if __name__ == '__main__':

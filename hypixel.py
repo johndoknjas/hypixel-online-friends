@@ -261,14 +261,12 @@ class Player:
         return session
     
     def getFriends(self) -> list[UUID_Plus_Time]:
-        """ This function returns a list of the UUIDs of all the player's friends. If the include_date
-        optional argument is given a value of True, the list returned will instead be a list of dictionaries, where
-        each dict stores a friend's uuid and the time they were friended. """
+        """ This function returns a list of the UUIDs of all the player's friends."""
         friends = []
         for friend in getJSON('friends', uuid=self.getUUID())['records']:
             friend_uuid = friend["uuidReceiver"] if friend["uuidReceiver"] != self.getUUID() else friend["uuidSender"]
             friends.append(UUID_Plus_Time(friend_uuid, friend['started']))
-        return friends
+        return list(reversed(friends))
     
     def isOnline(self):
         """ This function returns a bool representing whether the player is online. """
@@ -359,11 +357,9 @@ class Guild:
             roleList.append(member['name'])
 
         return allGuildMembers
-    
-    
+
 class Auction:
     """ This class represents an auction on Hypixel Skyblock as a single object.
-        
     """
     def __init__(self):
         """"Called to create an Auction class."""
