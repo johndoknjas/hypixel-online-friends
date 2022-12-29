@@ -7,6 +7,7 @@ import json
 import time
 import Utils
 from typing import Optional
+from copy import deepcopy
 
 _IGN_UUID_PAIRS: Optional[dict] = None
 
@@ -20,16 +21,16 @@ def ign_uuid_pairs() -> dict:
     """Retrieves pairs stored in the uuids.txt file as a dict - key ign, value uuid"""
     global _IGN_UUID_PAIRS
     if _IGN_UUID_PAIRS is not None:
-        return _IGN_UUID_PAIRS
+        return deepcopy(_IGN_UUID_PAIRS)
     _IGN_UUID_PAIRS = {} # key ign, value uuid
 
     if not os.path.isfile('uuids.txt'):
-        return _IGN_UUID_PAIRS
+        return deepcopy(_IGN_UUID_PAIRS)
     with open('uuids.txt') as file:
         for line in file:
             words = line.rstrip().split()
             _IGN_UUID_PAIRS[words[0].lower()] = words[1]
-    return _IGN_UUID_PAIRS
+    return deepcopy(_IGN_UUID_PAIRS)
 
 def get_uuid(uuid_or_ign) -> str:
     """If a uuid is passed in, it'll simply be returned. Otherwise if it's an ign, a uuid will be returned if

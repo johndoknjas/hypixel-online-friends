@@ -9,7 +9,7 @@ import Utils
 
 class UUID_Plus_Time:
     """This class encapsulates a UUID and a time (unix epoch), likely representing when
-    they were added to another player."""
+    the player was friended to the parent player."""
 
     def __init__(self, uuid: str, time_val: Union[str, float, int, None]):
         """time_val must be either a date string, or the unix epoch time in either seconds or milliseconds"""
@@ -17,8 +17,7 @@ class UUID_Plus_Time:
         self._unix_epoch_milliseconds: Optional[float] = None
         if isinstance(time_val, str):
             assert Utils.is_date_string(time_val)
-            self._unix_epoch_milliseconds = 1000 * time.mktime(datetime.datetime.strptime(
-                                                               time_val, '%Y-%m-%d').timetuple())
+            self._unix_epoch_milliseconds = Utils.date_to_epoch(time_val, False)
         elif isinstance(time_val, float) or isinstance(time_val, int):
             if time_val > 10000000000: # If greater than 10 billion, must already be in ms
                 self._unix_epoch_milliseconds = time_val
@@ -39,7 +38,7 @@ class UUID_Plus_Time:
         """Returns the time as a YYYY-MM-DD date string"""
         if self._unix_epoch_milliseconds is None:
             return None
-        return datetime.datetime.utcfromtimestamp(self._unix_epoch_milliseconds / 1000).strftime('%Y-%m-%d')
+        return Utils.epoch_to_date(self._unix_epoch_milliseconds, False)
     
     def no_time(self) -> bool:
         return self._unix_epoch_milliseconds is None

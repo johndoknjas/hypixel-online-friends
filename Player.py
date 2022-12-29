@@ -1,38 +1,25 @@
 from __future__ import annotations
 
 from typing import Optional, List, Union
+from copy import deepcopy
 
 import Utils
 import hypixel
 from MyClasses import UUID_Plus_Time, Specs
-import datetime
-import time
 
 class Player:
-
-    @classmethod
-    def remove_duplicates(cls, players: List[Player]) -> List[Player]:
-        return [p for i, p in enumerate(players) if not 
-                any(p.represents_same_person(other) for other in players[:i])]
-    
-    @classmethod
-    def remove_players_friended_to_parent_before_date(cls, players: List[Player], 
-                                                      date_cutoff: Optional[str]) -> List[Player]:
-        if not date_cutoff:
-            return players
-        return [p for p in players if (time_added := p.time_friended_parent_player('s')) and 
-                time_added >= time.mktime(datetime.datetime.strptime(date_cutoff, '%Y-%m-%d').timetuple())]
-
     def __init__(self, uuid: str, time_friended_parent_player: Union[str, float, int, None] = None,
                  hypixel_object: Optional[hypixel.Player] = None, name: str = None, 
                  friends: Optional[List[Union[UUID_Plus_Time, Player]]] = None, specs: Optional[Specs] = None,
-                 name_for_file_output: Optional[str] = None, exclude_friends: Optional[bool] = None):
+                 name_for_file_output: Optional[str] = None, will_exclude_friends: bool = False,
+                 date_cutoff_for_friends: Optional[str] = None):
         self._uuid_plus_time = UUID_Plus_Time(uuid, time_friended_parent_player)
         self._hypixel_object = hypixel_object
         self._name = name
         self._specs = specs
         self._name_for_file_output = name_for_file_output
-        self._exclude_friends = exclude_friends
+        self._will_exclude_friends = will_exclude_friends
+        self._date_cutoff_for_friends = date_cutoff_for_friends
         self._friends: Optional[List[Player]] = None
         self.set_friends(friends)
     
@@ -69,7 +56,7 @@ class Player:
     def friends(self) -> List[Player]:
         if not self._friends:
             self.set_friends(self.hypixel_object().getFriends())
-        return self._friends
+        return deepcopy(self._friends)
     
     def any_specs(self) -> bool:
         return self._specs is not None
@@ -99,6 +86,30 @@ class Player:
     def set_specs(self, specs: Specs) -> None:
         self._specs = specs
     
+    def set_date_cutoff_for_friends(self, date_cutoff: Optional[str]) -> None:
+        """Sets self._date_cutoff_for_friends to the param, and then applies it to the friends list"""
+        if date_cutoff:
+            assert not self.will_exclude_friends()
+        self._date_cutoff_for_friends = date_cutoff
+        self.remove_friends_added_before_cutoff()
+    
+    def get_date_cutoff_for_friends(self) -> Optional[str]:
+        return self._date_cutoff_for_friends
+    
+    def remove_friends_added_before_cutoff(self) -> None:
+        assert not self.will_exclude_friends()
+        if not self._date_cutoff_for_friends or not self._friends:
+            return
+        self._friends = [f for f in self._friends 
+                         if (time_added := f.time_friended_parent_player('s'))
+                         and time_added >= Utils.date_to_epoch(self._date_cutoff_for_friends, True)]
+    
+    def remove_duplicate_friends(self) -> None:
+        """Pre-condition: friends list must be sorted in the order you want, since duplicates coming after any 
+        originals will be removed. By a 'duplicate', this means a Player object with the same uuid."""
+        assert self._friends
+        self.set_friends([f for i, f in enumerate(self.friends()) if not f.in_list(self.friends()[:i])])
+    
     def set_friends(self, friends: Optional[List[Union[UUID_Plus_Time, Player]]]) -> None:
         if not friends:
             self._friends = None
@@ -111,14 +122,21 @@ class Player:
             else:
                 self._friends.append(friend)
             self._friends[len(self._friends)-1].set_specs(self.specs_for_friends())
+        if not self.will_exclude_friends():
+            self.remove_friends_added_before_cutoff()
     
-    def exclude_friends(self) -> bool:
+    def will_exclude_friends(self) -> bool:
         """Returns whether this player's friends are meant to be excluded, as specified in command line args."""
-        assert self._exclude_friends is not None
-        return self._exclude_friends
+        return self._will_exclude_friends
     
-    def set_exclude_friends(self, exclude_friends: bool) -> None:
-        self._exclude_friends = exclude_friends
+    def set_will_exclude_friends(self, exclude_friends: bool) -> None:
+        if exclude_friends:
+            assert not self._date_cutoff_for_friends
+        self._will_exclude_friends = exclude_friends
+    
+    def in_list(self, players: List[Player]) -> bool:
+        """Returns whether the player is already represented in this players list."""
+        return any(self.represents_same_person(p) for p in players)
     
     def create_dictionary_report(self) -> dict:
         # CONTINUE HERE - later, could make a Report class and return an object of that, instead of a dict here.
@@ -148,6 +166,7 @@ class Player:
         return self.polish_dictionary_report(report) if self.root_player() else report
     
     def polish_dictionary_report(self, report: dict) -> dict:
+        report = deepcopy(report)
         if 'friends' in report and all('fkdr' in d for d in report['friends']):
             report['friends'] = sorted(report['friends'], key=lambda d: d['fkdr'], reverse=True)
         if self.specs_for_friends() and self.specs_for_friends().required_online():
@@ -157,11 +176,12 @@ class Player:
             Utils.print_list_of_dicts(report['friends'])
         return report
     
-    def polish_friends_list(self, date_cutoff: Optional[str], friends_to_exclude: List[Player]) -> None:
-        if not self._friends:
-            return
-        self._friends = sorted(self._friends, key=lambda f: f.time_friended_parent_player('s'), reverse=True)
-        self._friends = Player.remove_duplicates(self._friends)
-        self._friends = [f for f in self._friends if not 
-                         any(f.represents_same_person(e) for e in friends_to_exclude)]
-        self._friends = Player.remove_players_friended_to_parent_before_date(self._friends, date_cutoff)
+    def polish_friends_list(self, friends_to_exclude: List[Player]) -> None:
+        """Will sort friends, remove duplicates, and remove any who appear in the friends_to_exclude param.
+        Note that a Player object is treated as an equivalent/duplicate player if it has the same uuid as
+        another Player. Other details (such as time friended parent player) can differ."""
+        assert self._friends
+        self.remove_friends_added_before_cutoff() # Probably redundant
+        self.set_friends(sorted(self.friends(), key=lambda f: f.time_friended_parent_player('s'), reverse=True))
+        self.remove_duplicate_friends()
+        self.set_friends([f for f in self.friends() if not f.in_list(friends_to_exclude)])

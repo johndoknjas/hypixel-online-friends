@@ -1,6 +1,7 @@
 """Functions in this file are the most general, and don't have dependencies on other files in the project."""
 
 import datetime
+import time
 from typing import List, Optional
 from collections import OrderedDict
 
@@ -33,3 +34,14 @@ def get_date_string_if_exists(lst: List[str]) -> Optional[str]:
 
 def fkdr_division(final_kills: int, final_deaths: int) -> float:
     return final_kills / final_deaths if final_deaths else float(final_kills)
+
+def date_to_epoch(date_string: str, in_seconds: bool) -> float:
+    epoch = time.mktime(datetime.datetime.strptime(date_string, '%Y-%m-%d').timetuple())
+    if not in_seconds:
+        epoch *= 1000
+    return epoch
+
+def epoch_to_date(epoch: float, in_seconds: bool) -> str:
+    if not in_seconds:
+        epoch /= 1000
+    return datetime.datetime.utcfromtimestamp(epoch).strftime('%Y-%m-%d')
