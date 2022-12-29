@@ -7,18 +7,22 @@ from MyClasses import UUID_Plus_Time, Specs
 import Utils
 import Files
 from Player import Player
+from copy import deepcopy
 
-def find_dict_for_given_username(d: dict, username: str, uuid: str = None) -> Optional[dict]:
-    # d will be a dictionary read from a file in json format - it will have a uuid key, and possibly
-    # a name, fkdr, and friends key. The friends key would have a value that is a list of dictionaries,
-    # recursively following the same dictionary requirements.
+def find_dict_for_given_username(d: dict, username: str, uuid: str = None,
+                                 make_deep_copy: bool = True) -> Optional[dict]:
+    """ d will be a dictionary read from a file in json format - it will have a uuid key, and possibly
+    a name, fkdr, and friends key. The friends key would have a value that is a list of dictionaries,
+    recursively following the same dictionary requirements."""
+    if make_deep_copy:
+        d = deepcopy(d)
     if uuid and d['uuid'] == uuid:
         return d
     if 'name' in d and d['name'].lower() == username.lower():
         return d
     elif 'friends' in d:
         for friend_dict in d['friends']:
-            if result := find_dict_for_given_username(friend_dict, username, uuid=uuid):
+            if result := find_dict_for_given_username(friend_dict, username, uuid=uuid, make_deep_copy=False):
                 return result
     return None
 
@@ -29,13 +33,15 @@ def is_players_friend_list_in_results(player: Player) -> bool:
     all_jsons: list[dict] = Files.get_all_jsons_in_results()
     return any(find_dict_for_given_username(json, player.name(), uuid=player.uuid()) for json in all_jsons)
 
-def get_all_players_with_f_list_in_dict(d: dict) -> list[str]:
+def get_all_players_with_f_list_in_dict(d: dict, make_deepcopy: bool = True) -> list[str]:
     """Returns the uuids of all players who have their f list represented in the dict. The dict is in the
     json format that the textfiles use, so it may be recursive and store multiple f lists."""
+    if make_deepcopy:
+        d = deepcopy(d)
     if 'friends' in d:
         list_of_players: list[str] = [d['uuid']]
         for friend_dict in d['friends']:
-            list_of_players.extend(get_all_players_with_f_list_in_dict(friend_dict))
+            list_of_players.extend(get_all_players_with_f_list_in_dict(friend_dict, make_deepcopy=False))
         return list_of_players
     else:
         return []
@@ -90,11 +96,12 @@ def make_players_list_from_args(args: List[str], specs: Specs) -> List[Player]:
 def combine_players(info_on_players: List[Player]) -> Player:
     """This function runs through the Player list and adds/subtracts f lists. Whether a Player's f list
     is used to add or subtract depends on the bool value of their player.will_exclude_friends() function."""
+    info_on_players = deepcopy(info_on_players)
     playerNameForFileOutput = info_on_players[0].name()
     playerUUID = info_on_players[0].uuid()
     playerFriends: List[Player] = info_on_players[0].friends()
     playerSpecs = info_on_players[0].specs()
-    date_cutoff_friends = info_on_players[0]._date_cutoff_for_friends()
+    date_cutoff_friends = info_on_players[0].date_cutoff_for_friends()
 
     exclude_friends: List[Player] = []
     for player in info_on_players[1:]:

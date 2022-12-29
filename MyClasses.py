@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
-import time
+from copy import deepcopy
 from typing import Optional, List, Union
 import Utils
 
@@ -86,7 +85,7 @@ class Specs:
         assert Specs._common_specs['set flag']
         self._include_players_name_and_fkdr = include_players_name_and_fkdr
         self._player_must_be_online = player_must_be_online
-        self._friends_specs = friends_specs
+        self._friends_specs = deepcopy(friends_specs)
         self._degrees_from_original_player = degrees_from_original_player
     
     def include_name_fkdr(self) -> bool:
@@ -96,7 +95,7 @@ class Specs:
         return self._player_must_be_online
     
     def specs_for_friends(self) -> Optional[Specs]:
-        return self._friends_specs
+        return deepcopy(self._friends_specs)
     
     def degrees_from_root_player(self) -> int:
         return self._degrees_from_original_player

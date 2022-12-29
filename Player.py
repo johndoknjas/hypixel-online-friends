@@ -16,7 +16,7 @@ class Player:
         self._uuid_plus_time = UUID_Plus_Time(uuid, time_friended_parent_player)
         self._hypixel_object = hypixel_object
         self._name = name
-        self._specs = specs
+        self._specs = deepcopy(specs)
         self._name_for_file_output = name_for_file_output
         self._will_exclude_friends = will_exclude_friends
         self._date_cutoff_for_friends = date_cutoff_for_friends
@@ -56,14 +56,14 @@ class Player:
     def friends(self) -> List[Player]:
         if not self._friends:
             self.set_friends(self.hypixel_object().getFriends())
-        return deepcopy(self._friends)
+        return self._friends
     
     def any_specs(self) -> bool:
         return self._specs is not None
     
     def specs(self) -> Specs:
         assert self._specs is not None
-        return self._specs
+        return deepcopy(self._specs)
     
     def root_player(self) -> bool:
         return self.specs().root_player()
@@ -93,7 +93,7 @@ class Player:
         self._date_cutoff_for_friends = date_cutoff
         self.remove_friends_added_before_cutoff()
     
-    def get_date_cutoff_for_friends(self) -> Optional[str]:
+    def date_cutoff_for_friends(self) -> Optional[str]:
         return self._date_cutoff_for_friends
     
     def remove_friends_added_before_cutoff(self) -> None:
@@ -115,7 +115,7 @@ class Player:
             self._friends = None
             return
         self._friends = []
-        for friend in friends:
+        for friend in deepcopy(friends):
             if isinstance(friend, UUID_Plus_Time):
                 self._friends.append(Player(friend.uuid(),
                                             time_friended_parent_player=friend.time_epoch_in_seconds()))
