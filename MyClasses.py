@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Optional, List, Union
+from typing import Optional, Union
+from pprint import pprint
+
 import Utils
 
 class UUID_Plus_Time:
@@ -111,6 +113,11 @@ class Specs:
     
     def print_only_players_friends(self) -> bool:
         return Specs._common_specs['print player data'] and self.root_player()
+    
+    def print_fields(self) -> None:
+        pprint(vars(self))
+        if specs_friends := self.specs_for_friends():
+            specs_friends.print_fields()
     
     def __eq__(self, other: Specs) -> bool:
         return (self.include_name_fkdr() == other.include_name_fkdr() and

@@ -131,7 +131,6 @@ def diff_f_lists(players: List[Player]) -> None:
         pass
         # CONTINUE HERE
         # Test program a bit more, but should be good.
-        # Use the deepcopy decorator in functions where you want to deepcopy all params.
         # Implement this diff_f_lists function (never did get around to doing this today...)
 
 

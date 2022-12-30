@@ -10,7 +10,7 @@ def list_subtract(main_list: List, subtract_list: List) -> List:
     return [x for x in main_list if x not in subtract_list]
 
 def remove_duplicates(lst: List) -> List:
-    return deepcopy(list(OrderedDict.fromkeys(lst))) # regular dict works to maintain order for python >= 3.7
+    return list(OrderedDict.fromkeys(deepcopy(lst))) # regular dict works to maintain order for python >= 3.7
 
 def is_date_string(text: str) -> bool:
     try:
@@ -46,9 +46,3 @@ def epoch_to_date(epoch: float, in_seconds: bool) -> str:
     if not in_seconds:
         epoch /= 1000
     return datetime.datetime.utcfromtimestamp(epoch).strftime('%Y-%m-%d')
-
-# https://stackoverflow.com/questions/49566650/deepcopy-all-function-arguments/49566747#49566747
-def deep_copy_params(to_call):
-    def f(*args, **kwargs):
-        return to_call(*deepcopy(args), **deepcopy(kwargs))
-    return f
