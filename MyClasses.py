@@ -111,3 +111,10 @@ class Specs:
     
     def print_only_players_friends(self) -> bool:
         return Specs._common_specs['print player data'] and self.root_player()
+    
+    def __eq__(self, other: Specs) -> bool:
+        return (self.include_name_fkdr() == other.include_name_fkdr() and
+                self.degrees_from_root_player() == other.degrees_from_root_player() and
+                self.friend_of_root_player() == other.friend_of_root_player() and
+                self.required_online() == other.required_online() and
+                self.specs_for_friends() == other.specs_for_friends())

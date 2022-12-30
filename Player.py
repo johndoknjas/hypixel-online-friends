@@ -86,6 +86,11 @@ class Player:
     def set_specs(self, specs: Specs) -> None:
         self._specs = specs
     
+    def __eq__(self, other: Player) -> bool:
+        return (len(self.friends()) == len(other.friends()) and self.name() == other.name() and 
+                self._specs == other._specs and self.uuid() == other.uuid() and
+                self.time_friended_parent_player('date') == other.time_friended_parent_player('date'))
+    
     def set_date_cutoff_for_friends(self, date_cutoff: Optional[str]) -> None:
         """Sets self._date_cutoff_for_friends to the param, and then applies it to the friends list"""
         if date_cutoff:

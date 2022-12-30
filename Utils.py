@@ -46,3 +46,9 @@ def epoch_to_date(epoch: float, in_seconds: bool) -> str:
     if not in_seconds:
         epoch /= 1000
     return datetime.datetime.utcfromtimestamp(epoch).strftime('%Y-%m-%d')
+
+# https://stackoverflow.com/questions/49566650/deepcopy-all-function-arguments/49566747#49566747
+def deep_copy_params(to_call):
+    def f(*args, **kwargs):
+        return to_call(*deepcopy(args), **deepcopy(kwargs))
+    return f

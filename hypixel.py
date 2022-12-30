@@ -64,6 +64,8 @@ def getJSON(typeOfRequest, **kwargs):
     if typeOfRequest == 'key':
         api_key = kwargs['key']
     else:
+        if not verified_api_keys:
+            set_api_keys()
         api_key = choice(verified_api_keys) # Select a random API key from the list available.
 
         if typeOfRequest == 'player':
@@ -141,13 +143,6 @@ def set_api_keys() -> None:
         ------
         HypixelAPIError
             If any of the keys are invalid or don't work, this will be raised.
-
-        Parameters
-        -----------
-        api_keys : list
-            A list of the API keys that you would like to use.
-
-            Example: ``['740b8cf8-8aba-f2ed-f7b10119d28']``.
     """
 
     api_keys = []

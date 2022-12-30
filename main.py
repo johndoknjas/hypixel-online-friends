@@ -130,6 +130,9 @@ def diff_f_lists(players: List[Player]) -> None:
     for p1, p2 in combinations(players, 2):
         pass
         # CONTINUE HERE
+        # Test program a bit more, but should be good.
+        # Use the deepcopy decorator in functions where you want to deepcopy all params.
+        # Implement this diff_f_lists function (never did get around to doing this today...)
 
 
 def main():
