@@ -46,3 +46,33 @@ def epoch_to_date(epoch: float, in_seconds: bool) -> str:
     if not in_seconds:
         epoch /= 1000
     return datetime.datetime.utcfromtimestamp(epoch).strftime('%Y-%m-%d')
+
+def find_path_to_key_in_nested_dict(data, target_key):
+    """Can use this function to find the path to some key in a nested dict."""
+    def search(obj, path):
+        if isinstance(obj, dict):
+            if target_key in obj:
+                return f"{path}[{target_key}]"
+            for key, value in obj.items():
+                if (inner_path := search(value, f"{path}[{key}]")) is not None:
+                    return inner_path
+        elif isinstance(obj, list):
+            for i, item in enumerate(obj):
+                if (inner_path := search(item, f"{path}[{i}]")) is not None:
+                    return inner_path
+        return None
+    return search(data, "dict")
+
+def find_value_of_nested_key(data, key):
+    if isinstance(data, dict):
+        if key in data:
+            return data[key]
+        else:
+            for value in data.values():
+                if (result := find_value_of_nested_key(value, key)) is not None:
+                    return result
+    elif isinstance(data, list):
+        for element in data:
+            if (result := find_value_of_nested_key(element, key)) is not None:
+                return result
+    return None

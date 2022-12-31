@@ -270,9 +270,14 @@ class Player:
     
     def getFKDR(self) -> float:
         if not self.JSON or 'stats' not in self.JSON or 'Bedwars' not in self.JSON['stats']:
-            return 0.0
+            return 0
         return Utils.fkdr_division(self.JSON['stats']['Bedwars'].get('final_kills_bedwars', 0), 
                                    self.JSON['stats']['Bedwars'].get('final_deaths_bedwars', 0))
+    
+    def getBedwarsStar(self) -> int:
+        if not self.JSON or 'achievements' not in self.JSON or 'bedwars_level' not in self.JSON['achievements']:
+            return 0
+        return self.JSON['achievements']['bedwars_level']
 
 class Guild:
     """ This class represents a guild on Hypixel as a single object.

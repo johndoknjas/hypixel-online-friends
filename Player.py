@@ -77,6 +77,9 @@ class Player:
     def get_fkdr(self) -> float:
         return self.hypixel_object().getFKDR()
     
+    def get_bw_star(self) -> int:
+        return self.hypixel_object().getBedwarsStar()
+    
     def specs_for_friends(self) -> Optional[Specs]:
         return self.specs().specs_for_friends()
     
@@ -143,7 +146,7 @@ class Player:
         """Returns whether the player is already represented in this players list."""
         return any(self.represents_same_person(p) for p in players)
     
-    def create_dictionary_report(self) -> dict:
+    def create_dictionary_report(self, sort_final_result_by_fkdr = True) -> dict:
         # CONTINUE HERE - later, could make a Report class and return an object of that, instead of a dict here.
         if self.root_player():
             assert not self.time_friended_parent_player('date')
@@ -151,8 +154,8 @@ class Player:
             return {}
 
         report = {}
-        if self.specs().include_name_fkdr():
-            report.update({'name': self.name(), 'fkdr': self.get_fkdr()})
+        if not self.specs().just_uuids():
+            report.update({'name': self.name(), 'fkdr': self.get_fkdr(), 'star': self.get_bw_star()})
         report['uuid'] = self.uuid()
         if time := self.time_friended_parent_player('ms' if Specs.does_program_display_time_as_unix_epoch() 
                                                     else 'date'):
@@ -168,12 +171,14 @@ class Player:
                 print("Processed " + str(i))
             if friend_report := friend.create_dictionary_report():
                 report['friends'].append(friend_report)
-        return self.polish_dictionary_report(report) if self.root_player() else report
+        return self.polish_dictionary_report(report, sort_final_result_by_fkdr) if self.root_player() else report
     
-    def polish_dictionary_report(self, report: dict) -> dict:
+    def polish_dictionary_report(self, report: dict, sort_by_fkdr: bool) -> dict:
         report = deepcopy(report)
         if 'friends' in report:
-            report['friends'] = sorted(report['friends'], key=lambda d: d.get('fkdr', 0), reverse=True)
+            report['friends'] = sorted(report['friends'], 
+                                key=lambda d: d.get('fkdr' if sort_by_fkdr else 'star', 0), 
+                                reverse=True)
         if self.specs_for_friends() and self.specs_for_friends().required_online():
             report['friends'] = [p for p in report['friends'] if Player(p['uuid']).is_online()]
         if self.specs().print_only_players_friends():

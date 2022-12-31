@@ -82,16 +82,16 @@ class Specs:
     def does_program_display_time_as_unix_epoch(cls) -> bool:
         return cls._get_value_for_key('display time as unix epoch')
 
-    def __init__(self, include_players_name_and_fkdr: bool, player_must_be_online: bool,
+    def __init__(self, just_uuids: bool, player_must_be_online: bool,
                  friends_specs: Optional[Specs], degrees_from_original_player: int):
         assert Specs._common_specs['set flag']
-        self._include_players_name_and_fkdr = include_players_name_and_fkdr
+        self._just_uuids = just_uuids
         self._player_must_be_online = player_must_be_online
         self._friends_specs = deepcopy(friends_specs)
         self._degrees_from_original_player = degrees_from_original_player
     
-    def include_name_fkdr(self) -> bool:
-        return self._include_players_name_and_fkdr
+    def just_uuids(self) -> bool:
+        return self._just_uuids
     
     def required_online(self) -> bool:
         return self._player_must_be_online
@@ -120,7 +120,7 @@ class Specs:
             specs_friends.print_fields()
     
     def __eq__(self, other: Specs) -> bool:
-        return (self.include_name_fkdr() == other.include_name_fkdr() and
+        return (self.just_uuids() == other.just_uuids() and
                 self.degrees_from_root_player() == other.degrees_from_root_player() and
                 self.friend_of_root_player() == other.friend_of_root_player() and
                 self.required_online() == other.required_online() and

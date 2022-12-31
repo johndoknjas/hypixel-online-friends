@@ -14,8 +14,8 @@ class Tests:
         pass
     
     def test_deep_copy_Specs_constructor(self):
-        friends_specs = Specs(True, True, None, 1)
-        specs = Specs(True, False, friends_specs, 0)
-        specs._friends_specs._include_players_name_and_fkdr = False
-        assert friends_specs._include_players_name_and_fkdr
+        friends_specs = Specs(False, True, None, 1)
+        specs = Specs(False, False, friends_specs, 0)
+        specs._friends_specs._just_uuids = True
+        assert not friends_specs._just_uuids
         # specs.print_fields()

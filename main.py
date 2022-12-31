@@ -120,9 +120,9 @@ def combine_players(info_on_players: List[Player]) -> Player:
 
 def make_Specs_object(find_friends_of_friends: bool, just_uuids_of_friends: bool, 
                       just_online_friends: bool) -> Specs:
-    friendsfriendsSpecs = Specs(False, False, None, 2) if find_friends_of_friends else None
-    friendsSpecs = Specs(not just_uuids_of_friends, just_online_friends, friendsfriendsSpecs, 1)
-    playerSpecs = Specs(True, False, friendsSpecs, 0)
+    friendsfriendsSpecs = Specs(True, False, None, 2) if find_friends_of_friends else None
+    friendsSpecs = Specs(just_uuids_of_friends, just_online_friends, friendsfriendsSpecs, 1)
+    playerSpecs = Specs(False, False, friendsSpecs, 0)
     return playerSpecs
 
 def diff_f_lists(players: List[Player], diff_left_to_right: bool, diff_right_to_left: bool) -> None:
@@ -145,11 +145,12 @@ def main():
     check_results = 'checkresults' in args
     diff_left_to_right = 'diff' in args or 'diffl' in args
     diff_right_to_left = 'diff' in args or 'diffr' in args
+    sort_by_star = any(x in args for x in ['sortstar', 'sortbystar', 'starsort'])
 
     Specs.set_common_specs(not find_friends_of_friends, 'epoch' in args)
     playerSpecs = make_Specs_object(find_friends_of_friends, 'justuuids' in args, just_online_friends)
     args = Utils.list_subtract(args, ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
-                                      'diff', 'diffl', 'diffr'])
+                                      'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort'])
     players = make_players_list_from_args(args, playerSpecs)
 
     diff_f_lists(players, diff_left_to_right, diff_right_to_left)
@@ -158,7 +159,7 @@ def main():
         print("There are " + str(num_players_with_f_lists_in_results()) + " players with their f list in results.")
         print("It's " + str(is_players_friend_list_in_results(player)).lower()
               + " that " + player.name() + "'s friends list is in the results folder.")
-    report = player.create_dictionary_report()
+    report = player.create_dictionary_report(not sort_by_star)
 
     if not just_online_friends:
         filename = ("Friends of " + ("friends of " if find_friends_of_friends else "") 
