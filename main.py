@@ -54,7 +54,7 @@ def num_players_with_f_lists_in_results() -> int:
         all_players_with_f_list_in_results.extend(get_all_players_with_f_list_in_dict(json))
     return len(Utils.remove_duplicates(all_players_with_f_list_in_results))
 
-def make_player_from_textfile_json(relative_filepath: str, username: str) -> Player:
+def make_player_from_textfile_json(relative_filepath: str, username: str, specs: Optional[Specs] = None) -> Player:
     dict_from_file = Files.read_json_textfile(relative_filepath)
     dict_for_player = find_dict_for_given_username(dict_from_file, username)
     assert dict_for_player
@@ -62,7 +62,8 @@ def make_player_from_textfile_json(relative_filepath: str, username: str) -> Pla
                   friends=[
                             UUID_Plus_Time(d['uuid'], d.get('time', None))
                             for d in dict_for_player.pop('friends')
-                          ]
+                          ],
+                  specs=specs
                  )
 
 def make_players_list_from_args(args: List[str], specs: Specs) -> List[Player]:
@@ -78,10 +79,9 @@ def make_players_list_from_args(args: List[str], specs: Specs) -> List[Player]:
             encountered_minus_symbol = True
             continue
 
-        player = (make_player_from_textfile_json(args[i+1], arg)
+        player = (make_player_from_textfile_json(args[i+1], arg, specs=specs)
                   if i < len(args) - 1 and args[i+1].endswith('.txt')
-                  else Player(hypixel.Player(arg).getUUID()))
-        player.set_specs(specs)
+                  else Player(hypixel.Player(arg).getUUID(), specs=specs))
         if len(info_on_players) == 0:
             print("The uuid of the player you're getting friends of is " + player.uuid())
             print("This player has " + str(len(player.friends())) + " friends total.")
@@ -125,14 +125,13 @@ def make_Specs_object(find_friends_of_friends: bool, just_uuids_of_friends: bool
     playerSpecs = Specs(True, False, friendsSpecs, 0)
     return playerSpecs
 
-def diff_f_lists(players: List[Player]) -> None:
+def diff_f_lists(players: List[Player], diff_left_to_right: bool, diff_right_to_left: bool) -> None:
     """Runs through all pairs of players and outputs the diff of their f lists"""
     for p1, p2 in combinations(players, 2):
-        pass
-        # CONTINUE HERE
-        # Test program a bit more, but should be good.
-        # Implement this diff_f_lists function (never did get around to doing this today...)
-
+        if diff_left_to_right:
+            p1.diff_f_lists(p2, print_results=True)
+        if diff_right_to_left:
+            p2.diff_f_lists(p1, print_results=True)
 
 def main():
     hypixel.set_api_keys()
@@ -144,19 +143,16 @@ def main():
     find_friends_of_friends = 'friendsoffriends' in args
     just_online_friends = 'all' not in args and not find_friends_of_friends
     check_results = 'checkresults' in args
-    should_compare_f_lists = 'diff' in args or 'compare' in args
+    diff_left_to_right = 'diff' in args or 'diffl' in args
+    diff_right_to_left = 'diff' in args or 'diffr' in args
 
     Specs.set_common_specs(not find_friends_of_friends, 'epoch' in args)
     playerSpecs = make_Specs_object(find_friends_of_friends, 'justuuids' in args, just_online_friends)
-    
     args = Utils.list_subtract(args, ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
-                                      'diff', 'compare'])
-
+                                      'diff', 'diffl', 'diffr'])
     players = make_players_list_from_args(args, playerSpecs)
 
-    if should_compare_f_lists:
-        diff_f_lists(players)
-
+    diff_f_lists(players, diff_left_to_right, diff_right_to_left)
     player = combine_players(players)
     if check_results:
         print("There are " + str(num_players_with_f_lists_in_results()) + " players with their f list in results.")

@@ -113,7 +113,7 @@ class Player:
         """Pre-condition: friends list must be sorted in the order you want, since duplicates coming after any 
         originals will be removed. By a 'duplicate', this means a Player object with the same uuid."""
         assert self._friends
-        self.set_friends([f for i, f in enumerate(self.friends()) if not f.in_list(self.friends()[:i])])
+        self.set_friends([f for i, f in enumerate(self.friends()) if not f.in_player_list(self.friends()[:i])])
     
     def set_friends(self, friends: Optional[List[Union[UUID_Plus_Time, Player]]]) -> None:
         if not friends:
@@ -139,7 +139,7 @@ class Player:
             assert not self._date_cutoff_for_friends
         self._will_exclude_friends = exclude_friends
     
-    def in_list(self, players: List[Player]) -> bool:
+    def in_player_list(self, players: List[Player]) -> bool:
         """Returns whether the player is already represented in this players list."""
         return any(self.represents_same_person(p) for p in players)
     
@@ -172,8 +172,8 @@ class Player:
     
     def polish_dictionary_report(self, report: dict) -> dict:
         report = deepcopy(report)
-        if 'friends' in report and all('fkdr' in d for d in report['friends']):
-            report['friends'] = sorted(report['friends'], key=lambda d: d['fkdr'], reverse=True)
+        if 'friends' in report:
+            report['friends'] = sorted(report['friends'], key=lambda d: d.get('fkdr', 0), reverse=True)
         if self.specs_for_friends() and self.specs_for_friends().required_online():
             report['friends'] = [p for p in report['friends'] if Player(p['uuid']).is_online()]
         if self.specs().print_only_players_friends():
@@ -187,6 +187,18 @@ class Player:
         another Player. Other details (such as time friended parent player) can differ."""
         assert self._friends
         self.remove_friends_added_before_cutoff() # Probably redundant
-        self.set_friends(sorted(self.friends(), key=lambda f: f.time_friended_parent_player('s'), reverse=True))
+        self.set_friends(sorted(self.friends(), key=lambda f: f.time_friended_parent_player('s') or 0, reverse=True))
         self.remove_duplicate_friends()
-        self.set_friends([f for f in self.friends() if not f.in_list(friends_to_exclude)])
+        self.set_friends([f for f in self.friends() if not f.in_player_list(friends_to_exclude)])
+    
+    def diff_f_lists(self, other: Player, print_results: bool = False) -> List[Player]:
+        diff = [f for f in self.friends() if not f.in_player_list(other.friends())]
+        if print_results:
+            print(str(len(diff)) + " friends of " + self.name() + " and not of " + other.name() + ":")
+            for player in diff:
+                player.print_uuid_name()
+            print('\n\n')
+        return diff
+    
+    def print_uuid_name(self) -> None:
+        print('name: ' + self.name() + ', uuid: ' + self.uuid())
