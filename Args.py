@@ -25,10 +25,10 @@ class Args:
         return 'checkresults' in self._ARGS
     
     def diff_left_to_right(self) -> bool:
-        return 'diff' in self._ARGS or 'diffl' in self._ARGS
+        return 'diff' in self._ARGS or 'diffr' in self._ARGS
     
     def diff_right_to_left(self) -> bool:
-        return 'diff' in self._ARGS or 'diffr' in self._ARGS
+        return 'diff' in self._ARGS or 'diffl' in self._ARGS
     
     def sort_by_star(self) -> bool:
         return any(x in self._ARGS for x in ['sortstar', 'sortbystar', 'starsort'])
