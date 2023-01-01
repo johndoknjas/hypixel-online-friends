@@ -76,3 +76,20 @@ def find_value_of_nested_key(data, key):
             if (result := find_value_of_nested_key(element, key)) is not None:
                 return result
     return None
+
+def find_dict_for_given_username(d: dict, username: str, uuid: str = None,
+                                 make_deep_copy: bool = True) -> Optional[dict]:
+    """ d will be a dictionary read from a file in json format - it will have a uuid key, and possibly
+    a name, fkdr, and friends key. The friends key would have a value that is a list of dictionaries,
+    recursively following the same dictionary requirements."""
+    if make_deep_copy:
+        d = deepcopy(d)
+    if uuid and d['uuid'] == uuid:
+        return d
+    if 'name' in d and d['name'].lower() == username.lower():
+        return d
+    elif 'friends' in d:
+        for friend_dict in d['friends']:
+            if result := find_dict_for_given_username(friend_dict, username, uuid=uuid, make_deep_copy=False):
+                return result
+    return None

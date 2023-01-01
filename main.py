@@ -1,37 +1,21 @@
 import sys
-from typing import List, Optional
+from typing import List
 from itertools import combinations
+from copy import deepcopy
 
 import hypixel
-from MyClasses import UUID_Plus_Time, Specs
+from MyClasses import Specs
 import Utils
 import Files
 from Player import Player
-from copy import deepcopy
-
-def find_dict_for_given_username(d: dict, username: str, uuid: str = None,
-                                 make_deep_copy: bool = True) -> Optional[dict]:
-    """ d will be a dictionary read from a file in json format - it will have a uuid key, and possibly
-    a name, fkdr, and friends key. The friends key would have a value that is a list of dictionaries,
-    recursively following the same dictionary requirements."""
-    if make_deep_copy:
-        d = deepcopy(d)
-    if uuid and d['uuid'] == uuid:
-        return d
-    if 'name' in d and d['name'].lower() == username.lower():
-        return d
-    elif 'friends' in d:
-        for friend_dict in d['friends']:
-            if result := find_dict_for_given_username(friend_dict, username, uuid=uuid, make_deep_copy=False):
-                return result
-    return None
+from Args import Args
 
 def is_players_friend_list_in_results(player: Player) -> bool:
     """Returns a bool representing if the player's friend list is stored in the results folder, whether
     it be with the player as the main subject of a textfile, or if the player's f list is shown in
     a 'friends of friends' textfile."""
     all_jsons: list[dict] = Files.get_all_jsons_in_results()
-    return any(find_dict_for_given_username(json, player.name(), uuid=player.uuid()) for json in all_jsons)
+    return any(Utils.find_dict_for_given_username(json, player.name(), uuid=player.uuid()) for json in all_jsons)
 
 def get_all_players_with_f_list_in_dict(d: dict, make_deepcopy: bool = True) -> list[str]:
     """Returns the uuids of all players who have their f list represented in the dict. The dict is in the
@@ -53,45 +37,6 @@ def num_players_with_f_lists_in_results() -> int:
     for json in all_jsons:
         all_players_with_f_list_in_results.extend(get_all_players_with_f_list_in_dict(json))
     return len(Utils.remove_duplicates(all_players_with_f_list_in_results))
-
-def make_player_from_textfile_json(relative_filepath: str, username: str, specs: Optional[Specs] = None) -> Player:
-    dict_from_file = Files.read_json_textfile(relative_filepath)
-    dict_for_player = find_dict_for_given_username(dict_from_file, username)
-    assert dict_for_player
-    return Player(uuid=dict_for_player['uuid'], 
-                  friends=[
-                            UUID_Plus_Time(d['uuid'], d.get('time', None))
-                            for d in dict_for_player.pop('friends')
-                          ],
-                  specs=specs
-                 )
-
-def make_players_list_from_args(args: List[str], specs: Specs) -> List[Player]:
-    """Will return a list of Players, where each Player represents each player referred to by args. """
-    date_cutoff: Optional[str] = Utils.get_date_string_if_exists(args)
-    args = Utils.remove_date_strings(args)
-    info_on_players: List[Player] = []
-    encountered_minus_symbol = False
-    for i, arg in enumerate(args):
-        if arg.endswith('.txt'):
-            continue
-        if arg == '-':
-            encountered_minus_symbol = True
-            continue
-
-        player = (make_player_from_textfile_json(args[i+1], arg, specs=specs)
-                  if i < len(args) - 1 and args[i+1].endswith('.txt')
-                  else Player(hypixel.Player(arg).getUUID(), specs=specs))
-        if len(info_on_players) == 0:
-            print("The uuid of the player you're getting friends of is " + player.uuid())
-            print("This player has " + str(len(player.friends())) + " friends total.")
-
-        player.set_will_exclude_friends(encountered_minus_symbol)
-        if not player.will_exclude_friends():
-            player.set_date_cutoff_for_friends(date_cutoff)
-        info_on_players.append(player)
-
-    return info_on_players
 
 def combine_players(info_on_players: List[Player]) -> Player:
     """This function runs through the Player list and adds/subtracts f lists. Whether a Player's f list
@@ -118,20 +63,40 @@ def combine_players(info_on_players: List[Player]) -> Player:
     print("Now " + str(len(player.friends())) + " friends after adjustments specified in args.")
     return player
 
-def make_Specs_object(find_friends_of_friends: bool, just_uuids_of_friends: bool, 
-                      just_online_friends: bool) -> Specs:
-    friendsfriendsSpecs = Specs(True, False, None, 2) if find_friends_of_friends else None
-    friendsSpecs = Specs(just_uuids_of_friends, just_online_friends, friendsfriendsSpecs, 1)
-    playerSpecs = Specs(False, False, friendsSpecs, 0)
-    return playerSpecs
-
-def diff_f_lists(players: List[Player], diff_left_to_right: bool, diff_right_to_left: bool) -> None:
+def diff_f_lists(players: List[Player], args: Args) -> None:
     """Runs through all pairs of players and outputs the diff of their f lists"""
     for p1, p2 in combinations(players, 2):
-        if diff_left_to_right:
+        if args.diff_left_to_right():
             p1.diff_f_lists(p2, print_results=True)
-        if diff_right_to_left:
+        if args.diff_right_to_left():
             p2.diff_f_lists(p1, print_results=True)
+
+def get_players_from_args(args: Args) -> List[Player]:
+    specs = Specs.make_specs_object_and_initialize_common_specs(args)
+    args_no_keywords_or_date = args.get_args(True, True)
+    players: List[Player] = []
+    encountered_minus_symbol = False
+
+    for i, arg in enumerate(args_no_keywords_or_date):
+        if arg.endswith('.txt'):
+            continue
+        if arg == '-':
+            encountered_minus_symbol = True
+            continue
+
+        player = (Player.make_player_from_json_textfile(args_no_keywords_or_date[i+1], arg, specs=specs)
+                if i < len(args_no_keywords_or_date) - 1 and args_no_keywords_or_date[i+1].endswith('.txt')
+                else Player(hypixel.Player(arg).getUUID(), specs=specs))
+        if len(players) == 0:
+            print("The uuid of the player you're getting friends of is " + player.uuid())
+            print("This player has " + str(len(player.friends())) + " friends total.")
+
+        player.set_will_exclude_friends(encountered_minus_symbol)
+        if not player.will_exclude_friends():
+            player.set_date_cutoff_for_friends(args.date_cutoff())
+        players.append(player)
+
+    return players
 
 def main():
     hypixel.set_api_keys()
@@ -139,30 +104,19 @@ def main():
     #Files.write_data_as_json_to_file(hypixel.getJSON('counts'), "test online hypixel player count")
     #Files.write_data_as_json_to_file(hypixel.getJSON('leaderboards'), "test leaderboards")
 
-    args = [arg if arg.endswith('.txt') else arg.lower() for arg in sys.argv][1:]
-    find_friends_of_friends = 'friendsoffriends' in args
-    just_online_friends = 'all' not in args and not find_friends_of_friends
-    check_results = 'checkresults' in args
-    diff_left_to_right = 'diff' in args or 'diffl' in args
-    diff_right_to_left = 'diff' in args or 'diffr' in args
-    sort_by_star = any(x in args for x in ['sortstar', 'sortbystar', 'starsort'])
-
-    Specs.set_common_specs(not find_friends_of_friends, 'epoch' in args)
-    playerSpecs = make_Specs_object(find_friends_of_friends, 'justuuids' in args, just_online_friends)
-    args = Utils.list_subtract(args, ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
-                                      'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort'])
-    players = make_players_list_from_args(args, playerSpecs)
-
-    diff_f_lists(players, diff_left_to_right, diff_right_to_left)
-    player = combine_players(players)
-    if check_results:
+    args = Args(sys.argv, ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
+                           'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort'])
+    players_from_args = get_players_from_args(args)
+    diff_f_lists(players_from_args, args)
+    player = combine_players(players_from_args)
+    if args.check_results():
         print("There are " + str(num_players_with_f_lists_in_results()) + " players with their f list in results.")
         print("It's " + str(is_players_friend_list_in_results(player)).lower()
               + " that " + player.name() + "'s friends list is in the results folder.")
-    report = player.create_dictionary_report(not sort_by_star)
 
-    if not just_online_friends:
-        filename = ("Friends of " + ("friends of " if find_friends_of_friends else "") 
+    report = player.create_dictionary_report(not args.sort_by_star())
+    if not args.just_online_friends():
+        filename = ("Friends of " + ("friends of " if args.find_friends_of_friends() else "") 
                     + player.name_for_file_output())
         Files.write_data_as_json_to_file(report, filename)
 

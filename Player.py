@@ -6,8 +6,24 @@ from copy import deepcopy
 import Utils
 import hypixel
 from MyClasses import UUID_Plus_Time, Specs
+import Files
 
 class Player:
+
+    @classmethod
+    def make_player_from_json_textfile(relative_filepath: str, username: str, 
+                                       specs: Optional[Specs] = None) -> Player:
+        dict_from_file = Files.read_json_textfile(relative_filepath)
+        dict_for_player = Utils.find_dict_for_given_username(dict_from_file, username)
+        assert dict_for_player
+        return Player(uuid=dict_for_player['uuid'], 
+                      friends=[
+                                  UUID_Plus_Time(d['uuid'], d.get('time', None))
+                                  for d in dict_for_player.get('friends')
+                              ],
+                      specs=specs
+                     )
+
     def __init__(self, uuid: str, time_friended_parent_player: Union[str, float, int, None] = None,
                  hypixel_object: Optional[hypixel.Player] = None, name: str = None, 
                  friends: Optional[List[Union[UUID_Plus_Time, Player]]] = None, specs: Optional[Specs] = None,

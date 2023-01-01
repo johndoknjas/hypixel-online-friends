@@ -7,6 +7,7 @@ from typing import Optional, Union
 from pprint import pprint
 
 import Utils
+import Args
 
 class UUID_Plus_Time:
     """This class encapsulates a UUID and a time (unix epoch), likely representing when
@@ -81,6 +82,14 @@ class Specs:
     @classmethod
     def does_program_display_time_as_unix_epoch(cls) -> bool:
         return cls._get_value_for_key('display time as unix epoch')
+    
+    @classmethod
+    def make_specs_object_and_initialize_common_specs(cls, args: Args.Args) -> Specs:
+        Specs.set_common_specs(not args.find_friends_of_friends(), args.epoch())
+        friendsfriendsSpecs = Specs(True, False, None, 2) if args.find_friends_of_friends() else None
+        friendsSpecs = Specs(args.just_uuids(), args.just_online_friends(), friendsfriendsSpecs, 1)
+        playerSpecs = Specs(False, False, friendsSpecs, 0)
+        return playerSpecs
 
     def __init__(self, just_uuids: bool, player_must_be_online: bool,
                  friends_specs: Optional[Specs], degrees_from_original_player: int):
