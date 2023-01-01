@@ -11,7 +11,7 @@ import Files
 class Player:
 
     @classmethod
-    def make_player_from_json_textfile(relative_filepath: str, username: str, 
+    def make_player_from_json_textfile(cls, relative_filepath: str, username: str, 
                                        specs: Optional[Specs] = None) -> Player:
         dict_from_file = Files.read_json_textfile(relative_filepath)
         dict_for_player = Utils.find_dict_for_given_username(dict_from_file, username)
