@@ -41,3 +41,6 @@ class Args:
     
     def date_cutoff(self) -> Optional[str]:
         return Utils.get_date_string_if_exists(self._ARGS)
+    
+    def do_file_output(self) -> bool:
+        return 'nofileoutput' not in self._ARGS and not self.just_online_friends()

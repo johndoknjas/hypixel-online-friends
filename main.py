@@ -105,7 +105,8 @@ def main():
     #Files.write_data_as_json_to_file(hypixel.getJSON('leaderboards'), "test leaderboards")
 
     args = Args(sys.argv, ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
-                           'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort'])
+                           'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
+                           'nofileoutput'])
     players_from_args = get_players_from_args(args)
     diff_f_lists(players_from_args, args)
     player = combine_players(players_from_args)
@@ -115,7 +116,7 @@ def main():
               + " that " + player.name() + "'s friends list is in the results folder.")
 
     report = player.create_dictionary_report(not args.sort_by_star())
-    if not args.just_online_friends():
+    if args.do_file_output():
         filename = ("Friends of " + ("friends of " if args.find_friends_of_friends() else "") 
                     + player.name_for_file_output())
         Files.write_data_as_json_to_file(report, filename)
