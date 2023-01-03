@@ -80,19 +80,26 @@ def find_value_of_nested_key(data, key):
                 return result
     return None
 
-def find_dict_for_given_username(d: dict, username: str, uuid: str = None,
-                                 make_deep_copy: bool = True) -> Optional[dict]:
+def find_dict_for_given_player(d: dict, uuid_or_ign: str, make_deep_copy: bool = True) -> Optional[dict]:
     """ d will be a dictionary read from a file in json format - it will have a uuid key, and possibly
     a name, fkdr, and friends key. The friends key would have a value that is a list of dictionaries,
     recursively following the same dictionary requirements."""
     if make_deep_copy:
         d = deepcopy(d)
-    if uuid and d['uuid'] == uuid:
-        return d
-    if 'name' in d and d['name'].lower() == username.lower():
+    if ((is_uuid(uuid_or_ign) and d['uuid'] == uuid_or_ign) or
+        (not is_uuid(uuid_or_ign) and 'name' in d and d['name'].lower() == uuid_or_ign.lower())):
         return d
     elif 'friends' in d:
         for friend_dict in d['friends']:
-            if result := find_dict_for_given_username(friend_dict, username, uuid=uuid, make_deep_copy=False):
+            if result := find_dict_for_given_player(friend_dict, uuid_or_ign, make_deep_copy=False):
                 return result
     return None
+
+def is_uuid(uuid_or_ign: str) -> bool:
+    """Assuming the parameter is either a uuid or ign, this function returns whether it's a uuid."""
+    if len(uuid_or_ign) in (32, 36):
+        return True
+    elif len(uuid_or_ign) <= 16:
+        return False
+    else:
+        raise ValueError("Invalid length")

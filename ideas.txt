@@ -3,8 +3,6 @@
     # Whenever you have both a player's uuid and username handy, you can just write them to the 'uuids.txt'
       file, assuming that that uuid-username pair does not exist there already.
 
-    # Continue here note in Player.py
-
 
 ----------------
 

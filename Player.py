@@ -10,15 +10,20 @@ import Files
 
 class Player:
 
-    # CONTINUE HERE - could implement a way where just having the uuid in the textfile is enough to make
-    # the player object with that player's friends. E.g., if the player's info in the textfile is stored
-    # in a 'friends of friends' file where they're a first level friend, they might only have their uuid and time
-    # stored (along with all their friends' uuids and times).
     @classmethod
-    def make_player_from_json_textfile(cls, relative_filepath: str, username: str, 
+    def make_player_from_json_textfile(cls, relative_filepath: str, uuid_or_ign: str, 
                                        specs: Optional[Specs] = None) -> Player:
         dict_from_file = Files.read_json_textfile(relative_filepath)
-        dict_for_player = Utils.find_dict_for_given_username(dict_from_file, username)
+        dict_for_player = Utils.find_dict_for_given_player(dict_from_file, uuid_or_ign)
+        if not dict_for_player and not Utils.is_uuid(uuid_or_ign):
+            # Possible nothing was found since the given json only contains the uuid for the player,
+            # and not their ign. So try again by passing in their uuid.
+            uuid_or_ign = Files.get_uuid(uuid_or_ign)
+            if not Utils.is_uuid(uuid_or_ign):
+                # uuid still not obtained, as the ign-uuid pair is not stored in the file system.
+                # So as a last resort, get the uuid via the hypixel api.
+                uuid_or_ign = hypixel.Player(uuid_or_ign).getUUID()
+            dict_for_player = Utils.find_dict_for_given_player(dict_from_file, uuid_or_ign)
         assert dict_for_player
         return Player(uuid=dict_for_player['uuid'], 
                       friends=[

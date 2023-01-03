@@ -15,7 +15,7 @@ def is_players_friend_list_in_results(player: Player) -> bool:
     it be with the player as the main subject of a textfile, or if the player's f list is shown in
     a 'friends of friends' textfile."""
     all_jsons: list[dict] = Files.get_all_jsons_in_results()
-    return any(Utils.find_dict_for_given_username(json, player.name(), uuid=player.uuid()) for json in all_jsons)
+    return any(Utils.find_dict_for_given_player(json, player.uuid()) for json in all_jsons)
 
 def get_all_players_with_f_list_in_dict(d: dict, make_deepcopy: bool = True) -> list[str]:
     """Returns the uuids of all players who have their f list represented in the dict. The dict is in the
