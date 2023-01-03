@@ -80,7 +80,8 @@ def find_value_of_nested_key(data, key):
                 return result
     return None
 
-def find_dict_for_given_player(d: dict, uuid_or_ign: str, make_deep_copy: bool = True) -> Optional[dict]:
+def find_dict_for_given_player(d: dict, uuid_or_ign: str, make_deep_copy: bool = True,
+                               dict_must_have_friends_list: bool = True) -> Optional[dict]:
     """ d will be a dictionary read from a file in json format - it will have a uuid key, and possibly
     a name, fkdr, and friends key. The friends key would have a value that is a list of dictionaries,
     recursively following the same dictionary requirements."""
@@ -88,11 +89,12 @@ def find_dict_for_given_player(d: dict, uuid_or_ign: str, make_deep_copy: bool =
         d = deepcopy(d)
     if ((is_uuid(uuid_or_ign) and d['uuid'] == uuid_or_ign) or
         (not is_uuid(uuid_or_ign) and 'name' in d and d['name'].lower() == uuid_or_ign.lower())):
-        return d
-    elif 'friends' in d:
-        for friend_dict in d['friends']:
-            if result := find_dict_for_given_player(friend_dict, uuid_or_ign, make_deep_copy=False):
-                return result
+        if 'friends' in d or not dict_must_have_friends_list:
+            return d
+    for friend_dict in d.get('friends', []):
+        if result := find_dict_for_given_player(friend_dict, uuid_or_ign, make_deep_copy=False,
+                                                dict_must_have_friends_list=dict_must_have_friends_list):
+            return result
     return None
 
 def is_uuid(uuid_or_ign: str) -> bool:
