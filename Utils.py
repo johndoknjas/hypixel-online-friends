@@ -24,7 +24,10 @@ def print_list_of_dicts(lst: List[dict]) -> None:
     print("\n".join([str(d) for d in lst]))
 
 def trim_if_needed(text: str, limit: int = 200) -> str:
-    return (text[:limit] + '.....') if len(text) > limit else text
+    if len(text) <= limit:
+        return text
+    side_lengths = int((limit - 5) / 2)
+    return text[:side_lengths].strip() + ' ..... ' + text[-side_lengths:].strip()
 
 def remove_date_strings(lst: List[str]) -> List[str]:
     return [x for x in deepcopy(lst) if not is_date_string(x)]

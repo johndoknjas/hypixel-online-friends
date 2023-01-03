@@ -117,8 +117,10 @@ def main():
 
     report = player.create_dictionary_report(not args.sort_by_star())
     if args.do_file_output():
-        filename = ("Friends of " + ("friends of " if args.find_friends_of_friends() else "") 
-                    + player.name_for_file_output())
+        filename = ("Friends of " + 
+                    ("friends of " if args.find_friends_of_friends() else "") + 
+                    player.name_for_file_output() + 
+                    (", added after " + date if (date := args.date_cutoff()) else ""))
         Files.write_data_as_json_to_file(report, filename)
 
 if __name__ == '__main__':

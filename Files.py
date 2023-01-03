@@ -12,7 +12,7 @@ from copy import deepcopy
 _IGN_UUID_PAIRS: Optional[dict] = None
 
 def write_data_as_json_to_file(data: dict, description: str = "") -> None:
-    filename = os.path.join("results", Utils.trim_if_needed(description) + " - " + str(time.time_ns()) + ".txt")
+    filename = os.path.join("results", Utils.trim_if_needed(description + " - " + str(time.time_ns()) + ".txt"))
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, "w") as f:
         f.write(json.dumps(data, indent=4))
