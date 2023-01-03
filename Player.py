@@ -10,6 +10,10 @@ import Files
 
 class Player:
 
+    # CONTINUE HERE - could implement a way where just having the uuid in the textfile is enough to make
+    # the player object with that player's friends. E.g., if the player's info in the textfile is stored
+    # in a 'friends of friends' file where they're a first level friend, they might only have their uuid and time
+    # stored (along with all their friends' uuids and times).
     @classmethod
     def make_player_from_json_textfile(cls, relative_filepath: str, username: str, 
                                        specs: Optional[Specs] = None) -> Player:

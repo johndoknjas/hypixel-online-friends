@@ -1,5 +1,13 @@
 # CONTINUE HERE - todos:
 
+    # Whenever you have both a player's uuid and username handy, you can just write them to the 'uuids.txt'
+      file, assuming that that uuid-username pair does not exist there already.
+
+    # Continue here note in Player.py
+
+
+----------------
+
     # Add a feature to just get friends over a certain fkdr.
         # When this is implemented you could then run the program and save this list a file, and then 
         # just go through this file when looking for people to party online.
