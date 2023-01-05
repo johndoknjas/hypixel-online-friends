@@ -51,3 +51,11 @@ def get_all_jsons_in_results() -> list[dict]:
         filename = os.path.join('results', f)
         all_jsons.append(read_json_textfile(filename))
     return all_jsons
+
+def num_players_with_f_lists_in_results() -> int:
+    """Returns the number of unique players who have their f lists stored in the results folder."""
+    all_jsons: list[dict] = get_all_jsons_in_results()
+    all_players_with_f_list_in_results: list[str] = []
+    for json in all_jsons:
+        all_players_with_f_list_in_results.extend(Utils.get_all_players_with_f_list_in_dict(json))
+    return len(Utils.remove_duplicates(all_players_with_f_list_in_results))

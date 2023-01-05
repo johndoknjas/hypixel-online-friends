@@ -105,3 +105,16 @@ def is_uuid(uuid_or_ign: str) -> bool:
         return False
     else:
         raise ValueError("Invalid length")
+
+def get_all_players_with_f_list_in_dict(d: dict, make_deepcopy: bool = True) -> list[str]:
+    """Returns the uuids of all players who have their f list represented in the dict. The dict is in the
+    json format that the textfiles use, so it may be recursive and store multiple f lists."""
+    if make_deepcopy:
+        d = deepcopy(d)
+    if 'friends' in d:
+        list_of_players: list[str] = [d['uuid']]
+        for friend_dict in d['friends']:
+            list_of_players.extend(get_all_players_with_f_list_in_dict(friend_dict, make_deepcopy=False))
+        return list_of_players
+    else:
+        return []

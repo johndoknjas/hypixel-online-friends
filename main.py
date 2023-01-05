@@ -17,27 +17,6 @@ def is_players_friend_list_in_results(player: Player) -> bool:
     all_jsons: list[dict] = Files.get_all_jsons_in_results()
     return any(Utils.find_dict_for_given_player(json, player.uuid()) for json in all_jsons)
 
-def get_all_players_with_f_list_in_dict(d: dict, make_deepcopy: bool = True) -> list[str]:
-    """Returns the uuids of all players who have their f list represented in the dict. The dict is in the
-    json format that the textfiles use, so it may be recursive and store multiple f lists."""
-    if make_deepcopy:
-        d = deepcopy(d)
-    if 'friends' in d:
-        list_of_players: list[str] = [d['uuid']]
-        for friend_dict in d['friends']:
-            list_of_players.extend(get_all_players_with_f_list_in_dict(friend_dict, make_deepcopy=False))
-        return list_of_players
-    else:
-        return []
-
-def num_players_with_f_lists_in_results() -> int:
-    """Returns the number of unique players who have their f lists stored in the results folder."""
-    all_jsons: list[dict] = Files.get_all_jsons_in_results()
-    all_players_with_f_list_in_results: list[str] = []
-    for json in all_jsons:
-        all_players_with_f_list_in_results.extend(get_all_players_with_f_list_in_dict(json))
-    return len(Utils.remove_duplicates(all_players_with_f_list_in_results))
-
 def combine_players(info_on_players: List[Player]) -> Player:
     """This function runs through the Player list and adds/subtracts f lists. Whether a Player's f list
     is used to add or subtract depends on the bool value of their player.will_exclude_friends() function."""
@@ -111,7 +90,8 @@ def main():
     diff_f_lists(players_from_args, args)
     player = combine_players(players_from_args)
     if args.check_results():
-        print("There are " + str(num_players_with_f_lists_in_results()) + " players with their f list in results.")
+        print("There are " + str(Files.num_players_with_f_lists_in_results()) + 
+              " players with their f list in results.")
         print("It's " + str(is_players_friend_list_in_results(player)).lower()
               + " that " + player.name() + "'s friends list is in the results folder.")
 
