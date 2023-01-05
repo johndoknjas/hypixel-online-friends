@@ -8,14 +8,20 @@ import time
 import Utils
 from typing import Optional
 from copy import deepcopy
+import shutil
 
 _IGN_UUID_PAIRS: Optional[dict] = None
 
-def write_data_as_json_to_file(data: dict, description: str = "") -> None:
-    filename = os.path.join("results", Utils.trim_if_needed(description + " - " + str(time.time_ns()) + ".txt"))
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
+def write_data_as_json_to_file(data: dict, description: str, folder_name: str = "results") -> None:
+    filename = create_file(description, folder_name)
     with open(filename, "w") as f:
         f.write(json.dumps(data, indent=4))
+
+def create_file(description: str, folder_name: str) -> str:
+    """Creates a file using the params and returns the name of the file, which can be used by the caller if desired."""
+    filename = os.path.join(folder_name, Utils.trim_if_needed(description + " - " + str(time.time_ns()) + ".txt"))
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    return filename
 
 def ign_uuid_pairs() -> dict:
     """Retrieves pairs stored in the uuids.txt file as a dict - key ign, value uuid"""
@@ -59,3 +65,21 @@ def num_players_with_f_lists_in_results() -> int:
     for json in all_jsons:
         all_players_with_f_list_in_results.extend(Utils.get_all_players_with_f_list_in_dict(json))
     return len(Utils.remove_duplicates(all_players_with_f_list_in_results))
+
+def update_uuids_file() -> None:
+    """Updates the uuids.txt file with new ign-uuid pairs found. 
+    uuids.txt should continue to contain no duplicates.
+    Note that if a player has changed their ign, and then another player is now using that ign, the existing
+    ign-uuid pair for the old player may or may not be overwritten by the new pair in uuids.txt.
+    Also, this function will make a backup of uuids.txt before overwriting it."""
+    shutil.copy('uuids.txt', create_file('uuids copy', 'old-uuids'))
+    pairs = ign_uuid_pairs()
+    all_jsons: list[dict] = get_all_jsons_in_results()
+    for json in all_jsons:
+        pairs.update(Utils.get_all_ign_uuid_pairs_in_dict(json))
+    # Due to the nature of the update function, there should be no duplicates in pairs.
+    with open("uuids.txt", "w") as file:
+        for key, value in pairs.items():
+            file.write(key + " " + value + "\n")
+            assert key == key.lower()
+    print("uuids.txt now contains uuid-ign pairs for " + str(len(pairs)) + " players.")

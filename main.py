@@ -85,7 +85,7 @@ def main():
 
     args = Args(sys.argv, ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
                            'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
-                           'nofileoutput'])
+                           'nofileoutput', 'updateuuids'])
     players_from_args = get_players_from_args(args)
     diff_f_lists(players_from_args, args)
     player = combine_players(players_from_args)
@@ -94,6 +94,8 @@ def main():
               " players with their f list in results.")
         print("It's " + str(is_players_friend_list_in_results(player)).lower()
               + " that " + player.name() + "'s friends list is in the results folder.")
+    if args.update_uuids():
+        Files.update_uuids_file()
 
     report = player.create_dictionary_report(not args.sort_by_star())
     if args.do_file_output():

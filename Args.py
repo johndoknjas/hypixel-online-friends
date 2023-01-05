@@ -44,3 +44,6 @@ class Args:
     
     def do_file_output(self) -> bool:
         return 'nofileoutput' not in self._ARGS and not self.just_online_friends()
+    
+    def update_uuids(self) -> bool:
+        return 'updateuuids' in self._ARGS

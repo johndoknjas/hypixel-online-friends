@@ -1,5 +1,6 @@
 /api-key.txt
-/uuids.txt
+/uuids*.txt
 __pycache__/
 /results/
+/old-uuids/
 /player-lists

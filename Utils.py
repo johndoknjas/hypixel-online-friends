@@ -118,3 +118,15 @@ def get_all_players_with_f_list_in_dict(d: dict, make_deepcopy: bool = True) -> 
         return list_of_players
     else:
         return []
+
+def get_all_ign_uuid_pairs_in_dict(d: dict, make_deepcopy: bool = True) -> dict:
+    """Traverses the d param and returns a dict, where each key-value pair represents an ign-uuid 
+    pair found in d."""
+    if make_deepcopy:
+        d = deepcopy(d)
+    uuid_name_pairs = {}
+    if 'name' in d:
+        uuid_name_pairs[d['name'].lower()] = d['uuid']
+    for friend_dict in d.get('friends', []):
+        uuid_name_pairs.update(get_all_ign_uuid_pairs_in_dict(friend_dict, False))
+    return uuid_name_pairs
