@@ -178,6 +178,8 @@ class Player:
     def __init__(self, UUID_or_ign: str):
         assert len(UUID_or_ign) <= 16 or len(UUID_or_ign) in (32, 36)
         self.JSON = getJSON('player', uuid=Files.get_uuid(UUID_or_ign))
+        if not Utils.is_uuid(UUID_or_ign):
+            assert self.getName().lower() == UUID_or_ign.lower()
 
     def getPlayerInfo(self):
         """ This is a simple function to return a bunch of common data about a player. """
