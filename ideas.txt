@@ -1,5 +1,16 @@
 # CONTINUE HERE - todos:
 
+    # Add an intersection operation for the arguments, that says to get players who are friends of both
+    # players specified. So now three operators: union, intersection, difference.
+        # keep no operator between two players as meaning union (can also add 'v' that the user can
+        use to optionally specify if they want though).
+        # '-' still means difference
+        # ^ can mean intersection.
+        # To allow the existing format of arguments to work, union will have higher precedence than difference.
+            # e.g., p1 p2 - p3 p4 should still mean the union of p1 and p2's friends minus the 
+              union of p3 and p4's friends.
+        # Allow the user to add parentheses if they want to specify some specific precedence.
+            # E.g., p1 (p2 - p3 p4) would evaluate p2 to p4 stuff first and then union that with p1's friends.
 
     # Add a feature to just get friends over a certain fkdr.
         # When this is implemented you could then run the program and save this list a file, and then 
