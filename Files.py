@@ -6,7 +6,7 @@ import os.path
 import json
 import time
 import Utils
-from typing import Optional
+from typing import Optional, List
 from copy import deepcopy
 import shutil
 
@@ -48,7 +48,7 @@ def read_json_textfile(relative_filepath: str) -> dict:
         dict_from_file = json.loads(f.read())
     return dict_from_file
 
-def get_all_jsons_in_results() -> list[dict]:
+def get_all_jsons_in_results() -> List[dict]:
     """Returns a list of dicts, where each dict represents the json each textfile stores."""
     all_jsons: list[dict] = []
     all_files = os.listdir('results')

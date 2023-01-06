@@ -7,6 +7,7 @@ __version__ = '0.8.0'
 from random import choice
 from time import time, sleep
 from copy import deepcopy
+from typing import List
 import grequests
 from MyClasses import UUID_Plus_Time
 import Files
@@ -257,7 +258,7 @@ class Player:
             session = None
         return session
     
-    def getFriends(self) -> list[UUID_Plus_Time]:
+    def getFriends(self) -> List[UUID_Plus_Time]:
         """ This function returns a list of the UUIDs of all the player's friends."""
         friends = []
         for friend in getJSON('friends', uuid=self.getUUID())['records']:
