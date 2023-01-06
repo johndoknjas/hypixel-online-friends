@@ -11,10 +11,10 @@ import Files
 class Player:
 
     @classmethod
-    def make_player_from_json_textfile(cls, relative_filepath: str, uuid_or_ign: str, 
+    def make_player_from_json_textfile(cls, filepath: str, uuid_or_ign: str, 
                                        specs: Optional[Specs] = None) -> Player:
         uuid_or_ign_copy = uuid_or_ign
-        dict_from_file = Files.read_json_textfile(relative_filepath)
+        dict_from_file = Files.read_json_textfile(filepath)
         dict_for_player = Utils.find_dict_for_given_player(dict_from_file, uuid_or_ign)
         if not dict_for_player and not Utils.is_uuid(uuid_or_ign):
             # Possible nothing was found since the given json only contains the uuid for the player,

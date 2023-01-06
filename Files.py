@@ -9,6 +9,7 @@ import Utils
 from typing import Optional, List
 from copy import deepcopy
 import shutil
+import ntpath
 
 _IGN_UUID_PAIRS: Optional[dict] = None
 
@@ -43,10 +44,14 @@ def get_uuid(uuid_or_ign) -> str:
     a pair for it exists. Otherwise, the ign just gets returned."""
     return ign_uuid_pairs().get(uuid_or_ign, uuid_or_ign)
 
-def read_json_textfile(relative_filepath: str) -> dict:
-    with open(relative_filepath, 'r') as f:
-        dict_from_file = json.loads(f.read())
-    return dict_from_file
+def read_json_textfile(filepath: str) -> dict:
+    try:
+        with open(filepath, 'r') as f:
+            return json.loads(f.read())
+    except FileNotFoundError:
+        # This could happen if the user gives a windows path when running the program with wsl. So try this:
+        with open('results/' + ntpath.basename(filepath), 'r') as f:
+            return json.loads(f.read())
 
 def get_all_jsons_in_results() -> List[dict]:
     """Returns a list of dicts, where each dict represents the json each textfile stores."""
