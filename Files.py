@@ -39,11 +39,6 @@ def ign_uuid_pairs() -> dict:
             _IGN_UUID_PAIRS[words[0].lower()] = words[1]
     return deepcopy(_IGN_UUID_PAIRS)
 
-def get_uuid(uuid_or_ign) -> str:
-    """If a uuid is passed in, it'll simply be returned. Otherwise if it's an ign, a uuid will be returned if
-    a pair for it exists. Otherwise, the ign just gets returned."""
-    return ign_uuid_pairs().get(uuid_or_ign, uuid_or_ign)
-
 def read_json_textfile(filepath: str) -> dict:
     try:
         with open(filepath, 'r') as f:

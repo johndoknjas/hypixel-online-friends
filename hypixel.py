@@ -108,6 +108,13 @@ def getJSON(typeOfRequest, **kwargs):
     except KeyError:
         return response
 
+def get_uuid_from_textfile_if_exists(uuid_or_ign) -> str:
+    """- If a uuid is passed in, it'll just be returned.
+    - Otherwise if it's an ign:
+        - A uuid will be returned if a pair for the ign is found in uuids.txt.
+        - If a pair isn't found, the ign will just be returned."""
+    return Files.ign_uuid_pairs().get(uuid_or_ign, uuid_or_ign)
+
 def cleanCache():
     """ This function is occasionally called to clean the cache of any expired objects. """
     itemsToRemove = []
@@ -178,7 +185,7 @@ class Player:
 
     def __init__(self, UUID_or_ign: str):
         assert len(UUID_or_ign) <= 16 or len(UUID_or_ign) in (32, 36)
-        self.JSON = getJSON('player', uuid=Files.get_uuid(UUID_or_ign))
+        self.JSON = getJSON('player', uuid=get_uuid_from_textfile_if_exists(UUID_or_ign))
         if not Utils.is_uuid(UUID_or_ign):
             assert self.getName().lower() == UUID_or_ign.lower()
 
