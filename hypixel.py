@@ -72,7 +72,7 @@ def getJSON(typeOfRequest, **kwargs):
         if typeOfRequest == 'player':
             UUIDType = 'uuid'
             uuid = kwargs['uuid']
-            if len(uuid) <= 16:
+            if not Utils.is_uuid(uuid):
                 UUIDType = 'name' # TODO: I could probably clean this up somehow.
         if typeOfRequest == 'skyblockplayer':
             typeOfRequest = "/skyblock/profiles"
@@ -108,12 +108,18 @@ def getJSON(typeOfRequest, **kwargs):
     except KeyError:
         return response
 
-def get_uuid_from_textfile_if_exists(uuid_or_ign) -> str:
-    """- If a uuid is passed in, it'll just be returned.
-    - Otherwise if it's an ign:
-        - A uuid will be returned if a pair for the ign is found in uuids.txt.
-        - If a pair isn't found, the ign will just be returned."""
-    return Files.ign_uuid_pairs().get(uuid_or_ign, uuid_or_ign)
+def get_uuid_from_textfile_if_exists(ign: str) -> str:
+    """ - A uuid will be returned if a pair for the ign is found in uuids.txt.
+        - If a pair isn't found, the ign itself will just be returned."""
+    assert not Utils.is_uuid(ign)
+    result = Files.ign_uuid_pairs().get(ign, ign) # result may be either the ign or a uuid
+    if Utils.is_uuid(result) and Player(result).getName().lower() != ign.lower():
+        # uuid found for the ign in uuids.txt, but the player has since changed their ign.
+        print("NOTE: " + ign + " is now the ign of another player.")
+        sleep(20) # Since I'd like to know if this ever happens - sleeping isn't necessary for the program itself.
+        return ign
+    else:
+        return result
 
 def cleanCache():
     """ This function is occasionally called to clean the cache of any expired objects. """
@@ -184,10 +190,8 @@ class Player:
     """
 
     def __init__(self, UUID_or_ign: str):
-        assert len(UUID_or_ign) <= 16 or len(UUID_or_ign) in (32, 36)
-        self.JSON = getJSON('player', uuid=get_uuid_from_textfile_if_exists(UUID_or_ign))
-        if not Utils.is_uuid(UUID_or_ign):
-            assert self.getName().lower() == UUID_or_ign.lower()
+        self.JSON = getJSON('player', uuid=(UUID_or_ign if Utils.is_uuid(UUID_or_ign) 
+                                            else get_uuid_from_textfile_if_exists(UUID_or_ign)))
 
     def getPlayerInfo(self):
         """ This is a simple function to return a bunch of common data about a player. """

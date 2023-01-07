@@ -13,7 +13,6 @@ class Player:
     @classmethod
     def make_player_from_json_textfile(cls, filepath: str, uuid_or_ign: str, 
                                        specs: Optional[Specs] = None) -> Player:
-        uuid_or_ign_copy = uuid_or_ign
         dict_from_file = Files.read_json_textfile(filepath)
         dict_for_player = Utils.find_dict_for_given_player(dict_from_file, uuid_or_ign)
         if not dict_for_player and not Utils.is_uuid(uuid_or_ign):
@@ -26,16 +25,13 @@ class Player:
                 uuid_or_ign = hypixel.Player(uuid_or_ign).getUUID()
             dict_for_player = Utils.find_dict_for_given_player(dict_from_file, uuid_or_ign)
         assert dict_for_player
-        player = Player(uuid=dict_for_player['uuid'], 
-                        friends=[
-                                    UUID_Plus_Time(d['uuid'], d.get('time', None))
-                                    for d in dict_for_player.get('friends')
-                                ],
-                        specs=specs
-                       )
-        if not Utils.is_uuid(uuid_or_ign_copy):
-            assert player.name().lower() == uuid_or_ign_copy.lower()
-        return player
+        return Player(uuid=dict_for_player['uuid'], 
+                      friends=[
+                                  UUID_Plus_Time(d['uuid'], d.get('time', None))
+                                  for d in dict_for_player.get('friends')
+                              ],
+                      specs=specs
+                     )
 
     def __init__(self, uuid: str, time_friended_parent_player: Union[str, float, int, None] = None,
                  hypixel_object: Optional[hypixel.Player] = None, name: str = None, 

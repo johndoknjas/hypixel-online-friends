@@ -98,7 +98,8 @@ def find_dict_for_given_player(d: dict, uuid_or_ign: str, make_deep_copy: bool =
     return None
 
 def is_uuid(uuid_or_ign: str) -> bool:
-    """Assuming the parameter is either a uuid or ign, this function returns whether it's a uuid."""
+    """This function returns whether 'uuid_or_ign' is a uuid.
+    Precondition: uuid_or_ign must be either a uuid or ign."""
     if len(uuid_or_ign) in (32, 36):
         return True
     elif len(uuid_or_ign) <= 16:
