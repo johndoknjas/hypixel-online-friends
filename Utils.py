@@ -107,19 +107,6 @@ def is_uuid(uuid_or_ign: str) -> bool:
     else:
         raise ValueError("Invalid length")
 
-def get_all_players_with_f_list_in_dict(d: dict, make_deepcopy: bool = True) -> List[str]:
-    """Returns the uuids of all players who have their f list represented in the dict. The dict is in the
-    json format that the textfiles use, so it may be recursive and store multiple f lists."""
-    if make_deepcopy:
-        d = deepcopy(d)
-    if 'friends' in d:
-        list_of_players: list[str] = [d['uuid']]
-        for friend_dict in d['friends']:
-            list_of_players.extend(get_all_players_with_f_list_in_dict(friend_dict, make_deepcopy=False))
-        return list_of_players
-    else:
-        return []
-
 def get_all_ign_uuid_pairs_in_dict(d: dict, make_deepcopy: bool = True) -> dict:
     """Traverses the d param and returns a dict, where each key-value pair represents an ign-uuid 
     pair found in d."""
@@ -131,3 +118,25 @@ def get_all_ign_uuid_pairs_in_dict(d: dict, make_deepcopy: bool = True) -> dict:
     for friend_dict in d.get('friends', []):
         uuid_name_pairs.update(get_all_ign_uuid_pairs_in_dict(friend_dict, False))
     return uuid_name_pairs
+
+def get_all_nested_dicts_in_dict(d: dict, make_deepcopy: bool = True) -> List[dict]:
+    """Traverses through d and returns a list of d and all its nested friend dicts."""
+    if make_deepcopy:
+        d = deepcopy(d)
+    dicts = [d]
+    for friend_dict in d.get('friends', []):
+        dicts.extend(get_all_nested_dicts_in_dict(friend_dict, False))
+    return dicts
+
+def bool_lowercase_str(b: bool) -> str:
+    return str(b).lower()
+
+def print_info_for_key(dicts: List[dict], k: str, indent: str) -> None:
+    k_for_print = k + ('s' if k == 'star' else '')
+    print(indent + str(len(dicts)) + " players with their " + k_for_print + " recorded in results.")
+    if k in ('star', 'fkdr', 'friends'):
+        highest_dict = max(dicts, key=lambda d: len(d[k]) if k == 'friends' else d[k])
+        print(indent*2 + "Most " + k_for_print + ": " + 
+                str(len(highest_dict[k]) if k == 'friends' else highest_dict[k]) + 
+                " (" + ((highest_dict['name'] + ", ") if 'name' in highest_dict else "") + 
+                'uuid ' + highest_dict['uuid'] + ")")

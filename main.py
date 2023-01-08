@@ -1,5 +1,5 @@
 import sys
-from typing import List
+from typing import List, Optional
 from itertools import combinations
 from copy import deepcopy
 
@@ -9,13 +9,6 @@ import Utils
 import Files
 from Player import Player
 from Args import Args
-
-def is_players_friend_list_in_results(player: Player) -> bool:
-    """Returns a bool representing if the player's friend list is stored in the results folder, whether
-    it be with the player as the main subject of a textfile, or if the player's f list is shown in
-    a 'friends of friends' textfile."""
-    all_jsons: list[dict] = Files.get_all_jsons_in_results()
-    return any(Utils.find_dict_for_given_player(json, player.uuid()) for json in all_jsons)
 
 def combine_players(info_on_players: List[Player]) -> Player:
     """This function runs through the Player list and adds/subtracts f lists. Whether a Player's f list
@@ -77,6 +70,28 @@ def get_players_from_args(args: Args) -> List[Player]:
 
     return players
 
+def check_results(player: Optional[Player]) -> None:
+    """Traverses through the results folder and prints some stats and info. If a Player object is provided
+    for player, then some specific info about them will be outputted as well."""
+
+    all_dicts: list[dict] = Files.get_all_unique_dicts_in_results()
+
+    print(str(len(all_dicts)) + " total unique uuids recorded in the results folder.")
+    keys = ['friends', 'name', 'fkdr', 'star']
+    all_dicts = [d for d in all_dicts if any(k in d for k in keys)]
+    print(str(len(all_dicts)) + " total players with non-trivial data stored in the results folder.")
+
+    for k in keys:
+        dicts_with_key = [d for d in all_dicts if k in d]
+        indent = "  "
+        Utils.print_info_for_key(dicts_with_key, k, indent)
+        if player and k == 'friends':
+            print(indent*2 + "Also, it's " + 
+                  Utils.bool_lowercase_str(player.uuid() in (d['uuid'] for d in dicts_with_key)) +
+                  " that " + player.name() + "'s friends list is in the results folder.")
+    print('\n\n')
+    
+
 def main():
     hypixel.set_api_keys()
 
@@ -90,10 +105,7 @@ def main():
     diff_f_lists(players_from_args, args)
     player = combine_players(players_from_args)
     if args.check_results():
-        print("There are " + str(Files.num_players_with_f_lists_in_results()) + 
-              " players with their f list in results.")
-        print("It's " + str(is_players_friend_list_in_results(player)).lower()
-              + " that " + player.name() + "'s friends list is in the results folder.")
+        check_results(player)
     if args.update_uuids():
         Files.update_uuids_file()
 

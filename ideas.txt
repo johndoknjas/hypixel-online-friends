@@ -11,6 +11,11 @@
               union of p3 and p4's friends.
         # Allow the user to add parentheses if they want to specify some specific precedence.
             # E.g., p1 (p2 - p3 p4) would evaluate p2 to p4 stuff first and then union that with p1's friends.
+    
+    # When the program starts, call the hypixel api to get the number of calls remaining for the current minute
+      for the api key (e.g., maybe you had just run the program). Then, set the num_api_calls_made global var
+      to 120 minus the value returned.
+        # See https://api.hypixel.net/#tag/API
 
     # Add a feature to just get friends over a certain fkdr.
         # When this is implemented you could then run the program and save this list a file, and then 
