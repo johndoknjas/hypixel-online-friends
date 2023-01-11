@@ -32,7 +32,6 @@ def combine_players(info_on_players: List[Player]) -> Player:
     player = Player(playerUUID, friends=playerFriends, name_for_file_output=playerNameForFileOutput,
                     specs=playerSpecs, date_cutoff_for_friends=date_cutoff_friends)
     player.polish_friends_list(exclude_friends)
-    print("Now " + str(len(player.friends())) + " friends after adjustments specified in args.")
     return player
 
 def diff_f_lists(players: List[Player], args: Args) -> None:
@@ -70,27 +69,33 @@ def get_players_from_args(args: Args) -> List[Player]:
 
     return players
 
-def check_results(player: Optional[Player]) -> None:
+def check_results(player: Optional[Player]) -> List[str]:
     """Traverses through the results folder and prints some stats and info. If a Player object is provided
-    for player, then some specific info about them will be outputted as well."""
+    for player, then some specific info about them will be outputted as well.
+    Also, a list of uuids for players who have their f list stored in the results folder will be returned.
+    The caller doesn't have to use it, but it may be useful. """
 
     all_dicts: list[dict] = Files.get_all_unique_dicts_in_results()
 
-    print(str(len(all_dicts)) + " total unique uuids recorded in the results folder.")
+    print("\n" + str(len(all_dicts)) + " total unique uuids recorded in the results folder.")
     keys = ['friends', 'name', 'fkdr', 'star']
     all_dicts = [d for d in all_dicts if any(k in d for k in keys)]
     print(str(len(all_dicts)) + " total players with non-trivial data stored in the results folder.")
+
+    player_uuids_with_f_list_in_results: List[str] = []
 
     for k in keys:
         dicts_with_key = [d for d in all_dicts if k in d]
         indent = "  "
         Utils.print_info_for_key(dicts_with_key, k, indent)
-        if player and k == 'friends':
-            print(indent*2 + "Also, it's " + 
-                  Utils.bool_lowercase_str(player.uuid() in (d['uuid'] for d in dicts_with_key)) +
-                  " that " + player.name() + "'s friends list is in the results folder.")
+        if k == 'friends':
+            player_uuids_with_f_list_in_results = [d['uuid'] for d in dicts_with_key]
+            if player:
+                print(indent*2 + "Also, it's " + 
+                      Utils.bool_lowercase_str(player.uuid() in player_uuids_with_f_list_in_results) +
+                      " that " + player.name() + "'s friends list is in the results folder.")
     print('\n\n')
-    
+    return player_uuids_with_f_list_in_results    
 
 def main():
     hypixel.set_api_keys()
@@ -98,18 +103,19 @@ def main():
     #Files.write_data_as_json_to_file(hypixel.getJSON('counts'), "test online hypixel player count")
     #Files.write_data_as_json_to_file(hypixel.getJSON('leaderboards'), "test leaderboards")
 
-    args = Args(sys.argv, ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
-                           'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
-                           'nofileoutput', 'updateuuids'])
+    args = Args(sys.argv)
     players_from_args = get_players_from_args(args)
     diff_f_lists(players_from_args, args)
     player = combine_players(players_from_args)
     if args.check_results():
-        check_results(player)
+        player_uuids_with_f_list_in_results = check_results(player)
+        if args.minus_results():
+            player.polish_friends_list([Player(uuid) for uuid in player_uuids_with_f_list_in_results])
+    print("Now " + str(len(player.friends())) + " friends after adjustments specified in args.")
     if args.update_uuids():
         Files.update_uuids_file()
 
-    report = player.create_dictionary_report(not args.sort_by_star())
+    report = player.create_dictionary_report(sort_final_result_by_fkdr=not args.sort_by_star())
     if args.do_file_output():
         filename = ("Friends of " + 
                     ("friends of " if args.find_friends_of_friends() else "") + 

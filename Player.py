@@ -46,7 +46,9 @@ class Player:
         self._will_exclude_friends = will_exclude_friends
         self._date_cutoff_for_friends = date_cutoff_for_friends
         self._friends: Optional[List[Player]] = None
-        self.set_friends(friends)
+        self._call_api_if_friends_empty_in_friends_getter: bool = True
+        if friends:
+            self._set_friends(friends)
     
     def hypixel_object(self) -> hypixel.Player:
         if not self._hypixel_object:
@@ -79,9 +81,9 @@ class Player:
         return self._name_for_file_output
 
     def friends(self) -> List[Player]:
-        if not self._friends:
-            self.set_friends(self.hypixel_object().getFriends())
-        return self._friends
+        if not self._friends and self._call_api_if_friends_empty_in_friends_getter:
+            self._set_friends(self.hypixel_object().getFriends())
+        return self._friends if self._friends is not None else []
     
     def any_specs(self) -> bool:
         return self._specs is not None
@@ -141,9 +143,16 @@ class Player:
         """Pre-condition: friends list must be sorted in the order you want, since duplicates coming after any 
         originals will be removed. By a 'duplicate', this means a Player object with the same uuid."""
         assert self._friends
-        self.set_friends([f for i, f in enumerate(self.friends()) if not f.in_player_list(self.friends()[:i])])
+        self._set_friends([f for i, f in enumerate(self.friends()) if not f.in_player_list(self.friends()[:i])])
     
-    def set_friends(self, friends: Optional[List[Union[UUID_Plus_Time, Player]]]) -> None:
+    def _set_friends(self, friends: Optional[List[Union[UUID_Plus_Time, Player]]]) -> None:
+        """Note that after this function has been called, if self.friends() is called later and
+        self._friends happens to be None or [], the hypixel api won't be called to populate self._friends. 
+        The reasoning for this is that since self._set_friends() is being called now, it's assumed the
+        caller wants self._friends to be equal to a certain value -- and None or [] are valid values
+        if that's what the caller wants."""
+
+        self._call_api_if_friends_empty_in_friends_getter = False
         if not friends:
             self._friends = None
             return
@@ -171,7 +180,7 @@ class Player:
         """Returns whether the player is already represented in this players list."""
         return any(self.represents_same_person(p) for p in players)
     
-    def create_dictionary_report(self, sort_final_result_by_fkdr = True) -> dict:
+    def create_dictionary_report(self, sort_final_result_by_fkdr: bool = True) -> dict:
         # CONTINUE HERE - later, could make a Report class and return an object of that, instead of a dict here.
         if self.root_player():
             assert not self.time_friended_parent_player('date')
@@ -217,9 +226,9 @@ class Player:
         another Player. Other details (such as time friended parent player) can differ."""
         assert self._friends
         self.remove_friends_added_before_cutoff() # Probably redundant
-        self.set_friends(sorted(self.friends(), key=lambda f: f.time_friended_parent_player('s') or 0, reverse=True))
+        self._set_friends(sorted(self.friends(), key=lambda f: f.time_friended_parent_player('s') or 0, reverse=True))
         self.remove_duplicate_friends()
-        self.set_friends([f for f in self.friends() if not f.in_player_list(friends_to_exclude)])
+        self._set_friends([f for f in self.friends() if not f.in_player_list(friends_to_exclude)])
     
     def diff_f_lists(self, other: Player, print_results: bool = False) -> List[Player]:
         diff = [f for f in self.friends() if not f.in_player_list(other.friends())]

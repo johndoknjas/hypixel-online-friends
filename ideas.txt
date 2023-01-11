@@ -17,6 +17,11 @@
       to 120 minus the value returned.
         # See https://api.hypixel.net/#tag/API
 
+    # When an ign/uuid is given as a command line argument, update the uuids.txt file with its pair, if
+      the file doesn't already contain it.
+
+    -----------------------------------
+
     # Add a feature to just get friends over a certain fkdr.
         # When this is implemented you could then run the program and save this list a file, and then 
         # just go through this file when looking for people to party online.

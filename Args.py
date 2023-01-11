@@ -3,9 +3,12 @@ from typing import List, Optional
 import Utils
 
 class Args:
-    def __init__(self, args: List[str], arg_keywords: List[str]):
+    def __init__(self, args: List[str], extra_keywords: List[str] = []):
         self._ARGS = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
-        self._ARG_KEYWORDS = [x.lower() for x in arg_keywords]
+        self._ARG_KEYWORDS = (  ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
+                                 'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
+                                 'nofileoutput', 'fileoutput', 'updateuuids', 'minusresults']
+                              + [x.lower() for x in extra_keywords] )
     
     def get_args(self, remove_keywords: bool, remove_dates: bool) -> List[str]:
         args = self._ARGS
@@ -22,7 +25,7 @@ class Args:
         return 'all' not in self._ARGS and not self.find_friends_of_friends()
     
     def check_results(self) -> bool:
-        return 'checkresults' in self._ARGS
+        return 'checkresults' in self._ARGS or self.minus_results()
     
     def diff_left_to_right(self) -> bool:
         return 'diff' in self._ARGS or 'diffr' in self._ARGS
@@ -43,7 +46,19 @@ class Args:
         return Utils.get_date_string_if_exists(self._ARGS)
     
     def do_file_output(self) -> bool:
-        return 'nofileoutput' not in self._ARGS and not self.just_online_friends()
+        if 'fileoutput' in self._ARGS:
+            assert 'nofileoutput' not in self._ARGS
+            return True
+        elif 'nofileoutput' in self._ARGS:
+            return False
+        else:
+            # User didn't explicitly specify, so decide based on the following:
+            return not self.just_online_friends() or self.just_uuids()
     
     def update_uuids(self) -> bool:
         return 'updateuuids' in self._ARGS
+    
+    def minus_results(self) -> bool:
+        """Return true if the user doesn't want to get f lists of uuids that already have their f list
+        stored in the results folder."""
+        return 'minusresults' in self._ARGS
