@@ -20,6 +20,12 @@
     # When an ign/uuid is given as a command line argument, update the uuids.txt file with its pair, if
       the file doesn't already contain it.
 
+    # Make an arg keyword 'leaderboard', that if entered will get the igns of the top x (maybe 10?) players
+      on some bw daily leaderboard, and puts their igns (or uuids) in the Args instance (as if they were entered
+      by the user). This processing could be handled in main.py, since importing the hypixel.py file
+      will be needed. Main.py can then send a list of igns/uuids to the Args instance via some member function
+      you'll write.
+
     -----------------------------------
 
     # Add a feature to just get friends over a certain fkdr.
