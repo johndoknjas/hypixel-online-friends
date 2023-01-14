@@ -32,6 +32,9 @@ def combine_players(info_on_players: List[Player]) -> Player:
     player = Player(playerUUID, friends=playerFriends, name_for_file_output=playerNameForFileOutput,
                     specs=playerSpecs, date_cutoff_for_friends=date_cutoff_friends)
     player.polish_friends_list(exclude_friends)
+
+    print("Now " + str(len(player.friends())) + " friends after adjustments specified in args.")
+
     return player
 
 def diff_f_lists(players: List[Player], args: Args) -> None:
@@ -75,7 +78,7 @@ def check_results(player: Optional[Player]) -> List[str]:
     Also, a list of uuids for players who have their f list stored in the results folder will be returned.
     The caller doesn't have to use it, but it may be useful. """
 
-    all_dicts: list[dict] = Files.get_all_unique_dicts_in_results()
+    all_dicts: list[dict] = Files.get_all_dicts_unique_uuids_in_results()
 
     print("\n" + str(len(all_dicts)) + " total unique uuids recorded in the results folder.")
     keys = ['friends', 'name', 'fkdr', 'star']
@@ -88,20 +91,18 @@ def check_results(player: Optional[Player]) -> List[str]:
         dicts_with_key = [d for d in all_dicts if k in d]
         indent = "  "
         Utils.print_info_for_key(dicts_with_key, k, indent)
-        if k == 'friends':
-            player_uuids_with_f_list_in_results = [d['uuid'] for d in dicts_with_key]
-            if player:
-                print(indent*2 + "Also, it's " + 
-                      Utils.bool_lowercase_str(player.uuid() in player_uuids_with_f_list_in_results) +
-                      " that " + player.name() + "'s friends list is in the results folder.")
+        if k != 'friends':
+            continue
+        player_uuids_with_f_list_in_results = [d['uuid'] for d in dicts_with_key]
+        if player:
+            print(indent*2 + "Also, it's " + 
+                  Utils.bool_lowercase_str(player.uuid() in player_uuids_with_f_list_in_results) +
+                  " that " + player.name() + "'s friends list is in the results folder.")
     print('\n\n')
-    return player_uuids_with_f_list_in_results    
+    return player_uuids_with_f_list_in_results
 
 def main():
     hypixel.set_api_keys()
-
-    #Files.write_data_as_json_to_file(hypixel.getJSON('counts'), "test online hypixel player count")
-    #Files.write_data_as_json_to_file(hypixel.getJSON('leaderboards'), "test leaderboards")
 
     args = Args(sys.argv)
     players_from_args = get_players_from_args(args)
@@ -111,7 +112,7 @@ def main():
         player_uuids_with_f_list_in_results = check_results(player)
         if args.minus_results():
             player.polish_friends_list([Player(uuid) for uuid in player_uuids_with_f_list_in_results])
-    print("Now " + str(len(player.friends())) + " friends after adjustments specified in args.")
+            print("Now " + str(len(player.friends())) + " friends after applying 'minusresults'.")
     if args.update_uuids():
         Files.update_uuids_file()
 

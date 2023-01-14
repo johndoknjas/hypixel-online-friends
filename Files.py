@@ -7,7 +7,6 @@ import json
 import time
 import Utils
 from typing import Optional, List
-from itertools import groupby
 from copy import deepcopy
 import shutil
 import ntpath
@@ -59,16 +58,13 @@ def get_all_jsons_in_results() -> List[dict]:
         all_jsons.append(read_json_textfile(filename))
     return all_jsons
 
-def get_all_unique_dicts_in_results() -> List[dict]:
+def get_all_dicts_unique_uuids_in_results() -> List[dict]:
     """Returns a flat list of dicts (no more than one per uuid), for all dicts/nested dicts found in the 
-    results folder. The list will be sorted by the dicts' uuid key-value pair. If multiple dicts
-    have the same uuid, the one with the biggest friends list will be kept."""
-
+    results folder. If multiple dicts have the same uuid, the one with the biggest friends list will be kept."""
     all_dicts: list[dict] = []
     for d in get_all_jsons_in_results():
-        all_dicts.extend(Utils.get_all_nested_dicts_in_dict(d))
-    all_dicts.sort(key=lambda d: (d['uuid'], -len(d.get('friends', []))))
-    return [next(d) for k, d in groupby(all_dicts, key=lambda x: x['uuid'])]
+        all_dicts.extend(Utils.get_all_nested_dicts_in_dict(d, make_deepcopy = False))
+    return Utils.remove_dicts_duplicate_uuids(all_dicts, make_deepcopy = False)
 
 def update_uuids_file() -> None:
     """Updates the uuids.txt file with new ign-uuid pairs found. 

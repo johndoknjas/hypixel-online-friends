@@ -140,3 +140,16 @@ def print_info_for_key(dicts: List[dict], k: str, indent: str) -> None:
                 str(len(highest_dict[k]) if k == 'friends' else highest_dict[k]) + 
                 " (" + ((highest_dict['name'] + ", ") if 'name' in highest_dict else "") + 
                 'uuid ' + highest_dict['uuid'] + ")")
+
+def remove_dicts_duplicate_uuids(dicts: List[dict], make_deepcopy: bool = True) -> List[dict]:
+    """ For dicts with the same uuid, only one dict will be kept in the new list. The criteria
+        for choosing which one is which dict has the bigger friends list. """
+    if make_deepcopy:
+        dicts = deepcopy(dicts)
+    dicts_unique_uuids: dict = {} # Key uuid, value a dict (one of the elements in dicts).
+    for d in dicts:
+        uuid = d['uuid']
+        if (uuid not in dicts_unique_uuids or
+            len(d.get('friends', [])) > len(dicts_unique_uuids[uuid].get('friends', []))):
+            dicts_unique_uuids[uuid] = d
+    return dicts_unique_uuids.values()
