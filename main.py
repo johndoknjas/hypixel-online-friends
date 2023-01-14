@@ -111,7 +111,7 @@ def main():
     if args.check_results():
         player_uuids_with_f_list_in_results = check_results(player)
         if args.minus_results():
-            player.polish_friends_list([Player(uuid) for uuid in player_uuids_with_f_list_in_results])
+            player.polish_friends_list({uuid: Player(uuid) for uuid in player_uuids_with_f_list_in_results})
             print("Now " + str(len(player.friends())) + " friends after applying 'minusresults'.")
     if args.update_uuids():
         Files.update_uuids_file()

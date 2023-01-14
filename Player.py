@@ -220,7 +220,7 @@ class Player:
             Utils.print_list_of_dicts(report['friends'])
         return report
     
-    def polish_friends_list(self, friends_to_exclude: List[Player]) -> None:
+    def polish_friends_list(self, friends_to_exclude: Union[List[Player], dict[str, Player]]) -> None:
         """Will sort friends, remove duplicates, and remove any who appear in the friends_to_exclude param.
         Note that a Player object is treated as an equivalent/duplicate player if it has the same uuid as
         another Player. Other details (such as time friended parent player) can differ."""
@@ -228,7 +228,12 @@ class Player:
         self.remove_friends_added_before_cutoff() # Probably redundant
         self._set_friends(sorted(self.friends(), key=lambda f: f.time_friended_parent_player('s') or 0, reverse=True))
         self.remove_duplicate_friends()
-        self._set_friends([f for f in self.friends() if not f.in_player_list(friends_to_exclude)])
+        if isinstance(friends_to_exclude, List):
+            self._set_friends([f for f in self.friends() if not f.in_player_list(friends_to_exclude)])
+        elif isinstance(friends_to_exclude, dict):
+            self._set_friends([f for f in self.friends() if not f.uuid() in friends_to_exclude])
+        else:
+            raise ValueError("friends_to_exclude must be a list or dict of Players")
     
     def diff_f_lists(self, other: Player, print_results: bool = False) -> List[Player]:
         diff = [f for f in self.friends() if not f.in_player_list(other.friends())]
