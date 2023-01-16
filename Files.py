@@ -5,11 +5,12 @@ import os
 import os.path
 import json
 import time
-import Utils
-from typing import Optional, List
+from typing import Optional
 from copy import deepcopy
 import shutil
 import ntpath
+
+import Utils
 
 _IGN_UUID_PAIRS: Optional[dict] = None
 
@@ -24,13 +25,13 @@ def create_file(description: str, folder_name: str) -> str:
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     return filename
 
-def ign_uuid_pairs() -> dict:
+def ign_uuid_pairs_in_uuids_txt() -> dict:
     """Retrieves pairs stored in the uuids.txt file as a dict - key ign, value uuid"""
     global _IGN_UUID_PAIRS
     if _IGN_UUID_PAIRS is not None:
         return deepcopy(_IGN_UUID_PAIRS)
-    _IGN_UUID_PAIRS = {} # key ign, value uuid
 
+    _IGN_UUID_PAIRS = {} # key ign, value uuid
     if not os.path.isfile('uuids.txt'):
         return deepcopy(_IGN_UUID_PAIRS)
     with open('uuids.txt') as file:
@@ -48,36 +49,14 @@ def read_json_textfile(filepath: str) -> dict:
         with open('results/' + ntpath.basename(filepath), 'r') as f:
             return json.loads(f.read())
 
-def get_all_jsons_in_results() -> List[dict]:
-    """Returns a list of dicts, where each dict represents the json each textfile stores."""
-    all_jsons: list[dict] = []
-    all_files = os.listdir('results')
-    all_files = [f for f in all_files if f.startswith('Friends of') and f.endswith('.txt')]
-    for f in all_files:
-        filename = os.path.join('results', f)
-        all_jsons.append(read_json_textfile(filename))
-    return all_jsons
+def update_uuids_file(ign_uuid_pairs: dict[str, str]) -> None:
+    """Updates the uuids.txt file with the ign_uuid_pairs param. 
+    If a uuid is found for an ign in uuids.txt that conflicts with a pair in the passed in param,
+    it will be replaced. Also, this function will make a backup of uuids.txt before overwriting it."""
 
-def get_all_dicts_unique_uuids_in_results() -> List[dict]:
-    """Returns a flat list of dicts (no more than one per uuid), for all dicts/nested dicts found in the 
-    results folder. If multiple dicts have the same uuid, the one with the biggest friends list will be kept."""
-    all_dicts: list[dict] = []
-    for d in get_all_jsons_in_results():
-        all_dicts.extend(Utils.get_all_nested_dicts_in_dict(d, make_deepcopy = False))
-    return Utils.remove_dicts_duplicate_uuids(all_dicts, make_deepcopy = False)
-
-def update_uuids_file() -> None:
-    """Updates the uuids.txt file with new ign-uuid pairs found. 
-    uuids.txt should continue to contain no duplicates.
-    Note that if a player has changed their ign, and then another player is now using that ign, the existing
-    ign-uuid pair for the old player may or may not be overwritten by the new pair in uuids.txt.
-    Also, this function will make a backup of uuids.txt before overwriting it."""
     shutil.copy('uuids.txt', create_file('uuids copy', 'old-uuids'))
-    pairs = ign_uuid_pairs()
-    all_jsons: list[dict] = get_all_jsons_in_results()
-    for json in all_jsons:
-        pairs.update(Utils.get_all_ign_uuid_pairs_in_dict(json))
-    # Due to the nature of the update function, there should be no duplicates in pairs.
+    pairs = ign_uuid_pairs_in_uuids_txt()
+    pairs.update(ign_uuid_pairs)
     with open("uuids.txt", "w") as file:
         for key, value in pairs.items():
             file.write(key + " " + value + "\n")

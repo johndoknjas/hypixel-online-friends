@@ -107,7 +107,7 @@ def is_uuid(uuid_or_ign: str) -> bool:
     else:
         raise ValueError("Invalid length")
 
-def get_all_ign_uuid_pairs_in_dict(d: dict, make_deepcopy: bool = True) -> dict:
+def get_all_ign_uuid_pairs_in_dict(d: dict, make_deepcopy: bool = False) -> dict:
     """Traverses the d param and returns a dict, where each key-value pair represents an ign-uuid 
     pair found in d."""
     if make_deepcopy:
@@ -116,7 +116,7 @@ def get_all_ign_uuid_pairs_in_dict(d: dict, make_deepcopy: bool = True) -> dict:
     if 'name' in d:
         uuid_name_pairs[d['name'].lower()] = d['uuid']
     for friend_dict in d.get('friends', []):
-        uuid_name_pairs.update(get_all_ign_uuid_pairs_in_dict(friend_dict, False))
+        uuid_name_pairs.update(get_all_ign_uuid_pairs_in_dict(friend_dict, make_deepcopy=False))
     return uuid_name_pairs
 
 def get_all_nested_dicts_in_dict(d: dict, make_deepcopy: bool = True) -> List[dict]:

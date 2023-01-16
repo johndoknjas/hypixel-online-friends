@@ -8,13 +8,14 @@ from random import choice
 from time import time, sleep
 from copy import deepcopy
 from typing import List
+import re
 import grequests
+
 from MyClasses import UUID_Plus_Time
 import Files
 import Utils
 
 import leveling
-import re
 
 HYPIXEL_API_URL = 'https://api.hypixel.net/'
 UUIDResolverAPI = "https://sessionserver.mojang.com/session/minecraft/profile/"
@@ -126,7 +127,7 @@ def get_uuid_from_textfile_if_exists(ign: str) -> str:
     """ - A uuid will be returned if a pair for the ign is found in uuids.txt.
         - If a pair isn't found, the ign itself will just be returned."""
     assert not Utils.is_uuid(ign)
-    result = Files.ign_uuid_pairs().get(ign.lower(), ign) # result may be either the ign or a uuid
+    result = Files.ign_uuid_pairs_in_uuids_txt().get(ign.lower(), ign) # result may be either the ign or a uuid
     if Utils.is_uuid(result) and Player(result).getName().lower() != ign.lower():
         # uuid found for the ign in uuids.txt, but the player has since changed their ign.
         print("NOTE: " + ign + " is now the ign of another player.")

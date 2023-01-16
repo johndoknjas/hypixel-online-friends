@@ -19,12 +19,19 @@
 
     # When an ign/uuid is given as a command line argument, update the uuids.txt file with its pair, if
       the file doesn't already contain it.
+        # Also, when the getName() function of hypixel.py is called, you could update the uuids file if the
+          uuid-ign pair doesn't exist in it yet.
 
     # Make an arg keyword 'leaderboard', that if entered will get the igns of the top x (maybe 10?) players
       on some bw daily leaderboard, and puts their igns (or uuids) in the Args instance (as if they were entered
       by the user). This processing could be handled in main.py, since importing the hypixel.py file
       will be needed. Main.py can then send a list of igns/uuids to the Args instance via some member function
       you'll write.
+    
+    # Abstract stuff related to the results folder into its own file.
+      - One point of doing this is to only run the whole stuff to read the folder once, and then just
+        apply checkresults/minusresults/updateuuids using that computed value.
+      - Could also then more easily switch to c++ for the stuff with results.
 
     -----------------------------------
 

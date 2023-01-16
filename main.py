@@ -1,14 +1,14 @@
 import sys
-from typing import List, Optional
+from typing import List
 from itertools import combinations
 from copy import deepcopy
 
 import hypixel
 from MyClasses import Specs
-import Utils
 import Files
 from Player import Player
 from Args import Args
+import ProcessingResults
 
 def combine_players(info_on_players: List[Player]) -> Player:
     """This function runs through the Player list and adds/subtracts f lists. Whether a Player's f list
@@ -72,35 +72,6 @@ def get_players_from_args(args: Args) -> List[Player]:
 
     return players
 
-def check_results(player: Optional[Player]) -> List[str]:
-    """Traverses through the results folder and prints some stats and info. If a Player object is provided
-    for player, then some specific info about them will be outputted as well.
-    Also, a list of uuids for players who have their f list stored in the results folder will be returned.
-    The caller doesn't have to use it, but it may be useful. """
-
-    all_dicts: list[dict] = Files.get_all_dicts_unique_uuids_in_results()
-
-    print("\n" + str(len(all_dicts)) + " total unique uuids recorded in the results folder.")
-    keys = ['friends', 'name', 'fkdr', 'star']
-    all_dicts = [d for d in all_dicts if any(k in d for k in keys)]
-    print(str(len(all_dicts)) + " total players with non-trivial data stored in the results folder.")
-
-    player_uuids_with_f_list_in_results: List[str] = []
-
-    for k in keys:
-        dicts_with_key = [d for d in all_dicts if k in d]
-        indent = "  "
-        Utils.print_info_for_key(dicts_with_key, k, indent)
-        if k != 'friends':
-            continue
-        player_uuids_with_f_list_in_results = [d['uuid'] for d in dicts_with_key]
-        if player:
-            print(indent*2 + "Also, it's " + 
-                  Utils.bool_lowercase_str(player.uuid() in player_uuids_with_f_list_in_results) +
-                  " that " + player.name() + "'s friends list is in the results folder.")
-    print('\n\n')
-    return player_uuids_with_f_list_in_results
-
 def main():
     hypixel.set_api_keys()
 
@@ -109,14 +80,16 @@ def main():
     diff_f_lists(players_from_args, args)
     player = combine_players(players_from_args)
     if args.check_results():
-        player_uuids_with_f_list_in_results = check_results(player)
+        ProcessingResults.check_results(player)
         if args.minus_results():
-            player.polish_friends_list({uuid: Player(uuid) for uuid in player_uuids_with_f_list_in_results})
+            player.polish_friends_list({uuid: Player(uuid) for uuid in 
+                                        ProcessingResults.player_uuids_with_f_list_in_results()})
             print("Now " + str(len(player.friends())) + " friends after applying 'minusresults'.")
-    if args.update_uuids():
-        Files.update_uuids_file()
 
-    report = player.create_dictionary_report(sort_final_result_by_fkdr=not args.sort_by_star())
+    if args.update_uuids():
+        Files.update_uuids_file(ProcessingResults.ign_uuid_pairs_in_results())
+
+    report = player.create_dictionary_report(sort_final_result_by_fkdr = not args.sort_by_star())
     if args.do_file_output():
         filename = ("Friends of " + 
                     ("friends of " if args.find_friends_of_friends() else "") + 
