@@ -28,10 +28,10 @@
       will be needed. Main.py can then send a list of igns/uuids to the Args instance via some member function
       you'll write.
     
-    # Abstract stuff related to the results folder into its own file.
-      - One point of doing this is to only run the whole stuff to read the folder once, and then just
-        apply checkresults/minusresults/updateuuids using that computed value.
-      - Could also then more easily switch to c++ for the stuff with results.
+    # Add an option where, if the user wants to get the f list of a player from a textfile, instead of having to
+      give the name of the textfile, they can just get the program to search through the results folder.
+      It will find the biggest friends list for the given player (already did this in ProcessingResults),
+      and then just use that.
 
     -----------------------------------
 
