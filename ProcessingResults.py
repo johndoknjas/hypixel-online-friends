@@ -10,6 +10,8 @@ from copy import deepcopy
 import Utils
 import Files
 from Player import Player
+from MyClasses import UUID_Plus_Time
+import hypixel
 
 _all_dicts_unique_uuids: Optional[list[dict]] = None
 _ign_uuid_pairs_in_results: Optional[dict[str, str]] = None
@@ -70,6 +72,14 @@ def get_all_dicts_unique_uuids_in_results(get_deepcopy: bool = False) -> List[di
                                                                      make_deepcopy = False)
 
     return deepcopy(_all_dicts_unique_uuids) if get_deepcopy else _all_dicts_unique_uuids
+
+def get_largest_f_list_for_player_in_results(ign_or_uuid: str) -> List[UUID_Plus_Time]:
+    if not Utils.is_uuid(ign_or_uuid):
+        ign_or_uuid = hypixel.get_uuid_from_textfile_if_exists(ign_or_uuid)
+    for d in get_all_dicts_unique_uuids_in_results():
+        if d['uuid'] == ign_or_uuid or d.get('name', None) == ign_or_uuid:
+            return [UUID_Plus_Time(f['uuid'], f.get('time', None)) for f in d.get('friends', [])]
+    return []
 
 def _get_all_jsons_in_results() -> List[dict]:
     """Returns a list of dicts, where each dict represents the json each textfile stores."""

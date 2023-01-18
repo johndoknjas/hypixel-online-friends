@@ -52,16 +52,25 @@ def get_players_from_args(args: Args) -> List[Player]:
     encountered_minus_symbol = False
 
     for i, arg in enumerate(args_no_keywords_or_date):
-        if arg.endswith('.txt'):
+        FROM_RESULTS = 'fromresults'
+        if arg.endswith('.txt') or arg == FROM_RESULTS:
             continue
         if arg == '-':
             encountered_minus_symbol = True
             continue
 
-        player = (Player.make_player_from_json_textfile(args_no_keywords_or_date[i+1], arg, specs=specs)
-                if i < len(args_no_keywords_or_date) - 1 and args_no_keywords_or_date[i+1].endswith('.txt')
-                else Player(hypixel.Player(arg).getUUID(), specs=specs))
-        if len(players) == 0:
+        player = None
+        if i+1 < len(args_no_keywords_or_date):
+            if args_no_keywords_or_date[i+1] == FROM_RESULTS:
+                uuid = hypixel.Player(arg).getUUID()
+                player = Player(uuid, specs=specs,
+                                friends=ProcessingResults.get_largest_f_list_for_player_in_results(uuid))
+            elif args_no_keywords_or_date[i+1].endswith('.txt'):
+                player = Player.make_player_from_json_textfile(args_no_keywords_or_date[i+1], arg, specs=specs)
+        if not player:
+            player = Player(hypixel.Player(arg).getUUID(), specs=specs)
+
+        if i == 0:
             print("The uuid of the player you're getting friends of is " + player.uuid())
             print("This player has " + str(len(player.friends())) + " friends total.")
 
