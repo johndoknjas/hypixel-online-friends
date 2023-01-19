@@ -33,10 +33,6 @@
       It will find the biggest friends list for the given player (already did this in ProcessingResults),
       and then just use that.
 
-    # Add a feature where, given a uuid/ign in the command line args, the program will find all 
-      matching ign/uuids in results. For most cases it will just be 1 to 1, but exceptions could be if
-      someone took over an ign, or if the player (that the uuid represents) switched igns.
-
     -----------------------------------
 
     # Add a feature to just get friends over a certain fkdr.

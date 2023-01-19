@@ -7,7 +7,8 @@ class Args:
         self._ARGS = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
         self._ARG_KEYWORDS = (  ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
                                  'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
-                                 'nofileoutput', 'fileoutput', 'updateuuids', 'minusresults', 'trivial']
+                                 'nofileoutput', 'fileoutput', 'updateuuids', 'minusresults', 'trivial',
+                                 'matchingignsuuids']
                               + [x.lower() for x in extra_keywords] )
     
     def get_args(self, remove_keywords: bool, remove_dates: bool) -> List[str]:
@@ -65,8 +66,12 @@ class Args:
     
     def get_trivial_dicts_in_results(self) -> bool:
         if 'trivial' in self._ARGS:
-            assert self.check_results() and not self.minus_results() and not self.update_uuids()
+            assert (self.check_results() and not self.minus_results() and not self.update_uuids()
+                    and not self.find_matching_igns_or_uuids_in_results())
             # The user should only be wanting to see how many total unique uuids are in results, if
             # the 'trivial' command has been entered with check_results.
             return True
         return False
+    
+    def find_matching_igns_or_uuids_in_results(self) -> bool:
+        return 'matchingignsuuids' in self._ARGS

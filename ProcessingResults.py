@@ -104,6 +104,22 @@ def get_largest_f_list_for_player_in_results(ign_or_uuid: str) -> List[UUID_Plus
             return [UUID_Plus_Time(f['uuid'], f.get('time', None)) for f in d.get('friends', [])]
     return []
 
+def print_all_matching_uuids_or_igns(ign_or_uuid: str) -> None:
+    """This function will traverse results, and find all igns or uuids that are grouped with
+       the ign_or_uuid param. For most igns/uuids, there will only be one result printed, but
+       some players may change their ign, and others could take over the ign."""
+
+    param_key = 'uuid' if Utils.is_uuid(ign_or_uuid) else 'name'
+    search_for = 'name' if param_key == 'uuid' else 'uuid'
+
+    print('\nMatching ' + search_for + 's found in the results folder:')
+    hits = []
+    for d in get_all_dicts_in_results(True):
+        if 'name' in d and d[param_key].lower() == ign_or_uuid.lower() and d[search_for] not in hits:
+            print(d[search_for])
+            hits.append(d[search_for])
+    print()
+
 def _get_all_jsons_in_results() -> List[dict]:
     """Returns a list of dicts, where each dict represents the json each textfile stores."""
     all_jsons: list[dict] = []

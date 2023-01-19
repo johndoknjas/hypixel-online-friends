@@ -97,6 +97,9 @@ def main():
 
     if args.update_uuids():
         Files.update_uuids_file(ProcessingResults.ign_uuid_pairs_in_results())
+    
+    if args.find_matching_igns_or_uuids_in_results():
+        ProcessingResults.print_all_matching_uuids_or_igns(args.get_args(True, True)[0])
 
     report = player.create_dictionary_report(sort_final_result_by_fkdr = not args.sort_by_star())
     if args.do_file_output():
