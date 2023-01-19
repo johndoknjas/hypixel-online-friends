@@ -89,7 +89,7 @@ def main():
     diff_f_lists(players_from_args, args)
     player = combine_players(players_from_args)
     if args.check_results():
-        ProcessingResults.check_results(player)
+        ProcessingResults.check_results(player, not args.get_trivial_dicts_in_results())
         if args.minus_results():
             player.polish_friends_list({uuid: Player(uuid) for uuid in 
                                         ProcessingResults.player_uuids_with_f_list_in_results()})

@@ -7,7 +7,7 @@ class Args:
         self._ARGS = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
         self._ARG_KEYWORDS = (  ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
                                  'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
-                                 'nofileoutput', 'fileoutput', 'updateuuids', 'minusresults']
+                                 'nofileoutput', 'fileoutput', 'updateuuids', 'minusresults', 'trivial']
                               + [x.lower() for x in extra_keywords] )
     
     def get_args(self, remove_keywords: bool, remove_dates: bool) -> List[str]:
@@ -62,3 +62,11 @@ class Args:
         """Return true if the user doesn't want to get f lists of uuids that already have their f list
         stored in the results folder."""
         return 'minusresults' in self._ARGS
+    
+    def get_trivial_dicts_in_results(self) -> bool:
+        if 'trivial' in self._ARGS:
+            assert self.check_results() and not self.minus_results() and not self.update_uuids()
+            # The user should only be wanting to see how many total unique uuids are in results, if
+            # the 'trivial' command has been entered with check_results.
+            return True
+        return False

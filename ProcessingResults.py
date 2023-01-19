@@ -30,10 +30,17 @@ def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> dict[str, str]:
             _ign_uuid_pairs_in_results.update(Utils.get_all_ign_uuid_pairs_in_dict(d))
     return deepcopy(_ign_uuid_pairs_in_results) if get_deepcopy else _ign_uuid_pairs_in_results
 
-def check_results(player: Optional[Player]) -> None:
+def check_results(player: Optional[Player], only_non_trivial_dicts: bool) -> None:
     """Traverses through the results folder and prints some stats and info. If a Player object is provided
     for player, then some specific info about them will be outputted as well."""
     global _player_uuids_with_f_list_in_results
+
+    _consistency_check_trivial_dicts_policy(only_non_trivial_dicts)
+
+    if not only_non_trivial_dicts:
+        print(str(len(get_all_dicts_unique_uuids_in_results(False))) + 
+              " total unique uuids recorded in the results folder.")
+        return
 
     all_dicts: list[dict] = get_all_dicts_unique_uuids_in_results(True)
     print(str(len(all_dicts)) + " total players with non-trivial data stored in the results folder.")
