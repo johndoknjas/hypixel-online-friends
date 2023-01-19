@@ -119,13 +119,13 @@ def get_all_ign_uuid_pairs_in_dict(d: dict, make_deepcopy: bool = False) -> dict
         uuid_name_pairs.update(get_all_ign_uuid_pairs_in_dict(friend_dict, make_deepcopy=False))
     return uuid_name_pairs
 
-def get_all_nested_dicts_in_dict(d: dict, make_deepcopy: bool = True) -> List[dict]:
+def get_all_nested_dicts_in_dict(d: dict, make_deepcopy: bool = False) -> List[dict]:
     """Traverses through d and returns a list of d and all its nested friend dicts."""
     if make_deepcopy:
         d = deepcopy(d)
     dicts = [d]
     for friend_dict in d.get('friends', []):
-        dicts.extend(get_all_nested_dicts_in_dict(friend_dict, False))
+        dicts.extend(get_all_nested_dicts_in_dict(friend_dict, make_deepcopy=False))
     return dicts
 
 def bool_lowercase_str(b: bool) -> str:
@@ -141,9 +141,10 @@ def print_info_for_key(dicts: List[dict], k: str, indent: str) -> None:
                 " (" + ((highest_dict['name'] + ", ") if 'name' in highest_dict else "") + 
                 'uuid ' + highest_dict['uuid'] + ")")
 
-def remove_dicts_duplicate_uuids(dicts: List[dict], make_deepcopy: bool = True) -> List[dict]:
+def remove_dicts_duplicate_uuids(dicts: List[dict], make_deepcopy: bool = False) -> List[dict]:
     """ For dicts with the same uuid, only one dict will be kept in the new list. The criteria
-        for choosing which one is which dict has the bigger friends list. """
+        for choosing which one is which dict has the bigger friends list. If neither has a friends list,
+        the one that comes earlier in the 'dicts' param will be kept. """
     if make_deepcopy:
         dicts = deepcopy(dicts)
     dicts_unique_uuids: dict = {} # Key uuid, value a dict (one of the elements in dicts).
@@ -152,4 +153,4 @@ def remove_dicts_duplicate_uuids(dicts: List[dict], make_deepcopy: bool = True) 
         if (uuid not in dicts_unique_uuids or
             len(d.get('friends', [])) > len(dicts_unique_uuids[uuid].get('friends', []))):
             dicts_unique_uuids[uuid] = d
-    return dicts_unique_uuids.values()
+    return list(dicts_unique_uuids.values())

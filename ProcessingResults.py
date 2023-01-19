@@ -18,6 +18,8 @@ _all_dicts_unique_uuids: Optional[list[dict]] = None
 _ign_uuid_pairs_in_results: Optional[dict[str, str]] = None
 _player_uuids_with_f_list_in_results: Optional[List[str]] = None
 
+NON_TRIVIAL_KEYS = ['friends', 'name', 'fkdr', 'star']
+
 def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> dict[str, str]:
     global _ign_uuid_pairs_in_results
 
@@ -35,11 +37,10 @@ def check_results(player: Optional[Player]) -> List[str]:
     all_dicts: list[dict] = get_all_dicts_unique_uuids_in_results()
 
     print("\n" + str(len(all_dicts)) + " total unique uuids recorded in the results folder.")
-    keys = ['friends', 'name', 'fkdr', 'star']
-    all_dicts = [d for d in all_dicts if any(k in d for k in keys)]
+    all_dicts = _get_only_non_trivial_keys_in_dict(all_dicts)
     print(str(len(all_dicts)) + " total players with non-trivial data stored in the results folder.")
 
-    for k in keys:
+    for k in NON_TRIVIAL_KEYS:
         dicts_with_key = [d for d in all_dicts if k in d]
         indent = "  "
         Utils.print_info_for_key(dicts_with_key, k, indent)
@@ -100,3 +101,6 @@ def _get_all_jsons_in_results() -> List[dict]:
         filename = os.path.join('results', f)
         all_jsons.append(Files.read_json_textfile(filename))
     return all_jsons
+
+def _get_only_non_trivial_keys_in_dict(dicts: List[dict]) -> List[dict]:
+    return [d for d in dicts if any(k in d for k in NON_TRIVIAL_KEYS)]
