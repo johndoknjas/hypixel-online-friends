@@ -33,6 +33,11 @@
       It will find the biggest friends list for the given player (already did this in ProcessingResults),
       and then just use that.
 
+    # In ProcessingResults, have an intermediate step where no dictionaries with duplicate uuids are removed,
+      since this will allow you to make a feature that, given a uuid/ign in the command line args, will find
+      all matching ign/uuids in results (for most cases it will just be 1 to 1, but could be multiple if someone else
+      took over an ign).
+
     -----------------------------------
 
     # Add a feature to just get friends over a certain fkdr.

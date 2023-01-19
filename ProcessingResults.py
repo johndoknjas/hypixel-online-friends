@@ -13,6 +13,7 @@ from Player import Player
 from MyClasses import UUID_Plus_Time
 import hypixel
 
+_all_dicts: Optional[list[dict]] = None
 _all_dicts_unique_uuids: Optional[list[dict]] = None
 _ign_uuid_pairs_in_results: Optional[dict[str, str]] = None
 _player_uuids_with_f_list_in_results: Optional[List[str]] = None
@@ -59,16 +60,25 @@ def player_uuids_with_f_list_in_results(get_deepcopy: bool = False) -> List[str]
     return (deepcopy(_player_uuids_with_f_list_in_results) 
             if get_deepcopy else _player_uuids_with_f_list_in_results)
 
+def get_all_dicts_in_results(get_deepcopy: bool = False) -> List[dict]:
+    """Returns a flat list of dicts, for all dicts/nested dicts found in the results folder. 
+       Note that there can be multiple dicts with the same uuid."""
+    global _all_dicts
+
+    if not _all_dicts:
+        _all_dicts = []
+        for d in _get_all_jsons_in_results():
+            _all_dicts.extend(Utils.get_all_nested_dicts_in_dict(d, make_deepcopy = False))
+
+    return deepcopy(_all_dicts) if get_deepcopy else _all_dicts
+
 def get_all_dicts_unique_uuids_in_results(get_deepcopy: bool = False) -> List[dict]:
     """Returns a flat list of dicts (no more than one per uuid), for all dicts/nested dicts found in the 
     results folder. If multiple dicts have the same uuid, the one with the biggest friends list will be kept."""
     global _all_dicts_unique_uuids
 
     if not _all_dicts_unique_uuids:
-        _all_dicts_unique_uuids = []
-        for d in _get_all_jsons_in_results():
-            _all_dicts_unique_uuids.extend(Utils.get_all_nested_dicts_in_dict(d, make_deepcopy = False))
-        _all_dicts_unique_uuids = Utils.remove_dicts_duplicate_uuids(_all_dicts_unique_uuids, 
+        _all_dicts_unique_uuids = Utils.remove_dicts_duplicate_uuids(get_all_dicts_in_results(),
                                                                      make_deepcopy = False)
 
     return deepcopy(_all_dicts_unique_uuids) if get_deepcopy else _all_dicts_unique_uuids
