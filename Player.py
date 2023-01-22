@@ -47,7 +47,7 @@ class Player:
         self._date_cutoff_for_friends = date_cutoff_for_friends
         self._friends: Optional[List[Player]] = None
         self._call_api_if_friends_empty_in_friends_getter: bool = True
-        if friends:
+        if friends is not None:
             self._set_friends(friends)
     
     def hypixel_object(self) -> hypixel.Player:
