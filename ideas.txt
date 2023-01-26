@@ -33,6 +33,21 @@
       It will find the biggest friends list for the given player (already did this in ProcessingResults),
       and then just use that.
 
+    # Added a textfile ('additional_friends.txt') where igns of people friended can be added. This is due to
+      Hypixel disabling the friends api endpoint.
+        # Implement a feature where, when specified by an argument, the program will get the igns from
+          this file and add them to the combined friends list to search.
+        # The friends in this textfile should be treated as the ones most recently added, in relation to
+          the friends retrieved through the api.
+        # And within the textfile itself, friends added in the bottom/later lines should be treated as
+          more recently added.
+    
+    # Add an option for the 'fromresults' feature, where if specified, the program will only find the
+      biggest friends list from files matching certain file names. I.e., no 'plus' or 'minus' in the
+      filename.
+        # The point of this could be to get the most recent/biggest list of friends for just one player 
+          (like yourself), but to not get a list of friends for multiple players.
+
     -----------------------------------
 
     # Add a feature to just get friends over a certain fkdr.
