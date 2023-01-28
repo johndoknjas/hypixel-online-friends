@@ -2,6 +2,7 @@ import sys
 from typing import List
 from itertools import combinations
 from copy import deepcopy
+import operator
 
 import hypixel
 from MyClasses import Specs
@@ -9,6 +10,7 @@ import Files
 from Player import Player
 from Args import Args
 import ProcessingResults
+import Utils
 
 def combine_players(info_on_players: List[Player]) -> Player:
     """This function runs through the Player list and adds/subtracts f lists. Whether a Player's f list
@@ -59,10 +61,9 @@ def get_players_from_args(args: Args) -> List[Player]:
             encountered_minus_symbol = True
             continue
 
-        use_specific_textfile = (i+1 < len(args_no_keywords_or_date) and 
-                                 args_no_keywords_or_date[i+1].endswith('.txt'))
-        use_results_folder = args.from_results_for_all() or (i+1 < len(args_no_keywords_or_date) and
-                                                             args_no_keywords_or_date[i+1] == FROM_RESULTS)
+        use_specific_textfile = Utils.cmp_element_val(args_no_keywords_or_date, i+1, '.txt', str.endswith)
+        use_results_folder = (args.from_results_for_all() or 
+                              Utils.cmp_element_val(args_no_keywords_or_date, i+1, FROM_RESULTS, operator.eq))
 
         player = None
         if use_specific_textfile:
