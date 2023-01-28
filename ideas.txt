@@ -42,11 +42,9 @@
         # And within the textfile itself, friends added in the bottom/later lines should be treated as
           more recently added.
     
-    # Add an option for the 'fromresults' feature, where if specified, the program will only find the
-      biggest friends list from files matching certain file names. I.e., no 'plus' or 'minus' in the
-      filename.
-        # The point of this could be to get the most recent/biggest list of friends for just one player 
-          (like yourself), but to not get a list of friends for multiple players.
+    # 'fromresultsall' option - applies 'fromresults' for every ign/uuid given via args.
+
+    # Do a mypy pass.
 
     -----------------------------------
 

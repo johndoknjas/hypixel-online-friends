@@ -85,6 +85,7 @@ def main():
     hypixel.set_api_keys()
 
     args = Args(sys.argv)
+    ProcessingResults.decide_only_read_singular_player_files(args.only_read_singular_player_files_in_results())
     if args.find_matching_igns_or_uuids_in_results():
         ProcessingResults.print_all_matching_uuids_or_igns(args.get_args(True, True)[0])
     players_from_args = get_players_from_args(args)

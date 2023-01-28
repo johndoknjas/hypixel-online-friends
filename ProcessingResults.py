@@ -20,6 +20,8 @@ _player_uuids_with_f_list_in_results: Optional[List[str]] = None
 
 _NON_TRIVIAL_KEYS = ['friends', 'name', 'fkdr', 'star']
 _get_only_non_trivial_dicts: Optional[bool] = None
+_only_read_singular_player_files: Optional[bool] = None 
+# Whether or not to include files with 'plus' or 'minus' in filename.
 
 def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> dict[str, str]:
     global _ign_uuid_pairs_in_results
@@ -124,11 +126,17 @@ def _get_all_jsons_in_results() -> List[dict]:
     """Returns a list of dicts, where each dict represents the json each textfile stores."""
     all_jsons: list[dict] = []
     all_files = os.listdir('results')
-    all_files = [f for f in all_files if f.startswith('Friends of') and f.endswith('.txt')]
+    all_files = [f for f in all_files if _does_filename_meet_reqs(f)]
     for f in all_files:
         filename = os.path.join('results', f)
         all_jsons.append(Files.read_json_textfile(filename))
     return all_jsons
+
+def _does_filename_meet_reqs(f: str) -> bool:
+    assert _only_read_singular_player_files is not None
+    return (f.startswith('Friends of') and
+            f.endswith('.txt') and
+            (not _only_read_singular_player_files or (' plus ' not in f and ' minus ' not in f)))
 
 def _get_only_non_trivial_keys_in_dict(dicts: List[dict]) -> List[dict]:
     return [d for d in dicts if any(k in d for k in _NON_TRIVIAL_KEYS)]
@@ -141,3 +149,9 @@ def _consistency_check_trivial_dicts_policy(get_non_trivial_dicts_param: bool) -
     elif _get_only_non_trivial_dicts != get_non_trivial_dicts_param:
         # Once set, the global should never be contradicted.
         raise ValueError('Already specified to either include/exclude trivial dicts.')
+
+def decide_only_read_singular_player_files(decision: bool) -> None:
+    global _only_read_singular_player_files
+
+    assert _only_read_singular_player_files is None
+    _only_read_singular_player_files = decision

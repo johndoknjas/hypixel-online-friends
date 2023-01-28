@@ -8,7 +8,7 @@ class Args:
         self._ARG_KEYWORDS = (  ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
                                  'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
                                  'nofileoutput', 'fileoutput', 'updateuuids', 'minusresults', 'trivial',
-                                 'matchingignsuuids']
+                                 'matchingignsuuids', 'singularplayerfiles']
                               + [x.lower() for x in extra_keywords] )
     
     def get_args(self, remove_keywords: bool, remove_dates: bool) -> List[str]:
@@ -75,3 +75,6 @@ class Args:
     
     def find_matching_igns_or_uuids_in_results(self) -> bool:
         return 'matchingignsuuids' in self._ARGS
+    
+    def only_read_singular_player_files_in_results(self) -> bool:
+        return 'singularplayerfiles' in self._ARGS
