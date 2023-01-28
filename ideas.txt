@@ -34,6 +34,12 @@
           this file and add them to the combined friends list to search.
         # The friends in this textfile should be treated as the ones most recently added, in relation to
           the friends retrieved through the api.
+            # If a friend in this textfile overlaps with the combined friends list, both duplicate uuids
+              obviously shouldn't be kept. The one in the textfile should override the other, and the friend
+              should be treated as recent (even if they were friended a long time ago via the combined
+              friends list).
+            # Can probably add these friends in this textfile to the combined friends list after the call
+              to combine_players / polish_friends_list or something.
         # And within the textfile itself, friends added in the bottom/later lines should be treated as
           more recently added.
 
