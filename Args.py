@@ -8,8 +8,12 @@ class Args:
         self._ARG_KEYWORDS = (  ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
                                  'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
                                  'nofileoutput', 'fileoutput', 'updateuuids', 'minusresults', 'trivial',
-                                 'matchingignsuuids', 'singularplayerfiles']
+                                 'matchingignsuuids', 'singularplayerfiles', 'fromresultsall', 'allfromresults']
                               + [x.lower() for x in extra_keywords] )
+        # These keywords are possible options the user can specify for using the program. All of these are
+        # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
+        # For 'positional' arguments, there are fewer (e.g., '-' and 'fromresults'). They don't appear in this
+        # class, but are instead used directly in the logic for main.py.
     
     def get_args(self, remove_keywords: bool, remove_dates: bool) -> List[str]:
         args = self._ARGS
@@ -78,3 +82,6 @@ class Args:
     
     def only_read_singular_player_files_in_results(self) -> bool:
         return 'singularplayerfiles' in self._ARGS
+    
+    def from_results_for_all(self) -> bool:
+        return 'fromresultsall' in self._ARGS or 'allfromresults' in self._ARGS

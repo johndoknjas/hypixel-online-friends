@@ -59,15 +59,19 @@ def get_players_from_args(args: Args) -> List[Player]:
             encountered_minus_symbol = True
             continue
 
+        use_specific_textfile = (i+1 < len(args_no_keywords_or_date) and 
+                                 args_no_keywords_or_date[i+1].endswith('.txt'))
+        use_results_folder = args.from_results_for_all() or (i+1 < len(args_no_keywords_or_date) and
+                                                             args_no_keywords_or_date[i+1] == FROM_RESULTS)
+
         player = None
-        if i+1 < len(args_no_keywords_or_date):
-            if args_no_keywords_or_date[i+1] == FROM_RESULTS:
-                uuid = hypixel.Player(arg).getUUID()
-                player = Player(uuid, specs=specs,
-                                friends=ProcessingResults.get_largest_f_list_for_player_in_results(uuid))
-            elif args_no_keywords_or_date[i+1].endswith('.txt'):
-                player = Player.make_player_from_json_textfile(args_no_keywords_or_date[i+1], arg, specs=specs)
-        if not player:
+        if use_specific_textfile:
+            player = Player.make_player_from_json_textfile(args_no_keywords_or_date[i+1], arg, specs=specs)
+        elif use_results_folder:
+            uuid = hypixel.Player(arg).getUUID()
+            player = Player(uuid, specs=specs,
+                            friends=ProcessingResults.get_largest_f_list_for_player_in_results(uuid))
+        else:
             player = Player(hypixel.Player(arg).getUUID(), specs=specs)
 
         if i == 0:
