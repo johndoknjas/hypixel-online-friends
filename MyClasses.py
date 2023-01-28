@@ -21,7 +21,7 @@ class UUID_Plus_Time:
             assert Utils.is_date_string(time_val)
             self._unix_epoch_milliseconds = Utils.date_to_epoch(time_val, False)
         elif isinstance(time_val, float) or isinstance(time_val, int):
-            if time_val > 10000000000: # If greater than 10 billion, must already be in ms
+            if Utils.is_in_milliseconds(time_val):
                 self._unix_epoch_milliseconds = time_val
             else:
                 self._unix_epoch_milliseconds = time_val * 1000
@@ -128,7 +128,9 @@ class Specs:
         if specs_friends := self.specs_for_friends():
             specs_friends.print_fields()
     
-    def __eq__(self, other: Specs) -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Specs):
+            raise ValueError("'other' is not an instance of Specs")
         return (self.just_uuids() == other.just_uuids() and
                 self.degrees_from_root_player() == other.degrees_from_root_player() and
                 self.friend_of_root_player() == other.friend_of_root_player() and

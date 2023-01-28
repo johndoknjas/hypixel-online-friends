@@ -9,7 +9,7 @@ from time import time, sleep
 from copy import deepcopy
 from typing import List
 import re
-import grequests
+import grequests # type: ignore
 
 from MyClasses import UUID_Plus_Time
 import Files
@@ -21,9 +21,9 @@ HYPIXEL_API_URL = 'https://api.hypixel.net/'
 UUIDResolverAPI = "https://sessionserver.mojang.com/session/minecraft/profile/"
 
 HYPIXEL_API_KEY_LENGTH = 36 # This is the length of a Hypixel-API key. Don't change from 36.
-verified_api_keys = []
+verified_api_keys: List[str] = []
 
-requestCache = {}
+requestCache: dict = {}
 cacheTime = 60
 
 TIME_STARTED: float = time()
@@ -174,7 +174,7 @@ def set_api_keys() -> None:
             If any of the keys are invalid or don't work, this will be raised.
     """
 
-    api_keys = []
+    api_keys: List[str] = []
     with open('api-key.txt') as file:
         for line in file:
             api_keys.append(line.rstrip())
@@ -224,7 +224,7 @@ class Player:
                 pass
         return playerInfo
 
-    def getName(self, extra_safety_check=True):
+    def getName(self, extra_safety_check=True) -> str:
         """ Just return player's name. """
         if not extra_safety_check:
             return self.JSON['displayname']

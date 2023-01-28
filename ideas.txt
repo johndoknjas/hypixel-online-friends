@@ -27,11 +27,6 @@
       by the user). This processing could be handled in main.py, since importing the hypixel.py file
       will be needed. Main.py can then send a list of igns/uuids to the Args instance via some member function
       you'll write.
-    
-    # Add an option where, if the user wants to get the f list of a player from a textfile, instead of having to
-      give the name of the textfile, they can just get the program to search through the results folder.
-      It will find the biggest friends list for the given player (already did this in ProcessingResults),
-      and then just use that.
 
     # Added a textfile ('additional_friends.txt') where igns of people friended can be added. This is due to
       Hypixel disabling the friends api endpoint.
@@ -41,10 +36,6 @@
           the friends retrieved through the api.
         # And within the textfile itself, friends added in the bottom/later lines should be treated as
           more recently added.
-    
-    # 'fromresultsall' option - applies 'fromresults' for every ign/uuid given via args.
-
-    # Do a mypy pass.
 
     -----------------------------------
 

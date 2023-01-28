@@ -28,14 +28,14 @@ class Player:
         return Player(uuid=dict_for_player['uuid'], 
                       friends=[
                                   UUID_Plus_Time(d['uuid'], d.get('time', None))
-                                  for d in dict_for_player.get('friends')
+                                  for d in dict_for_player.get('friends', [])
                               ],
                       specs=specs
                      )
 
     def __init__(self, uuid: str, time_friended_parent_player: Union[str, float, int, None] = None,
-                 hypixel_object: Optional[hypixel.Player] = None, name: str = None, 
-                 friends: Optional[List[Union[UUID_Plus_Time, Player]]] = None, specs: Optional[Specs] = None,
+                 hypixel_object: Optional[hypixel.Player] = None, name: Optional[str] = None, 
+                 friends: Union[List[UUID_Plus_Time], List[Player], None] = None, specs: Optional[Specs] = None,
                  name_for_file_output: Optional[str] = None, will_exclude_friends: bool = False,
                  date_cutoff_for_friends: Optional[str] = None):
         self._uuid_plus_time = UUID_Plus_Time(uuid, time_friended_parent_player)
@@ -116,7 +116,9 @@ class Player:
     def set_specs(self, specs: Specs) -> None:
         self._specs = specs
     
-    def __eq__(self, other: Player) -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Player):
+            raise ValueError("'other' is not an instance of Player.")
         return (len(self.friends()) == len(other.friends()) and self.name() == other.name() and 
                 self._specs == other._specs and self.uuid() == other.uuid() and
                 self.time_friended_parent_player('date') == other.time_friended_parent_player('date'))
@@ -135,9 +137,8 @@ class Player:
         assert not self.will_exclude_friends()
         if not self._date_cutoff_for_friends or not self._friends:
             return
-        self._friends = [f for f in self._friends 
-                         if (time_added := f.time_friended_parent_player('s'))
-                         and time_added >= Utils.date_to_epoch(self._date_cutoff_for_friends, True)]
+        self._friends = [f for f in self._friends if not
+                         Utils.is_older(f.time_friended_parent_player('s'), self._date_cutoff_for_friends)]
     
     def remove_duplicate_friends(self) -> None:
         """Pre-condition: friends list must be sorted in the order you want, since duplicates coming after any 
@@ -145,7 +146,7 @@ class Player:
         assert self._friends
         self._set_friends([f for i, f in enumerate(self.friends()) if not f.in_player_list(self.friends()[:i])])
     
-    def _set_friends(self, friends: Optional[List[Union[UUID_Plus_Time, Player]]]) -> None:
+    def _set_friends(self, friends: Union[List[UUID_Plus_Time], List[Player], None]) -> None:
         """Note that after this function has been called, if self.friends() is called later and
         self._friends happens to be None or [], the hypixel api won't be called to populate self._friends. 
         The reasoning for this is that since self._set_friends() is being called now, it's assumed the
@@ -163,7 +164,9 @@ class Player:
                                             time_friended_parent_player=friend.time_epoch_in_seconds()))
             else:
                 self._friends.append(friend)
-            self._friends[len(self._friends)-1].set_specs(self.specs_for_friends())
+            specs_for_friends = self.specs_for_friends()
+            assert isinstance(specs_for_friends, Specs)
+            self._friends[len(self._friends)-1].set_specs(specs_for_friends)
         if not self.will_exclude_friends():
             self.remove_friends_added_before_cutoff()
     
@@ -199,11 +202,12 @@ class Player:
         
         if not self.specs_for_friends():
             return report
-        report['friends']: List[dict] = []
+        report['friends'] = [] # Will be a list of dicts.
         for i, friend in enumerate(self.friends()):
             if self.root_player() and i % 20 == 0:
                 print("Processed " + str(i))
             if friend_report := friend.create_dictionary_report():
+                assert isinstance(report['friends'], List) # to satisfy mypy
                 report['friends'].append(friend_report)
         return self.polish_dictionary_report(report, sort_final_result_by_fkdr) if self.root_player() else report
     
@@ -213,7 +217,7 @@ class Player:
             report['friends'] = sorted(report['friends'], 
                                 key=lambda d: d.get('fkdr' if sort_by_fkdr else 'star', 0), 
                                 reverse=True)
-        if self.specs_for_friends() and self.specs_for_friends().required_online():
+        if (specs_for_friends := self.specs_for_friends()) and specs_for_friends.required_online():
             report['friends'] = [p for p in report['friends'] if Player(p['uuid']).is_online()]
         if self.specs().print_only_players_friends():
             print('\n\n')
