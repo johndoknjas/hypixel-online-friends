@@ -42,6 +42,11 @@
               to combine_players / polish_friends_list or something.
         # And within the textfile itself, friends added in the bottom/later lines should be treated as
           more recently added.
+    
+    # Make a feature where for igns given after a certain command line arg (such as 'contains'?), the program
+      will check if they are in the f list (that it makes for the earlier arg(s)).
+        # Only positional args coming after 'contains' should be igns. I.e., if a '-' is present it should have
+          been before, and also no filenames after 'contains' (since it's just igns, not f lists for them).
 
     -----------------------------------
 
