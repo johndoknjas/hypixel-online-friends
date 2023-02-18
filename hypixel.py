@@ -27,7 +27,7 @@ requestCache: dict = {}
 cacheTime = 60
 
 TIME_STARTED: float = time()
-CHOSEN_API_RATE: float = 1.8
+CHOSEN_API_RATE: float = 0.95
 num_api_calls_made: int = 0
 num_cumulative_calls_at_timestamps = {0.0: 0} # key timestamp (time() - TIME_STARTED), value num api calls made
 
@@ -58,7 +58,7 @@ def num_cumulative_calls_up_to_timestamp(timestamp_target: float) -> int:
     raise RuntimeError("Nothing returned")
 
 def sleep_for_rate_limiting() -> None:
-    if num_api_calls_made < 100:
+    if num_api_calls_made < (CHOSEN_API_RATE * 60):
         return
     time_passed = time() - TIME_STARTED
     num_calls_over_last_min = num_api_calls_made - num_cumulative_calls_up_to_timestamp(time_passed - 60)
