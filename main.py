@@ -11,6 +11,7 @@ from Player import Player
 from Args import Args
 import ProcessingResults
 import Utils
+import additional_friends
 
 def combine_players(info_on_players: List[Player]) -> Player:
     """This function runs through the Player list and adds/subtracts f lists. Whether a Player's f list
@@ -90,6 +91,9 @@ def main():
     hypixel.set_api_keys()
 
     args = Args(sys.argv)
+    if args.add_additional_friends():
+        additional_friends.add_additional_friends_to_file_system(args.get_args(True, True)[0])
+        sys.exit(0)
     ProcessingResults.decide_only_read_singular_player_files(args.only_read_singular_player_files_in_results())
     if args.find_matching_igns_or_uuids_in_results():
         ProcessingResults.print_all_matching_uuids_or_igns(args.get_args(True, True)[0])

@@ -79,6 +79,9 @@ class Player:
     def name_for_file_output(self) -> str:
         assert self._name_for_file_output is not None
         return self._name_for_file_output
+    
+    def set_name_for_file_output(self, name: str) -> None:
+        self._name_for_file_output = name
 
     def friends(self) -> List[Player]:
         if not self._friends and self._call_api_if_friends_empty_in_friends_getter:

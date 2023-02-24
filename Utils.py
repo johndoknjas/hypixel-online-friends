@@ -1,6 +1,6 @@
 """Functions in this file are the most general, and don't have dependencies on other files in the project."""
 
-import datetime
+from datetime import datetime
 import time
 from typing import List, Optional, TypeVar, Callable, Any, Union
 from collections import OrderedDict
@@ -17,7 +17,7 @@ def remove_duplicates(lst: List) -> List:
 
 def is_date_string(text: str) -> bool:
     try:
-        datetime.datetime.strptime(text, '%Y-%m-%d')
+        datetime.strptime(text, '%Y-%m-%d')
     except ValueError:
         return False
     else:
@@ -43,7 +43,7 @@ def fkdr_division(final_kills: int, final_deaths: int) -> float:
     return final_kills / final_deaths if final_deaths else float(final_kills)
 
 def date_to_epoch(date_string: str, in_seconds: bool) -> float:
-    epoch = time.mktime(datetime.datetime.strptime(date_string, '%Y-%m-%d').timetuple())
+    epoch = time.mktime(datetime.strptime(date_string, '%Y-%m-%d').timetuple())
     if not in_seconds:
         epoch *= 1000
     return epoch
@@ -51,7 +51,7 @@ def date_to_epoch(date_string: str, in_seconds: bool) -> float:
 def epoch_to_date(epoch: float, in_seconds: bool) -> str:
     if not in_seconds:
         epoch /= 1000
-    return datetime.datetime.utcfromtimestamp(epoch).strftime('%Y-%m-%d')
+    return datetime.utcfromtimestamp(epoch).strftime('%Y-%m-%d')
 
 def find_path_to_key_in_nested_dict(data, target_key):
     """Can use this function to find the path to some key in a nested dict."""
@@ -186,3 +186,6 @@ def is_older(time_one: Union[str, float, int, None], time_two: Union[str, float,
     """Returns true if time_one is more recent than time_two. time_one and time_two must each be either
        a datestring or epoch (in seconds/milliseconds)."""
     return convert_to_seconds(time_one) < convert_to_seconds(time_two)
+
+def get_current_date() -> str:
+    return datetime.now().strftime('%Y-%m-%d')

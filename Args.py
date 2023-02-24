@@ -9,7 +9,7 @@ class Args:
                                  'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
                                  'nofileoutput', 'fileoutput', 'updateuuids', 'minusresults', 'trivial',
                                  'matchingignsuuids', 'includemultiplayerfiles', 'fromresultsall', 
-                                 'allfromresults']
+                                 'allfromresults', 'additionalfriends', 'addadditionalfriends']
                               + [x.lower() for x in extra_keywords] )
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
@@ -86,3 +86,6 @@ class Args:
     
     def from_results_for_all(self) -> bool:
         return 'fromresultsall' in self._ARGS or 'allfromresults' in self._ARGS
+    
+    def add_additional_friends(self) -> bool:
+        return 'additionalfriends' in self._ARGS or 'addadditionalfriends' in self._ARGS
