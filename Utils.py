@@ -3,7 +3,7 @@
 from datetime import datetime
 import time
 from typing import List, Optional, TypeVar, Callable, Any, Union
-from collections import OrderedDict
+from collections import OrderedDict, deque
 from copy import deepcopy
 import operator
 
@@ -126,7 +126,7 @@ def get_all_nested_dicts_in_dict(d: dict, make_deepcopy: bool = False) -> List[d
     """Traverses through d and returns a list of d and all its nested friend dicts."""
     if make_deepcopy:
         d = deepcopy(d)
-    dicts = [d]
+    dicts = [d] if 'exclude' not in d else []
     for friend_dict in d.get('friends', []):
         dicts.extend(get_all_nested_dicts_in_dict(friend_dict, make_deepcopy=False))
     return dicts
@@ -189,3 +189,9 @@ def is_older(time_one: Union[str, float, int, None], time_two: Union[str, float,
 
 def get_current_date() -> str:
     return datetime.now().strftime('%Y-%m-%d')
+
+def remove_first_n_elem_fast(l: list, n: int) -> list:
+    deque_l = deque(l)
+    for _ in range(n):
+        deque_l.popleft()
+    return list(deque_l)

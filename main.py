@@ -5,7 +5,7 @@ from copy import deepcopy
 import operator
 
 import hypixel
-from MyClasses import Specs
+from MyClasses import Specs, UUID_Plus_Time
 import Files
 from Player import Player
 from Args import Args
@@ -71,14 +71,25 @@ def get_players_from_args(args: Args) -> List[Player]:
             player = Player.make_player_from_json_textfile(args_no_keywords_or_date[i+1], arg, specs=specs)
         elif use_results_folder:
             uuid = hypixel.Player(arg).getUUID()
-            player = Player(uuid, specs=specs,
-                            friends=ProcessingResults.get_largest_f_list_for_player_in_results(uuid))
+            all_friends: List[UUID_Plus_Time] = []
+            standard_friends = ProcessingResults.get_largest_f_list_for_player_in_results(uuid)
+            if args.get_additional_friends():
+                print("total number of unique standard friends (without additional friends) for " +
+                      arg + ": " + str(len(standard_friends)))
+                all_friends = ProcessingResults.get_all_additional_friends_for_player(uuid)
+                print("total number of unique additional friends is " + str(len(all_friends)))
+                for f in standard_friends:
+                    ProcessingResults.update_list_if_applicable(all_friends, f)
+            else:
+                all_friends = standard_friends
+            all_friends.sort(key=UUID_Plus_Time.sort_key)
+            player = Player(uuid, specs=specs, friends=all_friends)
         else:
             player = Player(hypixel.Player(arg).getUUID(), specs=specs)
 
         if i == 0:
             print("The uuid of the player you're getting friends of is " + player.uuid())
-            print("This player has " + str(len(player.friends())) + " friends total.")
+            print("This player has " + str(len(player.friends())) + " unique friends total.")
 
         player.set_will_exclude_friends(encountered_minus_symbol)
         if not player.will_exclude_friends():
@@ -94,7 +105,7 @@ def main():
     if args.add_additional_friends():
         additional_friends.add_additional_friends_to_file_system(args.get_args(True, True)[0])
         sys.exit(0)
-    ProcessingResults.decide_only_read_singular_player_files(args.only_read_singular_player_files_in_results())
+    ProcessingResults.set_args(args)
     if args.find_matching_igns_or_uuids_in_results():
         ProcessingResults.print_all_matching_uuids_or_igns(args.get_args(True, True)[0])
     players_from_args = get_players_from_args(args)
@@ -105,7 +116,7 @@ def main():
         if args.minus_results():
             player.polish_friends_list({uuid: Player(uuid) for uuid in 
                                         ProcessingResults.player_uuids_with_f_list_in_results()})
-            print("Now " + str(len(player.friends())) + " friends after applying 'minusresults'.")
+            print("Now " + str(len(player.friends())) + " unique friends after applying 'minusresults'.")
 
     if args.update_uuids():
         Files.update_uuids_file(ProcessingResults.ign_uuid_pairs_in_results())

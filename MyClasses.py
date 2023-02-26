@@ -48,10 +48,13 @@ class UUID_Plus_Time:
     def sort_key(self) -> float:
         if self._unix_epoch_milliseconds is None:
             return 0
-        return self._unix_epoch_milliseconds
+        return -self._unix_epoch_milliseconds
     
     def refers_to_same_person(self, other: UUID_Plus_Time) -> bool:
         return self._uuid == other.uuid()
+    
+    def more_recent(self, other: UUID_Plus_Time) -> bool:
+        return (self.time_epoch_in_milliseconds() or 0) > (other.time_epoch_in_milliseconds() or 0)
 
 class Specs:
     """This class represents specifications that a caller has when it calls the 

@@ -8,8 +8,9 @@ class Args:
         self._ARG_KEYWORDS = (  ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
                                  'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
                                  'nofileoutput', 'fileoutput', 'updateuuids', 'minusresults', 'trivial',
-                                 'matchingignsuuids', 'includemultiplayerfiles', 'fromresultsall', 
-                                 'allfromresults', 'additionalfriends', 'addadditionalfriends']
+                                 'matchingignsuuids', 'includefirstdictmultiplayerfiles', 'fromresultsall', 
+                                 'allfromresults', 'addadditionalfriends', 'noadditionalfriends',
+                                 'nomultiplayerfiles']
                               + [x.lower() for x in extra_keywords] )
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
@@ -81,11 +82,19 @@ class Args:
     def find_matching_igns_or_uuids_in_results(self) -> bool:
         return 'matchingignsuuids' in self._ARGS
     
-    def only_read_singular_player_files_in_results(self) -> bool:
-        return 'includemultiplayerfiles' not in self._ARGS
+    def include_multi_player_files(self) -> bool:
+        return 'nomultiplayerfiles' not in self._ARGS
+    
+    def skip_first_dict_in_multi_player_files(self) -> bool:
+        assert self.include_multi_player_files()
+        # Only makes sense to call this function if the above is true.
+        return 'includefirstdictmultiplayerfiles' not in self._ARGS
     
     def from_results_for_all(self) -> bool:
         return 'fromresultsall' in self._ARGS or 'allfromresults' in self._ARGS
     
     def add_additional_friends(self) -> bool:
-        return 'additionalfriends' in self._ARGS or 'addadditionalfriends' in self._ARGS
+        return 'addadditionalfriends' in self._ARGS
+    
+    def get_additional_friends(self) -> bool:
+        return 'noadditionalfriends' not in self._ARGS

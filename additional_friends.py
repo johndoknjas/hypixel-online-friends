@@ -21,34 +21,26 @@ def get_uuid(uuid_or_ign: str) -> Optional[str]:
     else:
         return player.getUUID()
 
-def make_player_with_friends(player_name: str, get_from_file_system: bool) -> Player:
-    """Creates a player with friends, either from user input, or from getting all additional friends
-       stored in the file system."""
+def make_player_with_friends(player_name: str) -> Player:
+    """Creates a player with friends, from user input."""
     friends_specs = Specs(False, False, None, 1)
     player_specs = Specs(False, False, friends_specs, 0)
     friends: List[Player] = []
-    if get_from_file_system:
-        pass
-        # CONTINUE HERE - get additional friends from file system, add to the 'friends' var.
-        # Then, these friends will be added to the player object returned at the end of this function.
-        # In this scenario, the caller of this function will probably be from main, such as in
-        # get_players_from_args(). Note that before calling this function, you'd have to check
-        # if any files starting with "Additional friends..." exist in the file system for the given player.
-    else:
-        user_input = input("Enter the ign/uuid of an additional friend (or 'done' to stop): ")
-        while user_input != 'done':
-            current_friend_uuid = get_uuid(user_input)
-            if not current_friend_uuid:
-                user_input = input("Nothing found for that ign - please enter the uuid instead: ")
-            else:
-                friends.append(Player(current_friend_uuid, specs=friends_specs))
-                user_input = input("Enter the ign/uuid of an additional friend (or 'done' to stop): ")
+    user_input = input("Enter the ign/uuid of an additional friend (or 'done' to stop): ")
+    while user_input not in ('done', 'stop'):
+        current_friend_uuid = get_uuid(user_input)
+        if not current_friend_uuid:
+            user_input = input("Nothing found for that ign - please enter the uuid instead: ")
+        else:
+            friends.append(Player(current_friend_uuid, specs=friends_specs,
+                                  time_friended_parent_player=Utils.get_current_date()))
+            user_input = input("Enter the ign/uuid of an additional friend (or 'done' to stop): ")
     player = Player(get_uuid(player_name), friends=friends, specs=player_specs)
     player.set_name_for_file_output(player.name())
     return player
 
 def add_additional_friends_to_file_system(player_name: str) -> None:
     Specs.set_common_specs(True, False)
-    player = make_player_with_friends(player_name, False)
+    player = make_player_with_friends(player_name)
     file_description = ("Additional friends of " + player.name_for_file_output() + ", " + Utils.get_current_date())
     Files.write_data_as_json_to_file(player.create_dictionary_report(), file_description)
