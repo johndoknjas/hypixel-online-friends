@@ -8,9 +8,9 @@ class Args:
         self._ARG_KEYWORDS = (  ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
                                  'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
                                  'nofileoutput', 'fileoutput', 'updateuuids', 'minusresults', 'trivial',
-                                 'matchingignsuuids', 'includefirstdictmultiplayerfiles', 'fromresultsall', 
-                                 'allfromresults', 'addadditionalfriends', 'noadditionalfriends',
-                                 'nomultiplayerfiles']
+                                 'matchingignsuuids', 'includemultiplayerfiles',
+                                 'keepfirstdictmultifiles', 'notallfromresults',
+                                 'addadditionalfriends', 'noadditionalfriends']
                               + [x.lower() for x in extra_keywords] )
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
@@ -83,15 +83,15 @@ class Args:
         return 'matchingignsuuids' in self._ARGS
     
     def include_multi_player_files(self) -> bool:
-        return 'nomultiplayerfiles' not in self._ARGS
+        return 'includemultiplayerfiles' in self._ARGS
     
     def skip_first_dict_in_multi_player_files(self) -> bool:
         assert self.include_multi_player_files()
         # Only makes sense to call this function if the above is true.
-        return 'includefirstdictmultiplayerfiles' not in self._ARGS
+        return 'keepfirstdictmultifiles' not in self._ARGS
     
     def from_results_for_all(self) -> bool:
-        return 'fromresultsall' in self._ARGS or 'allfromresults' in self._ARGS
+        return 'notallfromresults' not in self._ARGS
     
     def add_additional_friends(self) -> bool:
         return 'addadditionalfriends' in self._ARGS
