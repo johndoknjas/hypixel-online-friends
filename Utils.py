@@ -195,23 +195,3 @@ def remove_first_n_elem_fast(l: list, n: int) -> list:
     for _ in range(n):
         deque_l.popleft()
     return list(deque_l)
-
-def in_str_lst(lst: list[str], elem: str) -> bool:
-    """A case insensitive check for whether elem is in lst."""
-    return elem.lower() in [x.lower() for x in lst]
-
-def not_in_str_lst(lst: list[str], elem: str) -> bool:
-    """A case insensitive check for whether elem is not in lst."""
-    return not in_str_lst(lst, elem)
-
-def all_in(lst: list[str], elems: list[str]) -> bool:
-    """Returns true if all strings in elems appear in lst (case insensitive)."""
-    return all(in_str_lst(lst, x) for x in elems)
-
-def any_in(lst: list[str], elems: list[str]) -> bool:
-    """Returns true if any of the strings in elems appear in lst (case insensitive)."""
-    return any(in_str_lst(lst, x) for x in elems)
-
-def none_in(lst: list[str], elems: list[str]) -> bool:
-    """Returns true if all of the strings in elems don't appear in lst (case insensitive)."""
-    return not any_in(lst, elems)
