@@ -14,6 +14,7 @@ def get_uuid(uuid_or_ign: str) -> Optional[str]:
     uuid_or_ign = hypixel.get_uuid_from_textfile_if_exists(uuid_or_ign)
     if Utils.is_uuid(uuid_or_ign):
         return uuid_or_ign
+
     try:
         player = hypixel.Player(uuid_or_ign)
     except:
@@ -23,6 +24,9 @@ def get_uuid(uuid_or_ign: str) -> Optional[str]:
 
 def make_player_with_friends(player_name: str) -> Player:
     """Creates a player with friends, from user input."""
+    player_uuid = get_uuid(player_name)
+    if not player_uuid:
+        raise ValueError("player_name is not a player's ign")
     friends_specs = Specs(False, False, None, 1)
     player_specs = Specs(False, False, friends_specs, 0)
     friends: List[Player] = []
@@ -35,7 +39,7 @@ def make_player_with_friends(player_name: str) -> Player:
             friends.append(Player(current_friend_uuid, specs=friends_specs,
                                   time_friended_parent_player=Utils.get_current_date()))
             user_input = input("Enter the ign/uuid of an additional friend (or 'done' to stop): ")
-    player = Player(get_uuid(player_name), friends=friends, specs=player_specs)
+    player = Player(player_uuid, friends=friends, specs=player_specs)
     player.set_name_for_file_output(player.name())
     return player
 
