@@ -10,7 +10,8 @@ class Args:
                                  'nofileoutput', 'fileoutput', 'updateuuids', 'minusresults', 'trivial',
                                  'matchingignsuuids', 'includemultiplayerfiles',
                                  'keepfirstdictmultifiles', 'notallfromresults',
-                                 'addadditionalfriends', 'noadditionalfriends']
+                                 'addadditionalfriends', 'addadditionals', '+additionals', 
+                                 'noadditionalfriends', 'noadditionals']
                               + [x.lower() for x in extra_keywords] )
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
@@ -94,7 +95,7 @@ class Args:
         return 'notallfromresults' not in self._ARGS
     
     def add_additional_friends(self) -> bool:
-        return 'addadditionalfriends' in self._ARGS
+        return any(x in self._ARGS for x in ['addadditionalfriends', 'addadditionals', '+additionals'])
     
     def get_additional_friends(self) -> bool:
-        return 'noadditionalfriends' not in self._ARGS
+        return all(x not in self._ARGS for x in ['noadditionalfriends', 'noadditionals'])
