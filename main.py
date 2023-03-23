@@ -1,5 +1,5 @@
 import sys
-from typing import List
+from typing import List, Tuple
 from itertools import combinations
 from copy import deepcopy
 import operator
@@ -48,18 +48,36 @@ def diff_f_lists(players: List[Player], args: Args) -> None:
         if args.diff_right_to_left():
             p2.diff_f_lists(p1, print_results=True)
 
-def get_players_from_args(args: Args) -> List[Player]:
+def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
+    """The first item in the tuple will be a list of Players.
+       The second item will likely be empty for most use cases. However, if the user wants this feature,
+       it will be a list if uuid strings, where it's intended for each uuid to be checked for when they
+       were friended by a Player in the first list."""
+
     specs = Specs.make_specs_object_and_initialize_common_specs(args)
     args_no_keywords_or_date = args.get_args(True, True)
     players: List[Player] = []
-    encountered_minus_symbol = False
+    in_minus_symbol_section = False
+    in_encountered_when_section = False
+    FROM_RESULTS = 'fromresults'
+    FRIENDED_WHEN = 'friendedwhen'
+    uuids_for_friended_when: List[str] = []
 
     for i, arg in enumerate(args_no_keywords_or_date):
-        FROM_RESULTS = 'fromresults'
         if arg.endswith('.txt') or arg == FROM_RESULTS:
+            assert not in_encountered_when_section
             continue
         if arg == '-':
-            encountered_minus_symbol = True
+            in_minus_symbol_section = True
+            in_encountered_when_section = False
+            continue
+        if arg == FRIENDED_WHEN:
+            in_encountered_when_section = True
+            in_minus_symbol_section = False
+            continue
+
+        if in_encountered_when_section:
+            uuids_for_friended_when.append(hypixel.Player(arg).getUUID())
             continue
 
         use_specific_textfile = Utils.cmp_element_val(args_no_keywords_or_date, i+1, '.txt', str.endswith)
@@ -91,12 +109,12 @@ def get_players_from_args(args: Args) -> List[Player]:
             print("The uuid of the player you're getting friends of is " + player.uuid())
             print("This player has " + str(len(player.friends())) + " unique friends total.")
 
-        player.set_will_exclude_friends(encountered_minus_symbol)
+        player.set_will_exclude_friends(in_minus_symbol_section)
         if not player.will_exclude_friends():
             player.set_date_cutoff_for_friends(args.date_cutoff())
         players.append(player)
 
-    return players
+    return (players, uuids_for_friended_when)
 
 def main():
     hypixel.set_api_keys()
@@ -108,7 +126,7 @@ def main():
     ProcessingResults.set_args(args)
     if args.find_matching_igns_or_uuids_in_results():
         ProcessingResults.print_all_matching_uuids_or_igns(args.get_args(True, True)[0])
-    players_from_args = get_players_from_args(args)
+    players_from_args, uuids_for_friended_when = get_players_from_args(args)
     diff_f_lists(players_from_args, args)
     player = combine_players(players_from_args)
     if args.check_results():
@@ -120,6 +138,10 @@ def main():
 
     if args.update_uuids():
         Files.update_uuids_file(ProcessingResults.ign_uuid_pairs_in_results())
+
+    for friend in player.friends():
+        if friend.uuid() in uuids_for_friended_when:
+            print(friend.name() + " was friended on " + friend.time_friended_parent_player('date'))
 
     report = player.create_dictionary_report(sort_final_result_by_fkdr = not args.sort_by_star())
     if args.do_file_output():
