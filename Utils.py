@@ -2,7 +2,7 @@
 
 from datetime import datetime
 import time
-from typing import List, Optional, TypeVar, Callable, Any, Union
+from typing import List, Optional, TypeVar, Callable, Any, Union, Tuple
 from collections import OrderedDict, deque
 from copy import deepcopy
 import operator
@@ -128,6 +128,7 @@ def get_all_nested_dicts_in_dict(d: dict, make_deepcopy: bool = False) -> List[d
         d = deepcopy(d)
     dicts = [d] if 'exclude' not in d else []
     for friend_dict in d.get('friends', []):
+        friend_dict['filename'] = d['filename']
         dicts.extend(get_all_nested_dicts_in_dict(friend_dict, make_deepcopy=False))
     return dicts
 
@@ -144,17 +145,52 @@ def print_info_for_key(dicts: List[dict], k: str, indent: str) -> None:
                 " (" + ((highest_dict['name'] + ", ") if 'name' in highest_dict else "") + 
                 'uuid ' + highest_dict['uuid'] + ")")
 
-def remove_dicts_duplicate_uuids(dicts: List[dict], make_deepcopy: bool = False) -> List[dict]:
+def does_first_have_more_friends(first: list, second: list) -> Optional[bool]:
+    """True returned if more, False returned if less, None returned if equal."""
+    return True if len(first) > len(second) else (False if len(second) > len(first) else None)
+
+def does_first_record_times_better(first: list, second: list) -> Optional[bool]:
+    """True returned if better, False returned if worse, None returned if equal."""
+    first_has_times = len(first) > 0 and 'time' in first[0]
+    second_has_times = len(second) > 0 and 'time' in second[0]
+    return None if (first_has_times == second_has_times) else first_has_times
+
+def does_first_have_more_keys(first: dict, second: dict) -> Optional[bool]:
+    """True returned if more, False returned if less, None returned if equal."""
+    return None if len(first.keys()) == len(second.keys()) else len(first.keys()) > len(second.keys())
+
+def is_first_dict_more_valuable(first: dict, second: dict, must_have_times_friended: bool) -> bool:
+    """Returns true if the second dict should be replaced with the first dict, based off
+       some criteria. This function is called by the 'remove_dicts_duplicate_uuids' function."""
+    assert first['uuid'] == second['uuid']
+    first_friends, second_friends = first.get('friends', []), second.get('friends', [])
+
+    comparisons: List[Optional[bool]] = [
+        does_first_have_more_friends(first_friends, second_friends),
+        does_first_record_times_better(first_friends, second_friends),
+        does_first_have_more_keys(first, second)
+    ]
+    if must_have_times_friended:
+        comparisons[0], comparisons[1] = comparisons[1], comparisons[0]
+    
+    return next((b for b in comparisons if b is not None), False)
+
+def remove_dicts_duplicate_uuids(dicts: List[dict], make_deepcopy: bool = False,
+                                 must_have_times_friended: bool = False) -> List[dict]:
     """ For dicts with the same uuid, only one dict will be kept in the new list. The criteria
-        for choosing which one is which dict has the bigger friends list. If neither has a friends list,
-        the one that comes earlier in the 'dicts' param will be kept. """
+        for choosing which one are as follows (in order):
+        - bigger friends list
+        - records time added for friends
+        - more keys in dict
+        - The dict that came first in the `dicts` param
+        Note that 1) and 2) are swapped, if the `must_have_times_friended` param is set to True. """
     if make_deepcopy:
         dicts = deepcopy(dicts)
     dicts_unique_uuids: dict = {} # Key uuid, value a dict (one of the elements in dicts).
     for d in dicts:
         uuid = d['uuid']
-        if (uuid not in dicts_unique_uuids or
-            len(d.get('friends', [])) > len(dicts_unique_uuids[uuid].get('friends', []))):
+        if (uuid not in dicts_unique_uuids or is_first_dict_more_valuable(d, dicts_unique_uuids[uuid],
+        must_have_times_friended)):
             dicts_unique_uuids[uuid] = d
     return list(dicts_unique_uuids.values())
 

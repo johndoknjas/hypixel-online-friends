@@ -90,7 +90,8 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
         elif use_results_folder:
             uuid = hypixel.Player(arg).getUUID()
             all_friends: List[UUID_Plus_Time] = []
-            standard_friends = ProcessingResults.get_largest_f_list_for_player_in_results(uuid)
+            standard_friends = ProcessingResults.get_best_f_list_for_player_in_results(uuid,
+            must_have_times_friended=(FRIENDED_WHEN in args_no_keywords_or_date))
             if args.get_additional_friends():
                 print("total number of unique standard friends (without additional friends) for " +
                       arg + ": " + str(len(standard_friends)))

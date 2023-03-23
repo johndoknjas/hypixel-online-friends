@@ -94,7 +94,8 @@ def get_all_dicts_in_results(only_non_trivial_dicts: bool, get_deepcopy: bool = 
 
     return deepcopy(all_dicts) if get_deepcopy else all_dicts
 
-def get_all_dicts_unique_uuids_in_results(only_non_trivial_dicts: bool, get_deepcopy: bool = False) -> List[dict]:
+def get_all_dicts_unique_uuids_in_results(only_non_trivial_dicts: bool, get_deepcopy: bool = False,
+                                          must_have_times_friended: bool = False) -> List[dict]:
     """Returns a flat list of dicts (no more than one per uuid), for all dicts/nested dicts found in the 
     results folder. If multiple dicts have the same uuid, the one with the biggest friends list will be kept."""
     global _all_dicts_unique_uuids
@@ -103,16 +104,20 @@ def get_all_dicts_unique_uuids_in_results(only_non_trivial_dicts: bool, get_deep
 
     if not _all_dicts_unique_uuids:
         _all_dicts_unique_uuids = Utils.remove_dicts_duplicate_uuids(
-            get_all_dicts_in_results(only_non_trivial_dicts)
+            get_all_dicts_in_results(only_non_trivial_dicts),
+            must_have_times_friended=must_have_times_friended
         )
 
     return deepcopy(_all_dicts_unique_uuids) if get_deepcopy else _all_dicts_unique_uuids
 
-def get_largest_f_list_for_player_in_results(ign_or_uuid: str) -> List[UUID_Plus_Time]:
+def get_best_f_list_for_player_in_results(ign_or_uuid: str,
+                                             must_have_times_friended: bool = False
+                                            ) -> List[UUID_Plus_Time]:
     if not Utils.is_uuid(ign_or_uuid):
         ign_or_uuid = hypixel.get_uuid_from_textfile_if_exists(ign_or_uuid)
-    for d in get_all_dicts_unique_uuids_in_results(True):
+    for d in get_all_dicts_unique_uuids_in_results(True, must_have_times_friended=must_have_times_friended):
         if d['uuid'] == ign_or_uuid or d.get('name', None) == ign_or_uuid:
+            # print(d['filename']) For debugging - will show you the filename the dict came from.
             return [UUID_Plus_Time(f['uuid'], f.get('time', None)) for f in d.get('friends', [])]
     return []
 
@@ -167,6 +172,7 @@ def _get_all_jsons_in_results(get_additional_friends: bool = False) -> List[dict
         if is_multi_player_file and not _args.include_multi_player_files():
             continue
         json_in_file = Files.read_json_textfile(filename)
+        json_in_file['filename'] = filename
         if is_multi_player_file and _args.skip_first_dict_in_multi_player_files():
             json_in_file['exclude'] = '' # Adding this key as a signal to exclude this 
                                          # outermost dict of the file, when unnesting.
