@@ -13,6 +13,7 @@ import ntpath
 import Utils
 
 _IGN_UUID_PAIRS: Optional[dict] = None
+_UUID_IGN_PAIRS: Optional[dict] = None
 
 def write_data_as_json_to_file(data: dict, description: str, folder_name: str = "results") -> None:
     filename = create_file(description, folder_name)
@@ -25,20 +26,27 @@ def create_file(description: str, folder_name: str) -> str:
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     return filename
 
-def ign_uuid_pairs_in_uuids_txt() -> dict:
+def ign_uuid_pairs_in_uuids_txt(do_deepcopy: bool = False) -> dict:
     """Retrieves pairs stored in the uuids.txt file as a dict - key ign, value uuid"""
     global _IGN_UUID_PAIRS
     if _IGN_UUID_PAIRS is not None:
-        return deepcopy(_IGN_UUID_PAIRS)
+        return deepcopy(_IGN_UUID_PAIRS) if do_deepcopy else _IGN_UUID_PAIRS
 
     _IGN_UUID_PAIRS = {} # key ign, value uuid
     if not os.path.isfile('uuids.txt'):
-        return deepcopy(_IGN_UUID_PAIRS)
+        return {}
     with open('uuids.txt') as file:
         for line in file:
             words = line.rstrip().split()
             _IGN_UUID_PAIRS[words[0].lower()] = words[1]
-    return deepcopy(_IGN_UUID_PAIRS)
+    return deepcopy(_IGN_UUID_PAIRS) if do_deepcopy else _IGN_UUID_PAIRS
+
+def uuid_ign_pairs_in_uuids_txt(do_deepcopy: bool = False) -> dict:
+    """Retrieves pairs stored in the uuids.txt file as a dict - key uuid, value ign."""
+    global _UUID_IGN_PAIRS
+    if _UUID_IGN_PAIRS is None:
+        _UUID_IGN_PAIRS = {u: i for i, u in ign_uuid_pairs_in_uuids_txt().items()}
+    return deepcopy(_UUID_IGN_PAIRS) if do_deepcopy else _UUID_IGN_PAIRS
 
 def read_json_textfile(filepath: str) -> dict:
     try:
@@ -55,7 +63,7 @@ def update_uuids_file(ign_uuid_pairs: dict[str, str]) -> None:
     it will be replaced. Also, this function will make a backup of uuids.txt before overwriting it."""
 
     shutil.copy('uuids.txt', create_file('uuids copy', 'old-uuids'))
-    pairs = ign_uuid_pairs_in_uuids_txt()
+    pairs = ign_uuid_pairs_in_uuids_txt(do_deepcopy=True)
     pairs.update(ign_uuid_pairs)
     with open("uuids.txt", "w") as file:
         for key, value in pairs.items():
