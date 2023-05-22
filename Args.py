@@ -15,7 +15,8 @@ class Args:
                               + [x.lower() for x in extra_keywords] )
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
-        # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'addedwhen'). 
+
+        # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'friendedwhen', 'intersect'). 
         # They don't appear in this class, but are instead used directly in the logic for main.py.
     
     def get_args(self, remove_keywords: bool, remove_dates: bool) -> List[str]:

@@ -37,13 +37,14 @@ class Player:
                  hypixel_object: Optional[hypixel.Player] = None, name: Optional[str] = None, 
                  friends: Union[List[UUID_Plus_Time], List[Player], None] = None, specs: Optional[Specs] = None,
                  name_for_file_output: Optional[str] = None, will_exclude_friends: bool = False,
-                 date_cutoff_for_friends: Optional[str] = None):
+                 date_cutoff_for_friends: Optional[str] = None, will_intersect: bool = False):
         self._uuid_plus_time = UUID_Plus_Time(uuid, time_friended_parent_player)
         self._hypixel_object = hypixel_object
         self._name = name
         self._specs = deepcopy(specs)
         self._name_for_file_output = name_for_file_output
         self._will_exclude_friends = will_exclude_friends
+        self._will_intersect = will_intersect
         self._date_cutoff_for_friends = date_cutoff_for_friends
         self._friends: Optional[List[Player]] = None
         self._call_api_if_friends_empty_in_friends_getter: bool = True
@@ -181,6 +182,14 @@ class Player:
         if exclude_friends:
             assert not self._date_cutoff_for_friends
         self._will_exclude_friends = exclude_friends
+    
+    def will_intersect(self) -> bool:
+        """Returns whether this player's friends will be intersected with the friends (or exclude friends) 
+           list leading up to it in combine_players."""
+        return self._will_intersect
+
+    def set_will_intersect(self, will_intersect: bool) -> None:
+        self._will_intersect = will_intersect
     
     def in_player_list(self, players: List[Player]) -> bool:
         """Returns whether the player is already represented in this players list."""

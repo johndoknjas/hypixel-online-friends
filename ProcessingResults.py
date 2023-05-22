@@ -168,7 +168,7 @@ def _get_all_jsons_in_results(get_additional_friends: bool = False) -> List[dict
     assert _args
     for f in all_files:
         filename = os.path.join('results', f)
-        is_multi_player_file = ' plus ' in f or ' minus ' in f
+        is_multi_player_file = any(x in f for x in [' plus ', ' minus ', ' intersect '])
         if is_multi_player_file and not _args.include_multi_player_files():
             continue
         json_in_file = Files.read_json_textfile(filename)

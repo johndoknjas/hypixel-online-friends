@@ -13,9 +13,19 @@ import ProcessingResults
 import Utils
 import additional_friends
 
+def intersect_player_lists(l1: List[Player], l2: List[Player]) -> List[Player]:
+    return [p for p in l1 if p.in_player_list(l2)]
+
 def combine_players(info_on_players: List[Player]) -> Player:
-    """This function runs through the Player list and adds/subtracts f lists. Whether a Player's f list
-    is used to add or subtract depends on the bool value of their player.will_exclude_friends() function."""
+    """This function runs through the Player list and adds/subtracts/intersects f lists. Whether a Player's f list
+    is used to add/subtract/intersect depends on the bool value of their player.will_exclude_friends() 
+    and player.will_intersect() functions.
+    If a player's f list is used to intersect, it will intersect the entire friends list up to that point,
+    either for playerFriends or exclude_friends. 
+    Order of operations:
+        union, intersect (left to right for precedence amongst these)
+        subtract
+    """
     info_on_players = deepcopy(info_on_players)
     playerNameForFileOutput = info_on_players[0].name()
     playerUUID = info_on_players[0].uuid()
@@ -26,11 +36,19 @@ def combine_players(info_on_players: List[Player]) -> Player:
     exclude_friends: List[Player] = []
     for player in info_on_players[1:]:
         if player.will_exclude_friends():
-            exclude_friends.extend(player.friends())
-            playerNameForFileOutput += (' minus ' + player.name())
+            if player.will_intersect():
+                exclude_friends = intersect_player_lists(exclude_friends, player.friends())
+                playerNameForFileOutput += (' intersect ' + player.name())
+            else:
+                exclude_friends.extend(player.friends())
+                playerNameForFileOutput += (' minus ' + player.name())
         else:
-            playerFriends.extend(player.friends())
-            playerNameForFileOutput += (' plus ' + player.name())
+            if player.will_intersect():
+                playerFriends = intersect_player_lists(playerFriends, player.friends())
+                playerNameForFileOutput += (' intersect ' + player.name())
+            else:
+                playerFriends.extend(player.friends())
+                playerNameForFileOutput += (' plus ' + player.name())
 
     player = Player(playerUUID, friends=playerFriends, name_for_file_output=playerNameForFileOutput,
                     specs=playerSpecs, date_cutoff_for_friends=date_cutoff_friends)
@@ -58,25 +76,30 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
     args_no_keywords_or_date = args.get_args(True, True)
     players: List[Player] = []
     in_minus_symbol_section = False
-    in_encountered_when_section = False
+    in_friended_when_section = False
+    is_intersect_player = False
     FROM_RESULTS = 'fromresults'
     FRIENDED_WHEN = 'friendedwhen'
+    INTERSECT = 'intersect'
     uuids_for_friended_when: List[str] = []
 
     for i, arg in enumerate(args_no_keywords_or_date):
         if arg.endswith('.txt') or arg == FROM_RESULTS:
-            assert not in_encountered_when_section
+            assert not in_friended_when_section
             continue
         if arg == '-':
             in_minus_symbol_section = True
-            in_encountered_when_section = False
+            in_friended_when_section = False
             continue
         if arg == FRIENDED_WHEN:
-            in_encountered_when_section = True
+            in_friended_when_section = True
             in_minus_symbol_section = False
             continue
+        if arg == INTERSECT:
+            is_intersect_player = True
+            continue
 
-        if in_encountered_when_section:
+        if in_friended_when_section:
             uuids_for_friended_when.append(hypixel.Player(arg).getUUID())
             continue
 
@@ -111,9 +134,11 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             print("This player has " + str(len(player.friends())) + " unique friends total.")
 
         player.set_will_exclude_friends(in_minus_symbol_section)
+        player.set_will_intersect(is_intersect_player)
         if not player.will_exclude_friends():
             player.set_date_cutoff_for_friends(args.date_cutoff())
         players.append(player)
+        is_intersect_player = False
 
     return (players, uuids_for_friended_when)
 
@@ -128,7 +153,8 @@ def main():
     if args.find_matching_igns_or_uuids_in_results():
         ProcessingResults.print_all_matching_uuids_or_igns(args.get_args(True, True)[0])
     players_from_args, uuids_for_friended_when = get_players_from_args(args)
-    diff_f_lists(players_from_args, args)
+    if args.diff_left_to_right() or args.diff_right_to_left():
+        diff_f_lists(players_from_args, args)
     player = combine_players(players_from_args)
     if args.check_results():
         ProcessingResults.check_results(player, not args.get_trivial_dicts_in_results())
