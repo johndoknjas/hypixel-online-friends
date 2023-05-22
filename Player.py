@@ -147,7 +147,7 @@ class Player:
     def remove_duplicate_friends(self) -> None:
         """Pre-condition: friends list must be sorted in the order you want, since duplicates coming after any 
         originals will be removed. By a 'duplicate', this means a Player object with the same uuid."""
-        assert self._friends
+        assert self._friends is not None
         self._set_friends([f for i, f in enumerate(self.friends()) if not f.in_player_list(self.friends()[:i])])
     
     def _set_friends(self, friends: Union[List[UUID_Plus_Time], List[Player], None]) -> None:
@@ -159,7 +159,7 @@ class Player:
 
         self._call_api_if_friends_empty_in_friends_getter = False
         if not friends:
-            self._friends = None
+            self._friends = friends
             return
         self._friends = []
         for friend in deepcopy(friends):
@@ -240,7 +240,7 @@ class Player:
         """Will sort friends, remove duplicates, and remove any who appear in the friends_to_exclude param.
         Note that a Player object is treated as an equivalent/duplicate player if it has the same uuid as
         another Player. Other details (such as time friended parent player) can differ."""
-        assert self._friends
+        assert self._friends is not None
         self.remove_friends_added_before_cutoff() # Probably redundant
         self._set_friends(sorted(self.friends(), key=lambda f: f.time_friended_parent_player('s') or 0, reverse=True))
         self.remove_duplicate_friends()
