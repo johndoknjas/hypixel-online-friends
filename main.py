@@ -89,7 +89,7 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             continue
         if arg == '-':
             in_minus_symbol_section = True
-            in_friended_when_section = False
+            assert not in_friended_when_section
             continue
         if arg == FRIENDED_WHEN:
             in_friended_when_section = True
@@ -97,6 +97,7 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             continue
         if arg == INTERSECT:
             is_intersect_player = True
+            assert not in_friended_when_section
             continue
 
         if in_friended_when_section:
