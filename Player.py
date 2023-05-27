@@ -159,7 +159,8 @@ class Player:
 
         self._call_api_if_friends_empty_in_friends_getter = False
         if not friends:
-            self._friends = friends
+            self._friends = None if friends is None else []
+            # Above line instead of direct assignment in order to satisfy mypy.
             return
         self._friends = []
         for friend in deepcopy(friends):
