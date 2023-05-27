@@ -5,7 +5,7 @@ import os
 import os.path
 import json
 import time
-from typing import Optional
+from typing import Optional, Dict
 from copy import deepcopy
 import shutil
 import ntpath
@@ -57,7 +57,7 @@ def read_json_textfile(filepath: str) -> dict:
         with open('results/' + ntpath.basename(filepath), 'r') as f:
             return json.loads(f.read())
 
-def update_uuids_file(ign_uuid_pairs: dict[str, str]) -> None:
+def update_uuids_file(ign_uuid_pairs: Dict[str, str]) -> None:
     """Updates the uuids.txt file with the ign_uuid_pairs param. 
     If a uuid is found for an ign in uuids.txt that conflicts with a pair in the passed in param,
     it will be replaced. Also, this function will make a backup of uuids.txt before overwriting it."""

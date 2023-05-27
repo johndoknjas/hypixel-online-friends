@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Dict
 from copy import deepcopy
 
 import Utils
@@ -236,7 +236,7 @@ class Player:
             Utils.print_list_of_dicts(report['friends'])
         return report
     
-    def polish_friends_list(self, friends_to_exclude: Union[List[Player], dict[str, Player]]) -> None:
+    def polish_friends_list(self, friends_to_exclude: Union[List[Player], Dict[str, Player]]) -> None:
         """Will sort friends, remove duplicates, and remove any who appear in the friends_to_exclude param.
         Note that a Player object is treated as an equivalent/duplicate player if it has the same uuid as
         another Player. Other details (such as time friended parent player) can differ."""

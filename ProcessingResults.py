@@ -4,7 +4,7 @@
 
 import os
 import os.path
-from typing import Optional, List
+from typing import Optional, List, Dict
 from copy import deepcopy
 
 import Utils
@@ -14,10 +14,10 @@ from MyClasses import UUID_Plus_Time
 import hypixel
 from Args import Args
 
-_all_dicts_standard_files: Optional[list[dict]] = None
-_all_dicts_additional_friends_files: Optional[list[dict]] = None
-_all_dicts_unique_uuids: Optional[list[dict]] = None
-_ign_uuid_pairs_in_results: Optional[dict[str, str]] = None
+_all_dicts_standard_files: Optional[List[dict]] = None
+_all_dicts_additional_friends_files: Optional[List[dict]] = None
+_all_dicts_unique_uuids: Optional[List[dict]] = None
+_ign_uuid_pairs_in_results: Optional[Dict[str, str]] = None
 _player_uuids_with_f_list_in_results: Optional[List[str]] = None
 
 _NON_TRIVIAL_KEYS = ['friends', 'name', 'fkdr', 'star']
@@ -25,7 +25,7 @@ _get_only_non_trivial_dicts: Optional[bool] = None
 
 _args: Optional[Args] = None
 
-def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> dict[str, str]:
+def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
     global _ign_uuid_pairs_in_results
 
     if not _ign_uuid_pairs_in_results:
@@ -46,7 +46,7 @@ def check_results(player: Optional[Player], only_non_trivial_dicts: bool) -> Non
               " total unique uuids recorded in the results folder.")
         return
 
-    all_dicts: list[dict] = get_all_dicts_unique_uuids_in_results(True)
+    all_dicts: List[dict] = get_all_dicts_unique_uuids_in_results(True)
     print(str(len(all_dicts)) + " total players with non-trivial data stored in the results folder.")
 
     for k in _NON_TRIVIAL_KEYS:
@@ -121,7 +121,7 @@ def get_best_f_list_for_player_in_results(ign_or_uuid: str,
             return [UUID_Plus_Time(f['uuid'], f.get('time', None)) for f in d.get('friends', [])]
     return []
 
-def update_list_if_applicable(lst: list[UUID_Plus_Time], new_elem: UUID_Plus_Time) -> None:
+def update_list_if_applicable(lst: List[UUID_Plus_Time], new_elem: UUID_Plus_Time) -> None:
     """If no element in lst refers to the same person as elem, then elem will be appended at the end.
        Otherwise, elem will replace its duplicate, if it is more recent than it.
        The reference to the list itself will be modified by this function."""
@@ -162,7 +162,7 @@ def print_all_matching_uuids_or_igns(ign_or_uuid: str) -> None:
 
 def _get_all_jsons_in_results(get_additional_friends: bool = False) -> List[dict]:
     """Returns a list of dicts, where each dict represents the json each textfile stores."""
-    all_jsons: list[dict] = []
+    all_jsons: List[dict] = []
     all_files = os.listdir('results')
     all_files = [f for f in all_files if _does_filename_meet_reqs(f, get_additional_friends)]
     assert _args
