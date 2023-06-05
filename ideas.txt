@@ -1,5 +1,20 @@
 # CONTINUE HERE - todos:
 
+    # Run pylint and vulture on the project.
+
+    # Output Pit stats, in addition to Bedwars.
+
+    # Have a way to just output additional friends.
+
+    # Have a way to check whether someone is a friend. Similar to 'friendedwhen', but not requiring
+      a date.
+
+    # Add a command that lets you a uuid-ign pair from the terminal, to update uuids.txt.
+      # If a given uuid/ign exists in uuids.txt already, have the user confirm they want to replace it.
+
+
+----------------------------------
+
     # Add an intersection operation for the arguments, that says to get players who are friends of both
     # players specified. So now three operators: union, intersection, difference.
         # keep no operator between two players as meaning union (can also add 'v' that the user can
