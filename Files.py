@@ -76,9 +76,25 @@ def add_aliases() -> None:
     curr_alias = input("Enter alias (or 'done'/'stop' to quit): ")
     while curr_alias not in ('done', 'stop', 'quit'):
         curr_meaning = input("Enter the text this alias stands for: ")
-        aliases.append((curr_alias, curr_meaning))
+        if ' ' in curr_alias:
+            raise ValueError('An alias cannot contain a space')
+        aliases.append((curr_alias.lower(), curr_meaning.lower()))
         curr_alias = input("\nEnter alias (or 'done'/'stop' to quit): ")
 
     with open('aliases.txt', 'a+') as file:
         for alias_pair in aliases:
             file.write('"' + alias_pair[0] + '" = "' + alias_pair[1] + '"\n')
+
+def get_aliases() -> List[Tuple[str, List[str]]]:
+    """ Returns a list representing the aliases stored in aliases.txt. Each element of this list
+        will be a tuple, where the first element is a string (the alias), and the second element
+        is a list (what the alias stands for). """
+    aliases: List[Tuple[str, List[str]]] = []
+    lines: List[str]
+    with open('aliases.txt', 'r') as file:
+        lines = file.read().splitlines()
+    for line in lines:
+        split_line = [x.strip('" ') for x in line.split('=')]
+        assert line.count('=') == 1 and len(split_line) == 2
+        aliases.append((split_line[0], split_line[1].split(' ')))
+    return aliases

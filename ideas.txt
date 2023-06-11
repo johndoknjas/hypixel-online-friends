@@ -9,7 +9,7 @@
     # Have a way to check whether someone is a friend. Similar to 'friendedwhen', but not requiring
       a date.
 
-    # Add a command that lets you a uuid-ign pair from the terminal, to update uuids.txt.
+    # Add a command that lets you enter a uuid-ign pair from the terminal, to update uuids.txt.
       # If a given uuid/ign exists in uuids.txt already, have the user confirm they want to replace it.
 
 

@@ -231,3 +231,14 @@ def remove_first_n_elem_fast(l: list, n: int) -> list:
     for _ in range(n):
         deque_l.popleft()
     return list(deque_l)
+
+def replace_in_list(lst: List[str], elem_to_remove: str, list_to_insert: List[str]) -> List[str]:
+    """Returns a new list, where any occurrences of `elem_to_remove` in `lst` are replaced with the
+       elements in `list_to_insert`."""
+    replacement: List[str] = []
+    for s in lst:
+        if s == elem_to_remove:
+            replacement.extend(list_to_insert)
+        else:
+            replacement.append(s)
+    return replacement

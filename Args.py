@@ -1,10 +1,13 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import Utils
+import Files
 
 class Args:
     def __init__(self, args: List[str], extra_keywords: List[str] = []):
         self._ARGS = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
+        self._apply_aliases()
+
         self._ARG_KEYWORDS = (  ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
                                  'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
                                  'nofileoutput', 'fileoutput', 'updateuuids', 'minusresults', 'trivial',
@@ -19,6 +22,12 @@ class Args:
 
         # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'friendedwhen', 'intersect'). 
         # They don't appear in this class, but are instead used directly in the logic for main.py.
+
+
+    def _apply_aliases(self) -> None:
+        aliases: List[Tuple[str, List[str]]] = Files.get_aliases()
+        for alias in aliases:
+            self._ARGS = Utils.replace_in_list(self._ARGS, alias[0], alias[1])
     
     def get_args(self, remove_keywords: bool, remove_dates: bool) -> List[str]:
         args = self._ARGS
