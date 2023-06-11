@@ -5,7 +5,7 @@ import os
 import os.path
 import json
 import time
-from typing import Optional, Dict
+from typing import Optional, Dict, List, Tuple
 from copy import deepcopy
 import shutil
 import ntpath
@@ -70,3 +70,15 @@ def update_uuids_file(ign_uuid_pairs: Dict[str, str]) -> None:
             file.write(key + " " + value + "\n")
             assert key == key.lower()
     print("uuids.txt now contains uuid-ign pairs for " + str(len(pairs)) + " players.")
+
+def add_aliases() -> None:
+    aliases: List[Tuple[str, str]] = []
+    curr_alias = input("Enter alias (or 'done'/'stop' to quit): ")
+    while curr_alias not in ('done', 'stop', 'quit'):
+        curr_meaning = input("Enter the text this alias stands for: ")
+        aliases.append((curr_alias, curr_meaning))
+        curr_alias = input("\nEnter alias (or 'done'/'stop' to quit): ")
+
+    with open('aliases.txt', 'a+') as file:
+        for alias_pair in aliases:
+            file.write('"' + alias_pair[0] + '" = "' + alias_pair[1] + '"\n')

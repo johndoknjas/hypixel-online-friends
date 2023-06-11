@@ -150,6 +150,10 @@ def main():
     if args.add_additional_friends():
         additional_friends.add_additional_friends_to_file_system(args.get_args(True, True)[0])
         sys.exit(0)
+    if args.add_aliases():
+        Files.add_aliases()
+        sys.exit(0)
+
     ProcessingResults.set_args(args)
     if args.find_matching_igns_or_uuids_in_results():
         ProcessingResults.print_all_matching_uuids_or_igns(args.get_args(True, True)[0])
