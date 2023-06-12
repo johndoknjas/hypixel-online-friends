@@ -229,6 +229,7 @@ class Player:
                     print("Processed " + str(i) + " for a perpetual pass")
                 else:
                     print("Processed " + str(i) + (" for the second pass" if not first_pass else ""))
+            assert isinstance(report['friends'], list)
             if friend.uuid() not in [d['uuid'] for d in report['friends']]:
                 if friend_report := friend.create_dictionary_report(extra_online_check = 
                                                                     not first_pass or do_perpetual_passes):
