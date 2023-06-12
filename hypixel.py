@@ -292,10 +292,17 @@ class Player:
             friends.append(UUID_Plus_Time(friend_uuid, friend['started']))
         return list(reversed(friends))
     
-    def isOnline(self):
+    def isOnline(self, extra_online_check: bool = False) -> bool:
         """ This function returns a bool representing whether the player is online. """
-        onlineStatus = getJSON('status', uuid=self.getUUID())
-        return onlineStatus['session']['online']
+        if 'lastLogin' in self.JSON:
+            return self.JSON['lastLogin'] > self.JSON['lastLogout']
+        if not extra_online_check:
+            return False
+
+        # This player doesn't show their online status, but we're not on the first pass through
+        # friends. So, we can check if any stats from a few mins ago have been updated.
+        currJSON = getJSON('player', uuid=self.getUUID())
+        return self.JSON != currJSON
     
     def getFKDR(self) -> float:
         if not self.JSON or 'stats' not in self.JSON or 'Bedwars' not in self.JSON['stats']:

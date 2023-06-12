@@ -102,9 +102,6 @@ class Player:
     def friend_of_root_player(self) -> bool:
         return self.specs().friend_of_root_player()
     
-    def is_online(self) -> bool:
-        return self.hypixel_object().isOnline()
-    
     def get_fkdr(self) -> float:
         return self.hypixel_object().getFKDR()
     
@@ -196,11 +193,13 @@ class Player:
         """Returns whether the player is already represented in this players list."""
         return any(self.represents_same_person(p) for p in players)
     
-    def create_dictionary_report(self, sort_final_result_by_fkdr: bool = True) -> dict:
+    def create_dictionary_report(self, sort_final_result_by_fkdr: bool = True, 
+                                 extra_online_check: bool = False, should_terminate: bool = True) -> dict:
         # CONTINUE HERE - later, could make a Report class and return an object of that, instead of a dict here.
         if self.root_player():
             assert not self.time_friended_parent_player('date')
-        if self.specs().required_online() and not self.hypixel_object().isOnline():
+        if (self.specs().required_online() and 
+            not self.hypixel_object().isOnline(extra_online_check=extra_online_check)):
             return {}
 
         report = {}
@@ -212,29 +211,66 @@ class Player:
             report['time'] = time
         if self.specs().print_player_data_exclude_friends():
             print(str(report))
-        
         if not self.specs_for_friends():
             return report
+
         report['friends'] = [] # Will be a list of dicts.
-        for i, friend in enumerate(self.friends()):
+        first_pass: bool = True
+        friends = self.friends()
+        size_of_passes = 100
+        do_perpetual_passes = False # Can possibly become True after the first big iteration over all friends.
+        current_pass_size = 0
+        i = 0
+
+        while i < len(friends):
+            friend: Player = friends[i]
             if self.root_player() and i % 20 == 0:
-                print("Processed " + str(i))
-            if friend_report := friend.create_dictionary_report():
-                assert isinstance(report['friends'], List) # to satisfy mypy
-                report['friends'].append(friend_report)
+                if do_perpetual_passes:
+                    print("Processed " + str(i) + " for a perpetual pass")
+                else:
+                    print("Processed " + str(i) + (" for the second pass" if not first_pass else ""))
+            if friend.uuid() not in [d['uuid'] for d in report['friends']]:
+                if friend_report := friend.create_dictionary_report(extra_online_check = 
+                                                                    not first_pass or do_perpetual_passes):
+                    assert isinstance(report['friends'], List) # to satisfy mypy
+                    report['friends'].append(friend_report)
+
+            current_pass_size += 1
+            i += 1
+
+            if i == len(friends):
+                if not should_terminate:
+                    assert self.root_player()
+                    first_pass = False
+                    do_perpetual_passes = True
+                    current_pass_size = 0
+                    i = 0
+                    self.polish_dictionary_report(report, sort_final_result_by_fkdr)
+                    report['friends'] = []
+                    continue
+            elif (self.root_player() and current_pass_size == size_of_passes 
+                  and not should_terminate and not do_perpetual_passes):
+                if first_pass:
+                    i -= current_pass_size
+                first_pass = not first_pass
+                current_pass_size = 0
+
         return self.polish_dictionary_report(report, sort_final_result_by_fkdr) if self.root_player() else report
-    
+
     def polish_dictionary_report(self, report: dict, sort_by_fkdr: bool) -> dict:
         report = deepcopy(report)
         if 'friends' in report:
             report['friends'] = sorted(report['friends'], 
                                 key=lambda d: d.get('fkdr' if sort_by_fkdr else 'star', 0), 
                                 reverse=True)
-        if (specs_for_friends := self.specs_for_friends()) and specs_for_friends.required_online():
-            report['friends'] = [p for p in report['friends'] if Player(p['uuid']).is_online()]
+            # Remove duplicates for any uuids (friends) - however, shouldn't be any:
+            friends_copy = report['friends']
+            report['friends'] = list({f['uuid']:f for f in report['friends']}.values())
+            assert friends_copy == report['friends']
         if self.specs().print_only_players_friends():
             print('\n\n')
             Utils.print_list_of_dicts(report['friends'])
+            print ('\n\n')
         return report
     
     def polish_friends_list(self, friends_to_exclude: Union[List[Player], Dict[str, Player]]) -> None:

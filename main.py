@@ -175,7 +175,8 @@ def main():
         if friend.uuid() in uuids_for_friended_when:
             print(friend.name() + " was friended on " + friend.time_friended_parent_player('date'))
 
-    report = player.create_dictionary_report(sort_final_result_by_fkdr = not args.sort_by_star())
+    report = player.create_dictionary_report(sort_final_result_by_fkdr = not args.sort_by_star(),
+                                             should_terminate=args.do_file_output())
     if args.do_file_output():
         filename = ("Friends of " + 
                     ("friends of " if args.find_friends_of_friends() else "") + 
