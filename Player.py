@@ -239,18 +239,19 @@ class Player:
             current_pass_size += 1
             i += 1
 
+            if should_terminate:
+                continue
+
             if i == len(friends):
-                if not should_terminate:
-                    assert self.root_player()
-                    first_pass = False
-                    do_perpetual_passes = True
-                    current_pass_size = 0
-                    i = 0
-                    self.polish_dictionary_report(report, sort_final_result_by_fkdr)
-                    report['friends'] = []
-                    continue
-            elif (self.root_player() and current_pass_size == size_of_passes 
-                  and not should_terminate and not do_perpetual_passes):
+                assert self.root_player()
+                first_pass = False
+                do_perpetual_passes = True
+                current_pass_size = 0
+                i = 0
+                self.polish_dictionary_report(report, sort_final_result_by_fkdr)
+                report['friends'] = []
+                continue
+            elif self.root_player() and current_pass_size == size_of_passes and not do_perpetual_passes:
                 if first_pass:
                     i -= current_pass_size
                 first_pass = not first_pass
