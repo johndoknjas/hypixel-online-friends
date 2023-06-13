@@ -295,7 +295,8 @@ class Player:
     def isOnline(self, extra_online_check: bool = False) -> bool:
         """ This function returns a bool representing whether the player is online. """
         if 'lastLogin' in self.JSON:
-            return self.JSON['lastLogin'] > self.JSON['lastLogout']
+            return (self.JSON['lastLogin'] > self.JSON['lastLogout'] and
+                    getJSON('status', uuid=self.getUUID())['session']['online'])
         if not extra_online_check:
             return False
 
