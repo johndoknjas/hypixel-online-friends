@@ -214,6 +214,22 @@ class Player:
         if not self.specs_for_friends():
             return report
 
+        # The following code goes through the friends.
+            # For friends whose online status is shown through the API, this code checks if their
+            # self.JSON's last login is more recent than their last logout (doesn't require an API call).
+            # If so, it then checks with a current call to the API to see if this is still true.
+            # If this is also the case, then the friend is marked as online.
+
+            # For friends whose online status isn't shown through the API, the idea of this code is to
+            # get their game stats on a first pass. Then on subsequent passes, their game stats are retrieved again,
+            # and if there are any differences, this means the player is online.
+
+            # Over time (e.g., if the program keeps running for perpetual passes), there will be false negatives
+            # for the first group of friends. This is because friends who logged on recently won't be counted,
+            # since their original self.JSON shows them as offline. Meanwhile for the second group of friends,
+            # there will be false positives over time. This is because even if their current stats are different
+            # from their stats at the beginning of the program's run, they may have logged out since.
+
         report['friends'] = [] # Will be a list of dicts.
         first_pass: bool = True
         friends = self.friends()

@@ -176,7 +176,8 @@ def main():
             print(friend.name() + " was friended on " + friend.time_friended_parent_player('date'))
 
     report = player.create_dictionary_report(sort_final_result_by_fkdr = not args.sort_by_star(),
-                                             should_terminate=args.do_file_output())
+                                             should_terminate=(args.do_file_output() or
+                                                               not args.just_online_friends()))
     if args.do_file_output():
         filename = ("Friends of " + 
                     ("friends of " if args.find_friends_of_friends() else "") + 
