@@ -179,10 +179,10 @@ def main():
                                              should_terminate=(args.do_file_output() or
                                                                not args.just_online_friends()))
     if args.do_file_output():
+        assert (args.date_cutoff() is None and not args.just_online_friends() and not args.minus_results())
         filename = ("Friends of " + 
                     ("friends of " if args.find_friends_of_friends() else "") + 
-                    player.name_for_file_output() + 
-                    (", added after " + date if (date := args.date_cutoff()) else ""))
+                    player.name_for_file_output())
         Files.write_data_as_json_to_file(report, filename)
 
 if __name__ == '__main__':
