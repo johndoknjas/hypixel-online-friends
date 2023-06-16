@@ -10,7 +10,7 @@ class Args:
 
         self._ARG_KEYWORDS = (  ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
                                  'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
-                                 'nofileoutput', 'fileoutput', 'updateuuids', 'minusresults', 'trivial',
+                                 'fileoutput', 'updateuuids', 'minusresults', 'trivial',
                                  'matchingignsuuids', 'includemultiplayerfiles',
                                  'keepfirstdictmultifiles', 'notallfromresults',
                                  'addadditionalfriends', 'addadditionals', '+additionals', 
@@ -65,14 +65,7 @@ class Args:
         return Utils.get_date_string_if_exists(self._ARGS)
     
     def do_file_output(self) -> bool:
-        if 'fileoutput' in self._ARGS:
-            assert 'nofileoutput' not in self._ARGS
-            return True
-        elif 'nofileoutput' in self._ARGS:
-            return False
-        else:
-            # User didn't explicitly specify, so decide based on the following:
-            return not self.just_online_friends() or self.just_uuids()
+        return 'fileoutput' in self._ARGS
     
     def update_uuids(self) -> bool:
         return 'updateuuids' in self._ARGS

@@ -117,10 +117,10 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             standard_friends = ProcessingResults.get_best_f_list_for_player_in_results(uuid,
             must_have_times_friended=(FRIENDED_WHEN in args_no_keywords_or_date))
             if args.get_additional_friends():
-                print("total number of unique standard friends (without additional friends) for " +
+                print("total number of friends in biggest single friends list/file for " +
                       arg + ": " + str(len(standard_friends)))
                 all_friends = ProcessingResults.get_all_additional_friends_for_player(uuid)
-                print("total number of unique additional friends is " + str(len(all_friends)))
+                print("total number of 'additional friends' is " + str(len(all_friends)))
                 for f in standard_friends:
                     ProcessingResults.update_list_if_applicable(all_friends, f)
             else:
