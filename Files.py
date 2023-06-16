@@ -13,7 +13,6 @@ import ntpath
 import Utils
 
 _IGN_UUID_PAIRS: Optional[dict] = None
-_UUID_IGN_PAIRS: Optional[dict] = None
 
 def write_data_as_json_to_file(data: dict, description: str, folder_name: str = "results") -> None:
     filename = create_file(description, folder_name)
@@ -40,13 +39,6 @@ def ign_uuid_pairs_in_uuids_txt(do_deepcopy: bool = False) -> dict:
             words = line.rstrip().split()
             _IGN_UUID_PAIRS[words[0].lower()] = words[1]
     return deepcopy(_IGN_UUID_PAIRS) if do_deepcopy else _IGN_UUID_PAIRS
-
-def uuid_ign_pairs_in_uuids_txt(do_deepcopy: bool = False) -> dict:
-    """Retrieves pairs stored in the uuids.txt file as a dict - key uuid, value ign."""
-    global _UUID_IGN_PAIRS
-    if _UUID_IGN_PAIRS is None:
-        _UUID_IGN_PAIRS = {u: i for i, u in ign_uuid_pairs_in_uuids_txt().items()}
-    return deepcopy(_UUID_IGN_PAIRS) if do_deepcopy else _UUID_IGN_PAIRS
 
 def read_json_textfile(filepath: str) -> dict:
     try:
