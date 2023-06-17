@@ -85,6 +85,7 @@ def getJSON(typeOfRequest, **kwargs):
 
     cacheURL = HYPIXEL_API_URL + '{}?key={}{}'.format(typeOfRequest, "None", requestEnd) # TODO: Lowercase
     allURLS = [HYPIXEL_API_URL + '{}?key={}{}'.format(typeOfRequest, api_key, requestEnd)] # Create request URL.
+    # Note - the `allURLS` one is already always lowercase, doesn't have 'None' in it. So nothing to do there.
 
     # If url exists in request cache, and time hasn't expired...
     if cacheURL in requestCache and requestCache[cacheURL]['cacheTime'] > time():
@@ -225,7 +226,3 @@ class Player:
         if not self.JSON or 'achievements' not in self.JSON or 'bedwars_level' not in self.JSON['achievements']:
             return 0
         return self.JSON['achievements']['bedwars_level']
-        
-if __name__ == "__main__":
-    print("This is a Python library and shouldn't be run directly.\n"
-          "Please look at https://github.com/Snuggle/hypixel.py for usage & installation information.")
