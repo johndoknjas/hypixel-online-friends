@@ -89,9 +89,6 @@ class Player:
             self._set_friends(self.hypixel_object().getFriends())
         return self._friends if self._friends is not None else []
     
-    def any_specs(self) -> bool:
-        return self._specs is not None
-    
     def specs(self) -> Specs:
         assert self._specs is not None
         return deepcopy(self._specs)
