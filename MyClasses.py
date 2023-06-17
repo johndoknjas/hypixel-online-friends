@@ -42,9 +42,6 @@ class UUID_Plus_Time:
             return None
         return Utils.epoch_to_date(self._unix_epoch_milliseconds, False)
     
-    def no_time(self) -> bool:
-        return self._unix_epoch_milliseconds is None
-    
     def sort_key(self) -> float:
         if self._unix_epoch_milliseconds is None:
             return 0
@@ -73,14 +70,6 @@ class Specs:
     def _get_value_for_key(cls, key: str) -> bool:
         assert key in cls._common_specs and cls._common_specs[key] is not None
         return cls._common_specs[key]
-    
-    @classmethod
-    def is_common_specs_initialized(cls) -> bool:
-        return cls._get_value_for_key('set flag')
-    
-    @classmethod
-    def does_program_print_player_data(cls) -> bool:
-        return cls._get_value_for_key('print player data')
     
     @classmethod
     def does_program_display_time_as_unix_epoch(cls) -> bool:
