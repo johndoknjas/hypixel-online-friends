@@ -2,12 +2,9 @@
 
 from datetime import datetime
 import time
-from typing import List, Optional, TypeVar, Callable, Any, Union
+from typing import List, Optional, Union
 from collections import OrderedDict, deque
 from copy import deepcopy
-import operator
-
-T = TypeVar('T')
 
 def list_subtract(main_list: List, subtract_list: List) -> List:
     return [x for x in main_list if x not in subtract_list]
@@ -193,13 +190,6 @@ def remove_dicts_duplicate_uuids(dicts: List[dict], make_deepcopy: bool = False,
         must_have_times_friended)):
             dicts_unique_uuids[uuid] = d
     return list(dicts_unique_uuids.values())
-
-def cmp_element_val(l: List[T], index: int, val: T, cmp_func: Callable[[Any, Any], bool] = operator.eq) -> bool:
-    """Returns true if index is in-bounds, and if a comparison between the associated element and 'val' is True.
-    By default this comparison is just operator.eq (i.e., ==), but a function can be passed for cmp_func
-    to specify a function to use.
-    This is probably overengineered just to abstract away index checking, but it's fun."""
-    return index < len(l) and cmp_func(l[index], val)
 
 def is_in_milliseconds(epoch_val: Union[float, int]) -> bool:
     """epoch_val is assumed to be in either seconds or milliseconds"""

@@ -2,7 +2,6 @@ import sys
 from typing import List, Tuple
 from itertools import combinations
 from copy import deepcopy
-import operator
 
 import hypixel
 from MyClasses import Specs, UUID_Plus_Time
@@ -10,7 +9,6 @@ import Files
 from Player import Player
 from Args import Args
 import ProcessingResults
-import Utils
 import additional_friends
 
 def intersect_player_lists(l1: List[Player], l2: List[Player]) -> List[Player]:
@@ -104,12 +102,13 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             uuids_for_friended_when.append(hypixel.Player(arg).getUUID())
             continue
 
-        use_specific_textfile = Utils.cmp_element_val(args_no_keywords_or_date, i+1, '.txt', str.endswith)
-        use_results_folder = (args.from_results_for_all() or 
-                              Utils.cmp_element_val(args_no_keywords_or_date, i+1, FROM_RESULTS, operator.eq))
+        next_arg = args_no_keywords_or_date[i+1] if i+1 < len(args_no_keywords_or_date) else None
+        use_specific_textfile = next_arg and next_arg.endswith('.txt')
+        use_results_folder = args.from_results_for_all() or next_arg == FROM_RESULTS
 
         player = None
         if use_specific_textfile:
+            assert not args.do_file_output()
             player = Player.make_player_from_json_textfile(args_no_keywords_or_date[i+1], arg, specs=specs)
         elif use_results_folder:
             uuid = hypixel.Player(arg).getUUID()
