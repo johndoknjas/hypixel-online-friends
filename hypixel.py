@@ -15,7 +15,7 @@ import Utils
 
 HYPIXEL_API_URL = 'https://api.hypixel.net/'
 
-HYPIXEL_API_KEY_LENGTH = 36 # This is the length of a Hypixel-API key. Don't change from 36.
+HYPIXEL_API_KEY_LENGTH = 36
 verified_api_keys: List[str] = []
 
 TIME_STARTED: float = time()
@@ -54,12 +54,14 @@ def sleep_for_rate_limiting() -> None:
     sleep(sleep_duration)
 
 def getJSON(typeOfRequest, **kwargs):
+    """ This function is used for getting a JSON from Hypixel's Public API. """
     global num_api_calls_made
     global num_cumulative_calls_at_timestamps
-    """ This private function is used for getting JSON from Hypixel's Public API. """
+
     num_api_calls_made += 1
     num_cumulative_calls_at_timestamps[time() - TIME_STARTED] = num_api_calls_made
     sleep_for_rate_limiting()
+
     requestEnd = ''
     if typeOfRequest == 'key':
         api_key = kwargs['key']
@@ -81,22 +83,18 @@ def getJSON(typeOfRequest, **kwargs):
             requestEnd += '&{}={}'.format(name, value)
 
     allURLS = [HYPIXEL_API_URL + '{}?key={}{}'.format(typeOfRequest, api_key, requestEnd)] # Create request URL.
-
     requests = (grequests.get(u) for u in allURLS)
     responses = grequests.imap(requests)
-    for r in responses:
-        response = r.json()
+    responseJSON = next(responses).json()
 
-    if not response['success']:
-        raise HypixelAPIError(response)
-    if typeOfRequest == 'player':
-        if response['player'] is None:
-            raise PlayerNotFoundException(uuid)
-
+    if not responseJSON['success']:
+        raise HypixelAPIError(responseJSON)
+    if typeOfRequest == 'player' and responseJSON['player'] is None:
+        raise PlayerNotFoundException(uuid)
     try:
-        return response[typeOfRequest]
+        return responseJSON[typeOfRequest]
     except KeyError:
-        return response
+        return responseJSON
 
 def get_uuid_from_textfile_if_exists(ign: str) -> str:
     """ - A uuid will be returned if a pair for the ign is found in uuids.txt.
