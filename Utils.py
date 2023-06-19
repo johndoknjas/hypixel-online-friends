@@ -41,14 +41,10 @@ def fkdr_division(final_kills: int, final_deaths: int) -> float:
 
 def date_to_epoch(date_string: str, in_seconds: bool) -> float:
     epoch = time.mktime(datetime.strptime(date_string, '%Y-%m-%d').timetuple())
-    if not in_seconds:
-        epoch *= 1000
-    return epoch
+    return epoch * 1000 if not in_seconds else epoch
 
 def epoch_to_date(epoch: float, in_seconds: bool) -> str:
-    if not in_seconds:
-        epoch /= 1000
-    return datetime.utcfromtimestamp(epoch).strftime('%Y-%m-%d')
+    return datetime.utcfromtimestamp(epoch / 1000 if not in_seconds else epoch).strftime('%Y-%m-%d')
 
 def find_path_to_key_in_nested_dict(data, target_key):
     """Can use this function to find the path to some key in a nested dict."""

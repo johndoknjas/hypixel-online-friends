@@ -1,10 +1,5 @@
 # CONTINUE HERE - todos:
 
-    # Remove request cache stuff from hypixel.py. Currently what it does is if it sees some request has been
-    # made within the last minute, that result will be used (instead of doing a new request). This certainly
-    # isn't what you want - I noticed it did this for some friends that don't have their online status shown via
-    # the api (when doing the initial second pass).
-
     # Add type hinting to places in hypixel.py that don't have it.
 
     # Clean up any misc code in hypixel.py that could benefit from it.
