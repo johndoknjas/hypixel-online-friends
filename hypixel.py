@@ -19,9 +19,7 @@ HYPIXEL_API_KEY_LENGTH = 36
 verified_api_keys: List[str] = []
 
 TIME_STARTED: float = time()
-CHOSEN_API_RATE: float = 0.95
 num_api_calls_made: int = 0
-num_cumulative_calls_at_timestamps = {0.0: 0} # key timestamp (time() - TIME_STARTED), value num api calls made
 
 class PlayerNotFoundException(Exception):
     """ Simple exception if a player/UUID is not found. This exception can usually be ignored.
@@ -32,35 +30,12 @@ class HypixelAPIError(Exception):
     """ Simple exception if something's gone very wrong and the program can't continue. """
     pass
 
-def num_cumulative_calls_up_to_timestamp(timestamp_target: float) -> int:
-    """Returns the number of api calls made from the start of the program up to the timestamp"""
-    if timestamp_target < 0:
-        return 0
-    for timestamp, num_calls in reversed(num_cumulative_calls_at_timestamps.items()):
-        if timestamp < timestamp_target:
-            return num_calls
-    raise RuntimeError("Nothing returned")
-
-def sleep_for_rate_limiting() -> None:
-    if num_api_calls_made < (CHOSEN_API_RATE * 60):
-        return
-    time_passed = time() - TIME_STARTED
-    num_calls_over_last_min = num_api_calls_made - num_cumulative_calls_up_to_timestamp(time_passed - 60)
-    if num_calls_over_last_min / 60 < CHOSEN_API_RATE:
-        return
-    sleep_duration = num_calls_over_last_min / CHOSEN_API_RATE - 60 + 5
-    if sleep_duration > 10:
-        print("Sleeping " + str(round(sleep_duration, 2)) + " seconds for rate limiting...")
-    sleep(sleep_duration)
-
 def getJSON(typeOfRequest, **kwargs):
     """ This function is used for getting a JSON from Hypixel's Public API. """
     global num_api_calls_made
-    global num_cumulative_calls_at_timestamps
 
     num_api_calls_made += 1
-    num_cumulative_calls_at_timestamps[time() - TIME_STARTED] = num_api_calls_made
-    sleep_for_rate_limiting()
+    # print(str(num_api_calls_made) + '\n' + str(time() - TIME_STARTED) + '\n\n')
 
     requestEnd = ''
     if typeOfRequest == 'key':
@@ -84,8 +59,13 @@ def getJSON(typeOfRequest, **kwargs):
 
     allURLS = [HYPIXEL_API_URL + '{}?key={}{}'.format(typeOfRequest, api_key, requestEnd)] # Create request URL.
     requests = (grequests.get(u) for u in allURLS)
-    responses = grequests.imap(requests)
-    responseJSON = next(responses).json()
+    response = next(grequests.imap(requests))
+    responseHeaders, responseJSON = response.headers, response.json()
+
+    if 'RateLimit-Remaining' in responseHeaders:
+        remaining_allowed_requests = int(responseHeaders['RateLimit-Remaining'])
+        if remaining_allowed_requests <= 1:
+            sleep(int(responseHeaders['RateLimit-Reset']) + 1)
 
     if not responseJSON['success']:
         raise HypixelAPIError(responseJSON)
