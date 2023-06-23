@@ -16,6 +16,25 @@
     # Add a command that lets you enter a uuid-ign pair from the terminal, to update uuids.txt.
       # If a given uuid/ign exists in uuids.txt already, have the user confirm they want to replace it.
 
+    # Consider using lazy initialization for self.JSON in hypixel.py.
+
+    # In hypixel.get_uuid(), maybe add an optional param that gets the function to skip doing the
+      Player(possible_uuid).getName().lower() check.
+
+    # Consider reimplementing a cache, but with a lower time limit (like only a few seconds), just to
+    # skip the 5ish extra unneeded API calls at the beginning for cli arg players (maybe not worth it?).
+      # If you do this, no need to store request urls in the cache I think. Just store uuids/igns as the keys.
+      # Another option to limit a few of these early API calls is to add uuids for your main accs to the aliases
+        textfile. Although again, hardly any gains.
+
+    # For using the aliases textfile, you could do an outer loop to loop through all the lines (alias pairs), 
+      until an iteration doesn't change the args list. This could be useful if you had aliases ordered like this
+      in the textfile:
+      B = D
+      A = B C
+      First iteration changes A to B C, and then the second iteration lets the program change
+      # B C to D C.
+
 ----------------------------------
 
     # Add a way for the user to include parentheses in the cli args, if they want to control precedence.
