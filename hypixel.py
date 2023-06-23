@@ -35,7 +35,7 @@ def getJSON(typeOfRequest, **kwargs) -> dict:
     global num_api_calls_made
 
     num_api_calls_made += 1
-    # print('\n\n' + str(num_api_calls_made) + '\n' + str(time() - TIME_STARTED) + '\n\n')
+    # print(str(num_api_calls_made) + '\n' + str(time() - TIME_STARTED) + '\n\n')
 
     requestEnd = ''
     if typeOfRequest == 'key':

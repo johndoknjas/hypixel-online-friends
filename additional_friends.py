@@ -9,8 +9,6 @@ from Player import Player
 def make_player_with_friends(player_name: str) -> Player:
     """Creates a player with friends, from user input."""
     player_uuid = hypixel.get_uuid(player_name)
-    if not player_uuid:
-        raise ValueError("player_name is not a player's ign")
     friends_specs = Specs(False, False, None, 1)
     player_specs = Specs(False, False, friends_specs, 0)
     friends: List[Player] = []
