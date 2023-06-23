@@ -1,7 +1,5 @@
 # CONTINUE HERE - todos:
 
-    # Don't call the getJSON multiple times for the initial players in cli args.
-
     # Add type hinting to places in hypixel.py that don't have it.
 
     # Clean up any misc code in hypixel.py that could benefit from it.

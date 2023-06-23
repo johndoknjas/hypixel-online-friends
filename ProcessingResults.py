@@ -110,13 +110,11 @@ def get_all_dicts_unique_uuids_in_results(only_non_trivial_dicts: bool, get_deep
 
     return deepcopy(_all_dicts_unique_uuids) if get_deepcopy else _all_dicts_unique_uuids
 
-def get_best_f_list_for_player_in_results(ign_or_uuid: str,
-                                             must_have_times_friended: bool = False
-                                            ) -> List[UUID_Plus_Time]:
-    if not Utils.is_uuid(ign_or_uuid):
-        ign_or_uuid = hypixel.get_uuid_from_textfile_if_exists(ign_or_uuid)
+def get_best_f_list_for_player_in_results(uuid_or_ign: str,
+                                          must_have_times_friended: bool = False) -> List[UUID_Plus_Time]:
+    uuid = hypixel.get_uuid(uuid_or_ign)
     for d in get_all_dicts_unique_uuids_in_results(True, must_have_times_friended=must_have_times_friended):
-        if d['uuid'] == ign_or_uuid or d.get('name', None) == ign_or_uuid:
+        if d['uuid'] == uuid:
             # print(d['filename']) For debugging - will show you the filename the dict came from.
             return [UUID_Plus_Time(f['uuid'], f.get('time', None)) for f in d.get('friends', [])]
     return []
@@ -132,30 +130,29 @@ def update_list_if_applicable(lst: List[UUID_Plus_Time], new_elem: UUID_Plus_Tim
             return
     lst.append(new_elem)
 
-def get_all_additional_friends_for_player(ign_or_uuid: str) -> List[UUID_Plus_Time]:
-    if not Utils.is_uuid(ign_or_uuid):
-        ign_or_uuid = hypixel.get_uuid_from_textfile_if_exists(ign_or_uuid)
+def get_all_additional_friends_for_player(uuid_or_ign: str) -> List[UUID_Plus_Time]:
+    uuid = hypixel.get_uuid(uuid_or_ign)
     additional_friends: List[UUID_Plus_Time] = []
     for d in get_all_dicts_in_results(True, get_additional_friends=True):
-        if d['uuid'] != ign_or_uuid and d.get('name', None) != ign_or_uuid:
+        if d['uuid'] != uuid:
             continue
         for f in d.get('friends', []):
             current_friend = UUID_Plus_Time(f['uuid'], f.get('time', None))
             update_list_if_applicable(additional_friends, current_friend)
     return additional_friends
 
-def print_all_matching_uuids_or_igns(ign_or_uuid: str) -> None:
+def print_all_matching_uuids_or_igns(uuid_or_ign: str) -> None:
     """This function will traverse results, and find all igns or uuids that are grouped with
-       the ign_or_uuid param. For most igns/uuids, there will only be one result printed, but
+       the uuid_or_ign param. For most igns/uuids, there will only be one result printed, but
        some players may change their ign, and others could take over the ign."""
 
-    param_key = 'uuid' if Utils.is_uuid(ign_or_uuid) else 'name'
+    param_key = 'uuid' if Utils.is_uuid(uuid_or_ign) else 'name'
     search_for = 'name' if param_key == 'uuid' else 'uuid'
 
     print('\nMatching ' + search_for + 's found in the results folder:')
     hits = []
     for d in get_all_dicts_in_results(True):
-        if 'name' in d and d[param_key].lower() == ign_or_uuid.lower() and d[search_for] not in hits:
+        if 'name' in d and d[param_key].lower() == uuid_or_ign.lower() and d[search_for] not in hits:
             print(d[search_for])
             hits.append(d[search_for])
     print()

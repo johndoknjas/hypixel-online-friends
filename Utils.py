@@ -84,7 +84,7 @@ def find_dict_for_given_player(d: dict, uuid_or_ign: str, make_deep_copy: bool =
     if make_deep_copy:
         d = deepcopy(d)
     if ((is_uuid(uuid_or_ign) and d['uuid'] == uuid_or_ign) or
-        (not is_uuid(uuid_or_ign) and 'name' in d and d['name'].lower() == uuid_or_ign.lower())):
+        (is_ign(uuid_or_ign) and 'name' in d and d['name'].lower() == uuid_or_ign.lower())):
         if 'friends' in d or not dict_must_have_friends_list:
             return d
     for friend_dict in d.get('friends', []):
@@ -95,13 +95,15 @@ def find_dict_for_given_player(d: dict, uuid_or_ign: str, make_deep_copy: bool =
 
 def is_uuid(uuid_or_ign: str) -> bool:
     """This function returns whether 'uuid_or_ign' is a uuid.
-    Precondition: uuid_or_ign must be either a uuid or ign."""
-    if len(uuid_or_ign) in (32, 36):
-        return True
-    elif len(uuid_or_ign) <= 16:
-        return False
-    else:
-        raise ValueError("Invalid length")
+       Precondition: uuid_or_ign must be either a uuid or ign."""
+
+    assert len(uuid_or_ign) in (32, 36) or len(uuid_or_ign) <= 16
+    return len(uuid_or_ign) in (32, 36)
+
+def is_ign(uuid_or_ign: str) -> bool:
+    """This function returns whether 'uuid_or_ign' is an ign.
+       Precondition: uuid_or_ign must be either a uuid or ign."""
+    return not is_uuid(uuid_or_ign)
 
 def get_all_ign_uuid_pairs_in_dict(d: dict, make_deepcopy: bool = False) -> dict:
     """Traverses the d param and returns a dict, where each key-value pair represents an ign-uuid 

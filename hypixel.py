@@ -30,12 +30,12 @@ class HypixelAPIError(Exception):
     """ Simple exception if something's gone very wrong and the program can't continue. """
     pass
 
-def getJSON(typeOfRequest, **kwargs):
+def getJSON(typeOfRequest, **kwargs) -> dict:
     """ This function is used for getting a JSON from Hypixel's Public API. """
     global num_api_calls_made
 
     num_api_calls_made += 1
-    # print(str(num_api_calls_made) + '\n' + str(time() - TIME_STARTED) + '\n\n')
+    # print('\n\n' + str(num_api_calls_made) + '\n' + str(time() - TIME_STARTED) + '\n\n')
 
     requestEnd = ''
     if typeOfRequest == 'key':
@@ -48,7 +48,7 @@ def getJSON(typeOfRequest, **kwargs):
         if typeOfRequest == 'player':
             UUIDType = 'uuid'
             uuid = kwargs['uuid']
-            if not Utils.is_uuid(uuid):
+            if Utils.is_ign(uuid):
                 UUIDType = 'name' # TODO: I could probably clean this up somehow.
         if typeOfRequest == 'skyblockplayer':
             typeOfRequest = "/skyblock/profiles"
@@ -75,19 +75,23 @@ def getJSON(typeOfRequest, **kwargs):
         return responseJSON[typeOfRequest]
     except KeyError:
         return responseJSON
-
-def get_uuid_from_textfile_if_exists(ign: str) -> str:
-    """ - A uuid will be returned if a pair for the ign is found in uuids.txt.
-        - If a pair isn't found, the ign itself will just be returned."""
-    assert not Utils.is_uuid(ign)
-    result = Files.ign_uuid_pairs_in_uuids_txt().get(ign.lower(), ign) # result may be either the ign or a uuid
-    if Utils.is_uuid(result) and Player(result).getName().lower() != ign.lower():
-        # uuid found for the ign in uuids.txt, but the player has since changed their ign.
-        print("NOTE: " + ign + " is no longer the ign of the player with uuid " + result)
-        sleep(20) # Since I'd like to know if this ever happens - sleeping isn't necessary for the program itself.
-        return ign
-    else:
-        return result
+    
+def get_uuid(uuid_or_ign: str) -> str:
+    """Param can be an ign or uuid. If it's a uuid, this function will return it immediately. Otherwise,
+       it will try to get it from uuids.txt (and if so, then verify the player's current ign is still the same
+       by using a temp hypixel object). Fnally if this fails, a temp hypixel object is created in order to call
+       getUUID()."""
+    
+    assert uuid_or_ign == uuid_or_ign.lower()
+    if Utils.is_uuid(uuid_or_ign):
+        return uuid_or_ign
+    ign = uuid_or_ign
+    possible_uuid = Files.ign_uuid_pairs_in_uuids_txt().get(ign, ign)
+    if Utils.is_uuid(possible_uuid):
+        if Player(possible_uuid).getName().lower() != ign:
+            raise RuntimeError("NOTE: " + ign + " is no longer the ign of the player with uuid " + possible_uuid)
+        return possible_uuid
+    return Player(possible_uuid).getUUID()
 
 def set_api_keys() -> None:
     """ This function is used to set your Hypixel API keys.
@@ -121,7 +125,7 @@ class Player:
         Parameters
         -----------
         Username/UUID : string
-            Either the UUID or the username (Deprecated) for a Minecraft player.
+            Either the UUID or the username for a player.
 
         Attributes
         -----------
@@ -129,9 +133,8 @@ class Player:
             The raw JSON receieved from the Hypixel API.
     """
 
-    def __init__(self, UUID_or_ign: str):
-        self.JSON = getJSON('player', uuid=(UUID_or_ign if Utils.is_uuid(UUID_or_ign) 
-                                            else get_uuid_from_textfile_if_exists(UUID_or_ign)))
+    def __init__(self, uuid_or_ign: str) -> None:
+        self.JSON = getJSON('player', uuid=get_uuid(uuid_or_ign))
 
     def getName(self, extra_safety_check=True) -> str:
         """ Just return player's name. """
@@ -144,7 +147,7 @@ class Player:
             + ". To disable this safety check, call this function with getName(extra_safety_check=False).")
         return sanitized_name
     
-    def getUUID(self):
+    def getUUID(self) -> str:
         """ This function returns a player's UUID. """
         return self.JSON['uuid']
     

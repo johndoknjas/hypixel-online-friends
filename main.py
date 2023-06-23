@@ -99,7 +99,7 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             continue
 
         if in_friended_when_section:
-            uuids_for_friended_when.append(hypixel.Player(arg).getUUID())
+            uuids_for_friended_when.append(hypixel.get_uuid(arg))
             continue
 
         next_arg = args_no_keywords_or_date[i+1] if i+1 < len(args_no_keywords_or_date) else None
@@ -111,7 +111,8 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             assert not args.do_file_output()
             player = Player.make_player_from_json_textfile(args_no_keywords_or_date[i+1], arg, specs=specs)
         elif use_results_folder:
-            uuid = hypixel.Player(arg).getUUID()
+            hypixel_obj = hypixel.Player(arg)
+            uuid = hypixel_obj.getUUID()
             all_friends: List[UUID_Plus_Time] = []
             standard_friends = ProcessingResults.get_best_f_list_for_player_in_results(uuid,
             must_have_times_friended=(FRIENDED_WHEN in args_no_keywords_or_date))
@@ -125,9 +126,9 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             else:
                 all_friends = standard_friends
             all_friends.sort(key=UUID_Plus_Time.sort_key)
-            player = Player(uuid, specs=specs, friends=all_friends)
+            player = Player(uuid, specs=specs, friends=all_friends, hypixel_object=hypixel_obj)
         else:
-            player = Player(hypixel.Player(arg).getUUID(), specs=specs)
+            player = Player(hypixel.get_uuid(arg), specs=specs)
 
         if i == 0:
             print("The uuid of the player you're getting friends of is " + player.uuid())

@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List
 
 import Utils
 import hypixel
@@ -6,25 +6,9 @@ from MyClasses import Specs
 import Files
 from Player import Player
 
-def get_uuid(uuid_or_ign: str) -> Optional[str]:
-    """If the param is a uuid, it just gets returned. Otherwise if it's an ign, the associated uuid
-       will be returned. If a uuid cannot be found for it, None will be returned."""
-    if Utils.is_uuid(uuid_or_ign):
-        return uuid_or_ign
-    uuid_or_ign = hypixel.get_uuid_from_textfile_if_exists(uuid_or_ign)
-    if Utils.is_uuid(uuid_or_ign):
-        return uuid_or_ign
-
-    try:
-        player = hypixel.Player(uuid_or_ign)
-    except:
-        return None
-    else:
-        return player.getUUID()
-
 def make_player_with_friends(player_name: str) -> Player:
     """Creates a player with friends, from user input."""
-    player_uuid = get_uuid(player_name)
+    player_uuid = hypixel.get_uuid(player_name)
     if not player_uuid:
         raise ValueError("player_name is not a player's ign")
     friends_specs = Specs(False, False, None, 1)
@@ -32,7 +16,7 @@ def make_player_with_friends(player_name: str) -> Player:
     friends: List[Player] = []
     user_input = input("Enter the ign/uuid of an additional friend (or 'done' to stop): ")
     while user_input not in ('done', 'stop'):
-        current_friend_uuid = get_uuid(user_input)
+        current_friend_uuid = hypixel.get_uuid(user_input)
         if not current_friend_uuid:
             user_input = input("Nothing found for that ign - please enter the uuid instead: ")
         else:

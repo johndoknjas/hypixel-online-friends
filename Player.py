@@ -15,15 +15,11 @@ class Player:
                                        specs: Optional[Specs] = None) -> Player:
         dict_from_file = Files.read_json_textfile(filepath)
         dict_for_player = Utils.find_dict_for_given_player(dict_from_file, uuid_or_ign)
-        if not dict_for_player and not Utils.is_uuid(uuid_or_ign):
+        if not dict_for_player and Utils.is_ign(uuid_or_ign):
             # Possible nothing was found since the given json only contains the uuid for the player,
             # and not their ign. So try again by passing in their uuid.
-            uuid_or_ign = hypixel.get_uuid_from_textfile_if_exists(uuid_or_ign)
-            if not Utils.is_uuid(uuid_or_ign):
-                # uuid still not obtained, as the ign-uuid pair is not stored in the file system.
-                # So as a last resort, get the uuid via the hypixel api.
-                uuid_or_ign = hypixel.Player(uuid_or_ign).getUUID()
-            dict_for_player = Utils.find_dict_for_given_player(dict_from_file, uuid_or_ign)
+            dict_for_player = Utils.find_dict_for_given_player(dict_from_file, 
+                                                               hypixel.get_uuid(uuid_or_ign))
         assert dict_for_player
         return Player(uuid=dict_for_player['uuid'], 
                       friends=[
