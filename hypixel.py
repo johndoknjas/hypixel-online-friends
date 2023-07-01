@@ -76,11 +76,11 @@ def getJSON(typeOfRequest, **kwargs) -> dict:
     except KeyError:
         return responseJSON
     
-def get_uuid(uuid_or_ign: str) -> str:
+def get_uuid(uuid_or_ign: str, call_api_last_resort: bool = True) -> str:
     """Param can be an ign or uuid. If it's a uuid, this function will return it immediately. Otherwise,
        it will try to get it from uuids.txt (and if so, then verify the player's current ign is still the same
-       by using a temp hypixel object). Fnally if this fails, a temp hypixel object is created in order to call
-       getUUID()."""
+       by using a temp hypixel object). Finally if this fails, a temp hypixel object is created in order to call
+       getUUID() - unless `call_api_last_resort` is False, in which case the ign is just returned."""
     
     assert uuid_or_ign == uuid_or_ign.lower()
     if Utils.is_uuid(uuid_or_ign):
@@ -91,7 +91,7 @@ def get_uuid(uuid_or_ign: str) -> str:
         if Player(possible_uuid).getName().lower() != ign:
             raise RuntimeError("NOTE: " + ign + " is no longer the ign of the player with uuid " + possible_uuid)
         return possible_uuid
-    return Player(possible_uuid).getUUID()
+    return Player(ign).getUUID() if call_api_last_resort else ign
 
 def set_api_keys() -> None:
     """ This function is used to set your Hypixel API keys.
@@ -134,7 +134,7 @@ class Player:
     """
 
     def __init__(self, uuid_or_ign: str) -> None:
-        self.JSON = getJSON('player', uuid=get_uuid(uuid_or_ign))
+        self.JSON = getJSON('player', uuid=get_uuid(uuid_or_ign, call_api_last_resort=False))
 
     def getName(self, extra_safety_check=True) -> str:
         """ Just return player's name. """
