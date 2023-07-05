@@ -206,6 +206,16 @@ class Player:
             print(str(report))
         if not self.specs_for_friends():
             return report
+        
+        self.iterate_over_friends_for_report(report, self.friends(), should_terminate, sort_final_result_by_fkdr)
+
+        return self.polish_dictionary_report(report, sort_final_result_by_fkdr) if self.root_player() else report
+    
+    def iterate_over_friends_for_report(self, report: dict, friends: List[Player],
+                                        should_terminate: bool, sort_final_result_by_fkdr: bool) -> None:
+        """Will modify `report`, which is passed by reference."""
+        if 'friends' not in report:
+            report['friends'] = [] # list of dicts
 
         # The following code goes through the friends.
             # For friends whose online status is shown through the API, this code checks if their
@@ -223,9 +233,7 @@ class Player:
             # there will be false positives over time. This is because even if their current stats are different
             # from their stats at the beginning of the program's run, they may have logged out since.
 
-        report['friends'] = [] # Will be a list of dicts.
         first_pass: bool = True
-        friends = self.friends()
         size_of_passes = 100
         do_perpetual_passes = False # Can possibly become True after the first big iteration over all friends.
         current_pass_size = 0
@@ -265,8 +273,6 @@ class Player:
                     i -= current_pass_size
                 first_pass = not first_pass
                 current_pass_size = 0
-
-        return self.polish_dictionary_report(report, sort_final_result_by_fkdr) if self.root_player() else report
 
     def polish_dictionary_report(self, report: dict, sort_by_fkdr: bool) -> dict:
         report = deepcopy(report)
