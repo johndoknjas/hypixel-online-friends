@@ -207,12 +207,15 @@ class Player:
         if not self.specs_for_friends():
             return report
         
-        self.iterate_over_friends_for_report(report, self.friends(), should_terminate, sort_final_result_by_fkdr)
+        self.iterate_over_friends_for_report(report, self.friends(), should_terminate, sort_final_result_by_fkdr,
+                                             False, True)
 
         return self.polish_dictionary_report(report, sort_final_result_by_fkdr) if self.root_player() else report
     
     def iterate_over_friends_for_report(self, report: dict, friends: List[Player],
-                                        should_terminate: bool, sort_final_result_by_fkdr: bool) -> None:
+                                        should_terminate: bool, sort_final_result_by_fkdr: bool,
+                                        do_perpetual_passes_now: bool, first_pass: bool,
+                                        start_index: int = 0, end_index: Optional[int] = None) -> None:
         """Will modify `report`, which is passed by reference."""
         if 'friends' not in report:
             report['friends'] = [] # list of dicts
@@ -233,46 +236,49 @@ class Player:
             # there will be false positives over time. This is because even if their current stats are different
             # from their stats at the beginning of the program's run, they may have logged out since.
 
-        first_pass: bool = True
-        size_of_passes = 100
-        do_perpetual_passes = False # Can possibly become True after the first big iteration over all friends.
-        current_pass_size = 0
-        i = 0
+        if first_pass:
+            assert not do_perpetual_passes_now
 
-        while i < len(friends):
-            friend: Player = friends[i]
-            if self.root_player() and i % 20 == 0:
-                if do_perpetual_passes:
-                    print("Processed " + str(i) + " for a perpetual pass")
-                else:
-                    print("Processed " + str(i) + (" for the second pass" if not first_pass else ""))
+        size_of_passes = 100
+        if end_index is None:
+            end_index = len(friends) - 1
+
+        for i in range(start_index, end_index+1):
+            if self.root_player():
+                if i - start_index == size_of_passes and not do_perpetual_passes_now and not should_terminate:
+                    self.iterate_over_friends_for_report(
+                        report, friends, should_terminate, sort_final_result_by_fkdr, do_perpetual_passes_now, 
+                        not first_pass, start_index = start_index if first_pass else i, end_index=None
+                    )
+                    # control won't reach here (deliberate infinite recursion)
+                self.processed_msg(i, do_perpetual_passes_now, first_pass)
+
             assert isinstance(report['friends'], list)
+            friend: Player = friends[i]
             if friend.uuid() not in [d['uuid'] for d in report['friends']]:
                 if friend_report := friend.create_dictionary_report(extra_online_check = 
-                                                                    not first_pass or do_perpetual_passes):
-                    assert isinstance(report['friends'], List) # to satisfy mypy
+                                                                    not first_pass or do_perpetual_passes_now):
                     report['friends'].append(friend_report)
 
-            current_pass_size += 1
-            i += 1
-
-            if should_terminate:
-                continue
-
-            if i == len(friends):
-                assert self.root_player()
-                first_pass = False
-                do_perpetual_passes = True
-                current_pass_size = 0
-                i = 0
-                self.polish_dictionary_report(report, sort_final_result_by_fkdr)
-                report['friends'] = []
-                continue
-            elif self.root_player() and current_pass_size == size_of_passes and not do_perpetual_passes:
-                if first_pass:
-                    i -= current_pass_size
-                first_pass = not first_pass
-                current_pass_size = 0
+        if not should_terminate:
+            assert self.root_player()
+            self.polish_dictionary_report(report, sort_final_result_by_fkdr)
+            report['friends'] = []
+            self.iterate_over_friends_for_report(report, friends, should_terminate,
+                                                 sort_final_result_by_fkdr, True, False,
+                                                 start_index=0, end_index=None)
+    
+    def processed_msg(self, num_processed: int, on_perpetual_pass: bool, on_first_pass: bool) -> None:
+        """Prints a message saying how many players have been processed, if the number is a multiple of 20."""
+        if num_processed % 20 != 0:
+            return
+        print("Processed " + str(num_processed), end="")
+        if on_perpetual_pass:
+            print(" for a perpetual pass")
+        elif not on_first_pass:
+            print(" for the second pass")
+        else:
+            print()
 
     def polish_dictionary_report(self, report: dict, sort_by_fkdr: bool) -> dict:
         report = deepcopy(report)
