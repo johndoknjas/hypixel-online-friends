@@ -35,17 +35,6 @@
       First iteration changes A to B C, and then the second iteration lets the program change
       # B C to D C.
 
-    # Consider (at least as an option) to do something like this:
-      # On first pass at every 100, 200, 400, 800, etc, do a second pass up to that point.
-        # To scan again for players with online status off.
-        # Shouldn't take too long to do too, so not that expensive.
-        # Ideally, shouldn't print to the screen any players that were found on any previous 'second passes'
-          of this first big pass.
-            # E.g., if at the 400 point, shouldn't print any players both for this main first pass up to here,
-              nor for any players found on the 'second' passes up to 100 and up to 200.
-            # But should still start from 0 and go till 400, scanning players that have the online status off.
-      # Then after all this, continue indefinitely with the perpetual passes, as you currently do them.
-
 ----------------------------------
 
     # Add a way for the user to include parentheses in the cli args, if they want to control precedence.

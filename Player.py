@@ -207,76 +207,61 @@ class Player:
         if not self.specs_for_friends():
             return report
         
-        self.iterate_over_friends_for_report(report, self.friends(), should_terminate, sort_final_result_by_fkdr,
-                                             False, True)
+        self.iterate_over_friends_for_report(report, self.friends(), should_terminate, 
+                                             sort_final_result_by_fkdr, False, True)
 
         return self.polish_dictionary_report(report, sort_final_result_by_fkdr) if self.root_player() else report
     
     def iterate_over_friends_for_report(self, report: dict, friends: List[Player],
                                         should_terminate: bool, sort_final_result_by_fkdr: bool,
                                         do_perpetual_passes_now: bool, first_pass: bool,
-                                        start_index: int = 0, end_index: Optional[int] = None) -> None:
+                                        end_index: Optional[int] = None) -> None:
         """Will modify `report`, which is passed by reference."""
+
+        # For friends whose online status is shown, there will be some false negatives over time.
+        # This is because if their json shows them not online at the start of the program, it won't
+        # double check if they're currently online.
+
+        # For friends whose online status isn't shown, there will be some false positives over time.
+        # This is because a player's stats could have been updated, but then later on they logged out.
+
         if 'friends' not in report:
             report['friends'] = [] # list of dicts
-
-        # The following code goes through the friends.
-            # For friends whose online status is shown through the API, this code checks if their
-            # self.JSON's last login is more recent than their last logout (doesn't require an API call).
-            # If so, it then checks with a current call to the API to see if this is still true.
-            # If this is also the case, then the friend is marked as online.
-
-            # For friends whose online status isn't shown through the API, the idea of this code is to
-            # get their game stats on a first pass. Then on subsequent passes, their game stats are retrieved again,
-            # and if there are any differences, this means the player is online.
-
-            # Over time (e.g., if the program keeps running for perpetual passes), there will be false negatives
-            # for the first group of friends. This is because friends who logged on recently won't be counted,
-            # since their original self.JSON shows them as offline. Meanwhile for the second group of friends,
-            # there will be false positives over time. This is because even if their current stats are different
-            # from their stats at the beginning of the program's run, they may have logged out since.
-
         if first_pass:
             assert not do_perpetual_passes_now
+        points_to_do_second_passes = [100 * 2**i for i in range(0, 11)]
 
-        # CONTINUE HERE - soon, update to do the 100, 200, 400, etc thing, and also
-        # have start_index always be 0 (so, you can remove it as a param).
-
-        size_of_passes = 100
-        if end_index is None:
-            end_index = len(friends) - 1
-
-        for i in range(start_index, end_index+1):
-            if self.root_player():
-                if i % size_of_passes == 0 and i > 0 and first_pass and not should_terminate:
-                    self.iterate_over_friends_for_report(report, friends, True, sort_final_result_by_fkdr, False, 
-                                                         False, start_index=i-size_of_passes, end_index=i-1)
-                self.processed_msg(i, do_perpetual_passes_now, first_pass)
-
+        for i in range(len(friends) if end_index is None else end_index+1):
+            if self.root_player() and i in points_to_do_second_passes and first_pass and not should_terminate:
+                # Do a 'second pass' from 0 until i-1 indexed players, checking if their stats
+                # have been updated (for players who don't have the online status shown):
+                self.iterate_over_friends_for_report(report, friends, True, sort_final_result_by_fkdr,
+                                                     False, False, end_index=i-1)
             assert isinstance(report['friends'], list)
             friend: Player = friends[i]
             if friend.uuid() not in [d['uuid'] for d in report['friends']]:
-                if friend_report := friend.create_dictionary_report(extra_online_check = 
-                                                                    not first_pass or do_perpetual_passes_now):
+                if friend_report := friend.create_dictionary_report(extra_online_check = not first_pass):
                     report['friends'].append(friend_report)
+            self.processed_msg(i+1, do_perpetual_passes_now, first_pass)
 
         if not should_terminate:
             assert self.root_player()
             self.polish_dictionary_report(report, sort_final_result_by_fkdr)
             report['friends'] = []
+            # Do a perpetual pass - infinite recursion:
             self.iterate_over_friends_for_report(report, friends, should_terminate,
-                                                 sort_final_result_by_fkdr, True, False,
-                                                 start_index=0, end_index=None)
+                                                 sort_final_result_by_fkdr, True, False)
     
     def processed_msg(self, num_processed: int, on_perpetual_pass: bool, on_first_pass: bool) -> None:
-        """Prints a message saying how many players have been processed, if the number is a multiple of 20."""
-        if num_processed % 20 != 0:
+        """Prints a message saying how many players have been processed, if the number is a multiple of 20,
+           and if the player is the root player."""
+        if num_processed % 20 != 0 or not self.root_player():
             return
         print("Processed " + str(num_processed), end="")
         if on_perpetual_pass:
             print(" for a perpetual pass")
         elif not on_first_pass:
-            print(" for the second pass")
+            print(" for a 'second pass'")
         else:
             print()
 
