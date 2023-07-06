@@ -239,18 +239,18 @@ class Player:
         if first_pass:
             assert not do_perpetual_passes_now
 
+        # CONTINUE HERE - soon, update to do the 100, 200, 400, etc thing, and also
+        # have start_index always be 0 (so, you can remove it as a param).
+
         size_of_passes = 100
         if end_index is None:
             end_index = len(friends) - 1
 
         for i in range(start_index, end_index+1):
             if self.root_player():
-                if i - start_index == size_of_passes and not do_perpetual_passes_now and not should_terminate:
-                    self.iterate_over_friends_for_report(
-                        report, friends, should_terminate, sort_final_result_by_fkdr, do_perpetual_passes_now, 
-                        not first_pass, start_index = start_index if first_pass else i, end_index=None
-                    )
-                    # control won't reach here (deliberate infinite recursion)
+                if i % size_of_passes == 0 and i > 0 and first_pass and not should_terminate:
+                    self.iterate_over_friends_for_report(report, friends, True, sort_final_result_by_fkdr, False, 
+                                                         False, start_index=i-size_of_passes, end_index=i-1)
                 self.processed_msg(i, do_perpetual_passes_now, first_pass)
 
             assert isinstance(report['friends'], list)
