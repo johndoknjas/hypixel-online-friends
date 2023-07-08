@@ -214,7 +214,7 @@ class Player:
     
     def iterate_over_friends_for_report(self, report: dict, friends: List[Player],
                                         should_terminate: bool, sort_final_result_by_fkdr: bool,
-                                        do_perpetual_passes_now: bool, first_pass: bool,
+                                        on_perpetual_pass: bool, first_pass: bool,
                                         end_index: Optional[int] = None) -> None:
         """Will modify `report`, which is passed by reference."""
 
@@ -228,7 +228,7 @@ class Player:
         if 'friends' not in report:
             report['friends'] = [] # list of dicts
         if first_pass:
-            assert not do_perpetual_passes_now
+            assert not on_perpetual_pass
         points_to_do_second_passes = [100 * 2**i for i in range(0, 11)]
 
         for i in range(len(friends) if end_index is None else end_index+1):
@@ -242,15 +242,16 @@ class Player:
             if friend.uuid() not in [d['uuid'] for d in report['friends']]:
                 if friend_report := friend.create_dictionary_report(extra_online_check = not first_pass):
                     report['friends'].append(friend_report)
-            self.processed_msg(i+1, do_perpetual_passes_now, first_pass)
+            self.processed_msg(i+1, on_perpetual_pass, first_pass)
 
         if not should_terminate:
             assert self.root_player()
-            self.polish_dictionary_report(report, sort_final_result_by_fkdr)
-            report['friends'] = []
-            # Do a perpetual pass - infinite recursion:
-            self.iterate_over_friends_for_report(report, friends, should_terminate,
-                                                 sort_final_result_by_fkdr, True, False)
+            # Do perpetual passes:
+            while True:
+                self.polish_dictionary_report(report, sort_final_result_by_fkdr)
+                report['friends'] = []
+                self.iterate_over_friends_for_report(report, friends, True,
+                                                     sort_final_result_by_fkdr, True, False)
     
     def processed_msg(self, num_processed: int, on_perpetual_pass: bool, on_first_pass: bool) -> None:
         """Prints a message saying how many players have been processed, if the number is a multiple of 20,
