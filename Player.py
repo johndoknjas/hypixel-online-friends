@@ -207,14 +207,14 @@ class Player:
         if not self.specs_for_friends():
             return report
         
-        self.iterate_over_friends_for_report(report, self.friends(), should_terminate, 
+        self.iterate_over_friends_for_report(report, self.friends(), not should_terminate, 
                                              sort_final_result_by_fkdr, False, True)
 
         return self.polish_dictionary_report(report, sort_final_result_by_fkdr) if self.root_player() else report
     
     def iterate_over_friends_for_report(self, report: dict, friends: List[Player],
-                                        should_terminate: bool, sort_final_result_by_fkdr: bool,
-                                        on_perpetual_pass: bool, first_pass: bool,
+                                        do_additional_passes: bool, sort_final_result_by_fkdr: bool,
+                                        on_perpetual_pass: bool, on_first_pass: bool,
                                         end_index: Optional[int] = None) -> None:
         """Will modify `report`, which is passed by reference."""
 
@@ -225,32 +225,33 @@ class Player:
         # For friends whose online status isn't shown, there will be some false positives over time.
         # This is because a player's stats could have been updated, but then later on they logged out.
 
+        assert not (on_first_pass and on_perpetual_pass)
+        if do_additional_passes:
+            assert on_first_pass and self.root_player()
+
         if 'friends' not in report:
             report['friends'] = [] # list of dicts
-        if first_pass:
-            assert not on_perpetual_pass
         points_to_do_second_passes = [100 * 2**i for i in range(0, 11)]
 
         for i in range(len(friends) if end_index is None else end_index+1):
-            if self.root_player() and i in points_to_do_second_passes and first_pass and not should_terminate:
+            if i in points_to_do_second_passes and on_first_pass and do_additional_passes:
                 # Do a 'second pass' from 0 until i-1 indexed players, checking if their stats
                 # have been updated (for players who don't have the online status shown):
-                self.iterate_over_friends_for_report(report, friends, True, sort_final_result_by_fkdr,
+                self.iterate_over_friends_for_report(report, friends, False, sort_final_result_by_fkdr,
                                                      False, False, end_index=i-1)
             assert isinstance(report['friends'], list)
             friend: Player = friends[i]
             if friend.uuid() not in [d['uuid'] for d in report['friends']]:
-                if friend_report := friend.create_dictionary_report(extra_online_check = not first_pass):
+                if friend_report := friend.create_dictionary_report(extra_online_check = not on_first_pass):
                     report['friends'].append(friend_report)
-            self.processed_msg(i+1, on_perpetual_pass, first_pass)
+            self.processed_msg(i+1, on_perpetual_pass, on_first_pass)
 
-        if not should_terminate:
-            assert self.root_player()
+        if do_additional_passes:
             # Do perpetual passes:
             while True:
                 self.polish_dictionary_report(report, sort_final_result_by_fkdr)
                 report['friends'] = []
-                self.iterate_over_friends_for_report(report, friends, True,
+                self.iterate_over_friends_for_report(report, friends, False,
                                                      sort_final_result_by_fkdr, True, False)
     
     def processed_msg(self, num_processed: int, on_perpetual_pass: bool, on_first_pass: bool) -> None:
