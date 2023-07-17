@@ -10,6 +10,7 @@ from Player import Player
 from Args import Args
 import ProcessingResults
 import additional_friends
+import Utils
 
 def intersect_player_lists(l1: List[Player], l2: List[Player]) -> List[Player]:
     return [p for p in l1 if p.in_player_list(l2)]
@@ -117,8 +118,9 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             standard_friends = ProcessingResults.get_best_f_list_for_player_in_results(uuid,
             must_have_times_friended=(FRIENDED_WHEN in args_no_keywords_or_date))
             if args.get_additional_friends():
-                print("total number of friends in biggest single friends list/file for " +
-                      arg + ": " + str(len(standard_friends)))
+                print("total number of friends in biggest single friends list/file for " + arg +
+                      (" (" + hypixel_obj.getName() + ")" if Utils.is_uuid(arg) else "") +
+                      ": " + str(len(standard_friends)))
                 all_friends = ProcessingResults.get_all_additional_friends_for_player(uuid)
                 print("total number of 'additional friends' is " + str(len(all_friends)))
                 for f in standard_friends:
@@ -130,9 +132,9 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
         else:
             player = Player(hypixel.get_uuid(arg), specs=specs)
 
-        if i == 0:
-            print("The uuid of the player you're getting friends of is " + player.uuid())
-            print("This player has " + str(len(player.friends())) + " unique friends total.")
+        if Utils.is_ign(arg):
+            print("This player's uuid is " + player.uuid())
+        print("This player has " + str(len(player.friends())) + " unique friends total.\n")
 
         player.set_will_exclude_friends(in_minus_symbol_section)
         player.set_will_intersect(is_intersect_player)

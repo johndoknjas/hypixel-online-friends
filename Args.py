@@ -47,7 +47,7 @@ class Args:
     def print_args(self) -> None:
         for arg in self._ARGS:
             print(arg, end=" ")
-        print()
+        print("\n")
     
     def find_friends_of_friends(self) -> bool:
         return 'friendsoffriends' in self._ARGS
