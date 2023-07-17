@@ -65,13 +65,17 @@ def update_uuids_file(ign_uuid_pairs: Dict[str, str]) -> None:
 
 def add_aliases() -> None:
     aliases: List[Tuple[str, str]] = []
-    curr_alias = input("Enter alias (or 'done'/'stop' to quit): ")
-    while curr_alias not in ('done', 'stop', 'quit'):
-        curr_meaning = input("Enter the text this alias stands for: ")
+    while True:
+        curr_alias = input("Enter alias (or 'done'/'stop' to quit): ").lower()
+        if curr_alias in ('done', 'stop', 'quit'):
+            break
+        if curr_alias in [pair[0] for pair in get_aliases()]:
+            raise ValueError(f'{curr_alias} is already an alias')
         if Utils.contains_whitespace(curr_alias):
             raise ValueError('An alias cannot contain any whitespace')
-        aliases.append((curr_alias.lower(), curr_meaning.lower()))
-        curr_alias = input("\nEnter alias (or 'done'/'stop' to quit): ")
+        curr_meaning = input("Enter the text this alias stands for: ").lower()
+        aliases.append((curr_alias, curr_meaning))
+        print()
 
     with open('aliases.txt', 'a+') as file:
         for alias_pair in aliases:
