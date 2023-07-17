@@ -222,7 +222,7 @@ def remove_first_n_elem_fast(l: list, n: int) -> list:
 
 def replace_in_list(lst: List[str], elem_to_remove: str, list_to_insert: List[str]) -> List[str]:
     """Returns a new list, where any occurrences of `elem_to_remove` in `lst` are replaced with the
-       elements in `list_to_insert`."""
+       elements in `list_to_insert`. `lst` will not be modified."""
     replacement: List[str] = []
     for s in lst:
         if s == elem_to_remove:

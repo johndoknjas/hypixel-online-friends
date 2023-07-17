@@ -1,4 +1,5 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional
+import copy
 
 import Utils
 import Files
@@ -7,6 +8,8 @@ class Args:
     def __init__(self, args: List[str], extra_keywords: List[str] = []):
         self._ARGS = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
         self._apply_aliases()
+        print("Args list after applying aliases: ", end="")
+        self.print_args()
 
         self._ARG_KEYWORDS = (  ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
                                  'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
@@ -25,17 +28,26 @@ class Args:
 
 
     def _apply_aliases(self) -> None:
-        aliases: List[Tuple[str, List[str]]] = Files.get_aliases()
-        for alias in aliases:
+        """Updates self._ARGS by replacing any args in it with their appropriate aliases."""
+        old_args_list = copy.copy(self._ARGS)
+        for alias in Files.get_aliases():
             self._ARGS = Utils.replace_in_list(self._ARGS, alias[0], alias[1])
+        if self._ARGS != old_args_list:
+            self._apply_aliases()
+            # Could be that an alias has an alias of its own, so keep recursing until no changes.
     
     def get_args(self, remove_keywords: bool, remove_dates: bool) -> List[str]:
-        args = self._ARGS
+        args = copy.copy(self._ARGS)
         if remove_keywords:
             args = Utils.list_subtract(args, self._ARG_KEYWORDS)
         if remove_dates:
             args = Utils.remove_date_strings(args)
         return args
+    
+    def print_args(self) -> None:
+        for arg in self._ARGS:
+            print(arg, end=" ")
+        print()
     
     def find_friends_of_friends(self) -> bool:
         return 'friendsoffriends' in self._ARGS
