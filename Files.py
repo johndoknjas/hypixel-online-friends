@@ -12,7 +12,8 @@ import ntpath
 
 import Utils
 
-_IGN_UUID_PAIRS: Optional[dict] = None
+_ign_uuid_pairs: Optional[dict] = None
+_aliases: Optional[List[Tuple[str, List[str]]]] = None
 
 def write_data_as_json_to_file(data: dict, description: str, folder_name: str = "results") -> None:
     filename = create_file(description, folder_name)
@@ -27,18 +28,17 @@ def create_file(description: str, folder_name: str) -> str:
 
 def ign_uuid_pairs_in_uuids_txt(do_deepcopy: bool = False) -> dict:
     """Retrieves pairs stored in the uuids.txt file as a dict - key ign, value uuid"""
-    global _IGN_UUID_PAIRS
-    if _IGN_UUID_PAIRS is not None:
-        return deepcopy(_IGN_UUID_PAIRS) if do_deepcopy else _IGN_UUID_PAIRS
-
-    _IGN_UUID_PAIRS = {} # key ign, value uuid
+    global _ign_uuid_pairs
+    if _ign_uuid_pairs is not None:
+        return deepcopy(_ign_uuid_pairs) if do_deepcopy else _ign_uuid_pairs
+    _ign_uuid_pairs = {} # key ign, value uuid
     if not os.path.isfile('uuids.txt'):
         return {}
     with open('uuids.txt') as file:
         for line in file:
             words = line.rstrip().split()
-            _IGN_UUID_PAIRS[words[0].lower()] = words[1]
-    return deepcopy(_IGN_UUID_PAIRS) if do_deepcopy else _IGN_UUID_PAIRS
+            _ign_uuid_pairs[words[0].lower()] = words[1]
+    return deepcopy(_ign_uuid_pairs) if do_deepcopy else _ign_uuid_pairs
 
 def read_json_textfile(filepath: str) -> dict:
     try:
@@ -81,12 +81,16 @@ def get_aliases() -> List[Tuple[str, List[str]]]:
     """ Returns a list representing the aliases stored in aliases.txt. Each element of this list
         will be a tuple, where the first element is a string (the alias), and the second element
         is a list (what the alias stands for). """
-    aliases: List[Tuple[str, List[str]]] = []
+    global _aliases
+    
+    if _aliases is not None:
+        return _aliases
+    _aliases = []
     lines: List[str]
     with open('aliases.txt', 'r') as file:
         lines = file.read().splitlines()
     for line in lines:
         split_line = [x.strip('" ') for x in line.split('=')]
         assert line.count('=') == 1 and len(split_line) == 2
-        aliases.append((split_line[0], split_line[1].split(' ')))
-    return aliases
+        _aliases.append((split_line[0], split_line[1].split(' ')))
+    return _aliases
