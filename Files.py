@@ -68,8 +68,8 @@ def add_aliases() -> None:
     curr_alias = input("Enter alias (or 'done'/'stop' to quit): ")
     while curr_alias not in ('done', 'stop', 'quit'):
         curr_meaning = input("Enter the text this alias stands for: ")
-        if ' ' in curr_alias:
-            raise ValueError('An alias cannot contain a space')
+        if Utils.contains_whitespace(curr_alias):
+            raise ValueError('An alias cannot contain any whitespace')
         aliases.append((curr_alias.lower(), curr_meaning.lower()))
         curr_alias = input("\nEnter alias (or 'done'/'stop' to quit): ")
 

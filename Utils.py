@@ -230,3 +230,9 @@ def replace_in_list(lst: List[str], elem_to_remove: str, list_to_insert: List[st
         else:
             replacement.append(s)
     return replacement
+
+def contains_whitespace(s: str) -> bool:
+    return s != remove_whitespace(s)
+
+def remove_whitespace(s: str) -> str:
+    return ''.join(s.split())
