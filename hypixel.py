@@ -134,6 +134,7 @@ class Player:
     """
 
     def __init__(self, uuid_or_ign: str) -> None:
+        # print(uuid_or_ign)
         self.JSON = getJSON('player', uuid=get_uuid(uuid_or_ign, call_api_last_resort=False))
 
     def getName(self, extra_safety_check=True) -> str:
