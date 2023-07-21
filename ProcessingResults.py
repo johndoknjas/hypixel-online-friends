@@ -6,6 +6,7 @@ import os
 import os.path
 from typing import Optional, List, Dict
 from copy import deepcopy
+import copy
 
 import Utils
 import Files
@@ -62,13 +63,13 @@ def check_results(player: Optional[Player], only_non_trivial_dicts: bool) -> Non
                   " that " + player.name() + "'s friends list is in the results folder.")
     print('\n\n')
 
-def player_uuids_with_f_list_in_results(get_deepcopy: bool = False) -> List[str]:
+def player_uuids_with_f_list_in_results(get_copy: bool = False) -> List[str]:
     global _player_uuids_with_f_list_in_results
 
     if not _player_uuids_with_f_list_in_results:
         raise ValueError("Probably haven't called the checkresults() function yet.")
-    return (deepcopy(_player_uuids_with_f_list_in_results) 
-            if get_deepcopy else _player_uuids_with_f_list_in_results)
+    return (copy.copy(_player_uuids_with_f_list_in_results) if get_copy
+            else _player_uuids_with_f_list_in_results)
 
 def get_all_dicts_in_results(only_non_trivial_dicts: bool, get_deepcopy: bool = False,
                              get_additional_friends: bool = False) -> List[dict]:
