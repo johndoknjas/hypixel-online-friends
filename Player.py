@@ -278,9 +278,7 @@ class Player:
             report['friends'] = list({f['uuid']:f for f in report['friends']}.values())
             assert friends_copy == report['friends']
         if self.specs().print_only_players_friends():
-            print('\n\n')
-            Utils.print_list_of_dicts(report['friends'])
-            print ('\n\n')
+            Utils.print_list(report['friends'], prepended_msg="\n\n", separator="\n")
         return report
     
     def polish_friends_list(self, friends_to_exclude: Union[List[Player], Dict[str, Player]]) -> None:

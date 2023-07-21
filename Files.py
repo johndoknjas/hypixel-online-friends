@@ -6,7 +6,7 @@ import os.path
 import json
 import time
 from typing import Optional, Dict, List, Tuple
-from copy import deepcopy
+import copy
 import shutil
 import ntpath
 
@@ -30,7 +30,7 @@ def ign_uuid_pairs_in_uuids_txt(do_deepcopy: bool = False) -> dict:
     """Retrieves pairs stored in the uuids.txt file as a dict - key ign, value uuid"""
     global _ign_uuid_pairs
     if _ign_uuid_pairs is not None:
-        return deepcopy(_ign_uuid_pairs) if do_deepcopy else _ign_uuid_pairs
+        return copy.deepcopy(_ign_uuid_pairs) if do_deepcopy else _ign_uuid_pairs
     _ign_uuid_pairs = {} # key ign, value uuid
     if not os.path.isfile('uuids.txt'):
         return {}
@@ -38,7 +38,7 @@ def ign_uuid_pairs_in_uuids_txt(do_deepcopy: bool = False) -> dict:
         for line in file:
             words = line.rstrip().split()
             _ign_uuid_pairs[words[0].lower()] = words[1]
-    return deepcopy(_ign_uuid_pairs) if do_deepcopy else _ign_uuid_pairs
+    return copy.deepcopy(_ign_uuid_pairs) if do_deepcopy else _ign_uuid_pairs
 
 def read_json_textfile(filepath: str) -> dict:
     try:
@@ -88,14 +88,21 @@ def get_aliases() -> List[Tuple[str, List[str]]]:
         is a list (what the alias stands for). """
     global _aliases
     
-    if _aliases is not None:
-        return _aliases
-    _aliases = []
-    lines: List[str]
-    with open('aliases.txt', 'r') as file:
-        lines = file.read().splitlines()
-    for line in lines:
-        split_line = [x.strip('" ') for x in line.split('=')]
-        assert line.count('=') == 1 and len(split_line) == 2 and line == line.lower()
-        _aliases.append((split_line[0], split_line[1].split(' ')))
+    if _aliases is None:
+        _aliases = []
+        lines: List[str]
+        with open('aliases.txt', 'r') as file:
+            lines = file.read().splitlines()
+        for line in lines:
+            split_line = [x.strip('" ') for x in line.split('=')]
+            assert line.count('=') == 1 and len(split_line) == 2 and line == line.lower()
+            _aliases.append((split_line[0], split_line[1].split(' ')))
     return _aliases
+
+def apply_aliases(lst: List[str]) -> List[str]:
+    """Returns a new list that results from applying the aliases (in aliases.txt) to the strings in lst."""
+    old_lst = lst
+    for alias in get_aliases():
+        lst = Utils.replace_in_list(lst, alias[0], alias[1])
+    # If lst got updated, keep recursing (as some aliases may have aliases of their own):
+    return apply_aliases(lst) if lst != old_lst else lst

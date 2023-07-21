@@ -149,6 +149,8 @@ def main():
     hypixel.set_api_keys()
 
     args = Args(sys.argv)
+    assert set(args.get_keywords()).isdisjoint([pair[0] for pair in Files.get_aliases()])
+    Utils.print_list(args.get_args(False, False), prepended_msg="self._ARGS list after applying aliases: ")
     if args.add_additional_friends():
         additional_friends.add_additional_friends_to_file_system(args.get_args(True, True)[0])
         sys.exit(0)

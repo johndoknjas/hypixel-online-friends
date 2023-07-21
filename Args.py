@@ -6,6 +6,8 @@ import Files
 
 class Args:
     def __init__(self, args: List[str]):
+        args = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
+        self._ARGS = Files.apply_aliases(args)
         self._ARG_KEYWORDS = ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
                               'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
                               'fileoutput', 'updateuuids', 'minusresults', 'trivial',
@@ -17,21 +19,6 @@ class Args:
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'friendedwhen', 'intersect'). 
         # They don't appear in this class, but are instead used directly in the logic for main.py.
-
-        self._ARGS = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
-        self._apply_aliases()
-        print("Args list after applying aliases: ", end="")
-        self.print_args()
-
-    def _apply_aliases(self) -> None:
-        """Updates self._ARGS by replacing any args in it with their appropriate aliases."""
-        old_args_list = copy.copy(self._ARGS)
-        for alias in Files.get_aliases():
-            assert alias not in self._ARG_KEYWORDS
-            self._ARGS = Utils.replace_in_list(self._ARGS, alias[0], alias[1])
-        if self._ARGS != old_args_list:
-            self._apply_aliases()
-            # Could be that an alias has an alias of its own, so keep recursing until no changes.
     
     def get_args(self, remove_keywords: bool, remove_dates: bool) -> List[str]:
         args = copy.copy(self._ARGS)
@@ -40,11 +27,6 @@ class Args:
         if remove_dates:
             args = Utils.remove_date_strings(args)
         return args
-    
-    def print_args(self) -> None:
-        for arg in self._ARGS:
-            print(arg, end=" ")
-        print("\n")
 
     def get_keywords(self) -> List[str]:
         return copy.copy(self._ARG_KEYWORDS)

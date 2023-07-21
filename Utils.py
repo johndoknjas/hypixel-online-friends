@@ -20,8 +20,9 @@ def is_date_string(text: str) -> bool:
     else:
         return True
 
-def print_list_of_dicts(lst: List[dict]) -> None:
-    print("\n".join([str(d) for d in lst]))
+def print_list(lst: List, prepended_msg: str = "", separator: str = " ", appended_msg: str = "\n\n") -> None:
+    print(prepended_msg, end="")
+    print(separator.join([str(x) for x in lst]), end=appended_msg)
 
 def trim_if_needed(text: str, limit: int = 200) -> str:
     if len(text) <= limit:
