@@ -153,7 +153,7 @@ def main():
         additional_friends.add_additional_friends_to_file_system(args.get_args(True, True)[0])
         sys.exit(0)
     if args.add_aliases():
-        Files.add_aliases()
+        Files.add_aliases(args.get_keywords())
         sys.exit(0)
 
     ProcessingResults.set_args(args)

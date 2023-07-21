@@ -63,14 +63,15 @@ def update_uuids_file(ign_uuid_pairs: Dict[str, str]) -> None:
             assert key == key.lower()
     print("uuids.txt now contains uuid-ign pairs for " + str(len(pairs)) + " players.")
 
-def add_aliases() -> None:
+def add_aliases(keywords: List[str]) -> None:
     aliases: List[Tuple[str, str]] = []
+    forbidden_as_aliases = keywords + [pair[0] for pair in get_aliases()]
     while True:
         curr_alias = input("Enter alias (or 'done'/'stop' to quit): ").lower()
         if curr_alias in ('done', 'stop', 'quit'):
             break
-        if curr_alias in [pair[0] for pair in get_aliases()]:
-            raise ValueError(f'{curr_alias} is already an alias')
+        if curr_alias in forbidden_as_aliases:
+            raise ValueError(f'{curr_alias} is either already an alias, or is a keyword')
         if Utils.contains_whitespace(curr_alias):
             raise ValueError('An alias cannot contain any whitespace')
         curr_meaning = input("Enter the text this alias stands for: ").lower()
@@ -95,6 +96,6 @@ def get_aliases() -> List[Tuple[str, List[str]]]:
         lines = file.read().splitlines()
     for line in lines:
         split_line = [x.strip('" ') for x in line.split('=')]
-        assert line.count('=') == 1 and len(split_line) == 2
+        assert line.count('=') == 1 and len(split_line) == 2 and line == line.lower()
         _aliases.append((split_line[0], split_line[1].split(' ')))
     return _aliases
