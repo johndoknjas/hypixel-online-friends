@@ -5,16 +5,14 @@ import Utils
 import Files
 
 class Args:
-    def __init__(self, args: List[str], extra_keywords: List[str] = []):
-        self._ARG_KEYWORDS = (  ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
-                                 'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
-                                 'fileoutput', 'updateuuids', 'minusresults', 'trivial',
-                                 'matchingignsuuids', 'includemultiplayerfiles',
-                                 'keepfirstdictmultifiles', 'notallfromresults',
-                                 'addadditionalfriends', 'addadditionals', '+additionals', 
-                                 'noadditionalfriends', 'noadditionals',
-                                 'addaliases']
-                              + [x.lower() for x in extra_keywords] )
+    def __init__(self, args: List[str]):
+        self._ARG_KEYWORDS = ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
+                              'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
+                              'fileoutput', 'updateuuids', 'minusresults', 'trivial',
+                              'matchingignsuuids', 'includemultiplayerfiles',
+                              'keepfirstdictmultifiles', 'notallfromresults',
+                              'addadditionalfriends', 'addadditionals', '+additionals',
+                              'noadditionalfriends', 'noadditionals', 'addaliases']
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'friendedwhen', 'intersect'). 
