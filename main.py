@@ -145,7 +145,7 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
 
     return (players, uuids_for_friended_when)
 
-def main():
+def main() -> None:
     hypixel.set_api_keys()
 
     args = Args(sys.argv)
