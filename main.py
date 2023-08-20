@@ -177,7 +177,9 @@ def main() -> None:
 
     for friend in player.friends():
         if friend.uuid() in uuids_for_friended_when:
-            print(friend.name() + " was friended on " + friend.time_friended_parent_player('date'))
+            time_friended = friend.time_friended_parent_player('date')
+            assert type(time_friended) is str
+            print(friend.name() + " was friended on " + time_friended)
 
     report = player.create_dictionary_report(sort_final_result_by_fkdr = not args.sort_by_star(),
                                              should_terminate=(args.do_file_output() or
