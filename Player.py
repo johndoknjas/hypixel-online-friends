@@ -231,7 +231,7 @@ class Player:
 
         if 'friends' not in report:
             report['friends'] = [] # list of dicts
-        points_to_do_second_passes = [100 * 2**i for i in range(0, 11)]
+        points_to_do_second_passes = [200 * 2**i for i in range(0, 10)]
 
         for i in range(len(friends) if end_index is None else end_index+1):
             if i in points_to_do_second_passes and on_first_pass and do_additional_passes:
