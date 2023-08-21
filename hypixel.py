@@ -52,13 +52,16 @@ def getJSON(typeOfRequest, **kwargs) -> dict:
                 UUIDType = 'name' # TODO: I could probably clean this up somehow.
         if typeOfRequest == 'skyblockplayer':
             typeOfRequest = "/skyblock/profiles"
+        conjunct_in_url = ''
         for name, value in kwargs.items():
             if typeOfRequest == "player" and name == "uuid":
                 name = UUIDType
-            requestEnd += '&{}={}'.format(name, value)
+            requestEnd += (conjunct_in_url + '{}={}'.format(name, value))
+            conjunct_in_url = '&'
 
-    allURLS = [HYPIXEL_API_URL + '{}?key={}{}'.format(typeOfRequest, api_key, requestEnd)] # Create request URL.
-    requests = (grequests.get(u) for u in allURLS)
+    custom_headers = {"API-Key": api_key}
+    allURLS = [HYPIXEL_API_URL + '{}?{}'.format(typeOfRequest, requestEnd)] # Create request URL.
+    requests = (grequests.get(u, headers=custom_headers) for u in allURLS)
     response = next(grequests.imap(requests))
     responseHeaders, responseJSON = response.headers, response.json()
 
@@ -94,29 +97,13 @@ def get_uuid(uuid_or_ign: str, call_api_last_resort: bool = True) -> str:
     return Player(ign).getUUID() if call_api_last_resort else ign
 
 def set_api_keys() -> None:
-    """ This function is used to set your Hypixel API keys.
-        It also checks that they are valid/working.
-
-        Raises
-        ------
-        HypixelAPIError
-            If any of the keys are invalid or don't work, this will be raised.
+    """ This function gets the api key(s) from `api-key.txt` and stores them in `verified_api_keys`. The
+        function also checks that the api keys are all of the required length.
     """
-
-    api_keys: List[str] = []
+    global verified_api_keys
     with open('api-key.txt') as file:
-        for line in file:
-            api_keys.append(line.rstrip())
-
-    for api_key in api_keys:
-        if len(api_key) == HYPIXEL_API_KEY_LENGTH:
-            response = getJSON('key', key=api_key)
-            if response['success']:
-                verified_api_keys.append(api_key)
-            else:
-                raise HypixelAPIError("hypixel/setKeys: Error with key XXXXXXXX-XXXX-XXXX-XXXX{} | {}".format(api_key[23:], response))
-        else:
-            raise HypixelAPIError("hypixel/setKeys: The key '{}' is not 36 characters.".format(api_key))
+        verified_api_keys = [line.rstrip() for line in file]
+    assert all(len(api_key) == HYPIXEL_API_KEY_LENGTH for api_key in verified_api_keys)
 
 class Player:
     """ This class represents a player on Hypixel as a single object.
