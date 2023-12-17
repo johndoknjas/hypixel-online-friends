@@ -53,7 +53,7 @@ class Player:
         return self._hypixel_object
     
     def player_JSON(self) -> dict:
-        return self.hypixel_object().getJSON()
+        return self.hypixel_object().JSON
 
     def uuid(self) -> str:
         return self._uuid_plus_time.uuid()

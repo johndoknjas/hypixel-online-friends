@@ -124,9 +124,6 @@ class Player:
         # print(uuid_or_ign)
         self.JSON = getJSON('player', uuid=get_uuid(uuid_or_ign, call_api_last_resort=False))
 
-    def getJSON(self) -> dict:
-        return self.JSON
-
     def getName(self, extra_safety_check=True) -> str:
         """ Just return player's name. """
         if not extra_safety_check:
