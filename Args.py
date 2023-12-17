@@ -14,7 +14,8 @@ class Args:
                               'matchingignsuuids', 'includemultiplayerfiles',
                               'keepfirstdictmultifiles', 'notallfromresults',
                               'addadditionalfriends', 'addadditionals', '+additionals',
-                              'noadditionalfriends', 'noadditionals', 'addaliases']
+                              'noadditionalfriends', 'noadditionals', 'addaliases',
+                              'getplayerjson', 'playerjson']
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'friendedwhen', 'intersect'). 
@@ -100,3 +101,6 @@ class Args:
     
     def add_aliases(self) -> bool:
         return 'addaliases' in self._ARGS
+    
+    def get_player_json(self) -> bool:
+        return 'getplayerjson' in self._ARGS or 'playerjson' in self._ARGS

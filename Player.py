@@ -51,6 +51,9 @@ class Player:
         if not self._hypixel_object:
             self._hypixel_object = hypixel.Player(self.uuid())
         return self._hypixel_object
+    
+    def player_JSON(self) -> dict:
+        return self.hypixel_object().getJSON()
 
     def uuid(self) -> str:
         return self._uuid_plus_time.uuid()

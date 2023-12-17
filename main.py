@@ -145,6 +145,11 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
 
     return (players, uuids_for_friended_when)
 
+def output_player_jsons_to_file(players: List[Player]) -> None:
+    for player in players:
+        Files.write_data_as_json_to_file(player.player_JSON(), "Player json for " + player.name(), 
+                                         "results/player-jsons")
+
 def main() -> None:
     hypixel.set_api_keys()
 
@@ -159,6 +164,9 @@ def main() -> None:
         sys.exit(0)
 
     ProcessingResults.set_args(args)
+    if args.get_player_json():
+        output_player_jsons_to_file(get_players_from_args(args)[0])
+        sys.exit(0)
     if args.find_matching_igns_or_uuids_in_results():
         ProcessingResults.print_all_matching_uuids_or_igns(args.get_args(True, True)[0])
     players_from_args, uuids_for_friended_when = get_players_from_args(args)
