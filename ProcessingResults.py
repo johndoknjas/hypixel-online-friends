@@ -21,7 +21,7 @@ _all_dicts_unique_uuids: Optional[List[dict]] = None
 _ign_uuid_pairs_in_results: Optional[Dict[str, str]] = None
 _player_uuids_with_f_list_in_results: Optional[List[str]] = None
 
-_NON_TRIVIAL_KEYS = ['friends', 'name', 'fkdr', 'star']
+_NON_TRIVIAL_KEYS = ['friends', 'name', 'fkdr', 'star', 'pit_rank']
 _get_only_non_trivial_dicts: Optional[bool] = None
 
 _args: Optional[Args] = None

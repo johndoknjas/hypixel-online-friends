@@ -1,5 +1,7 @@
 # CONTINUE HERE - todos:
 
+    # Add an option to sort friends by their pit rank.
+
     # Consider if there's a better algorithm for when to do second passes, due to the updated api rate limit of
       300 per 5 mins, rather than 60 per 1 min.
 
@@ -8,8 +10,6 @@
     # Clean up any misc code in hypixel.py that could benefit from it.
 
     # Run pylint on the project.
-
-    # Output Pit stats, in addition to Bedwars.
 
     # Have a way to just output additional friends.
 

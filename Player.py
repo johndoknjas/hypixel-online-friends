@@ -7,6 +7,7 @@ import Utils
 import hypixel
 from MyClasses import UUID_Plus_Time, Specs
 import Files
+from Pit import PitStats
 
 class Player:
 
@@ -44,6 +45,7 @@ class Player:
         self._date_cutoff_for_friends = date_cutoff_for_friends
         self._friends: Optional[List[Player]] = None
         self._call_api_if_friends_empty_in_friends_getter: bool = True
+        self._pit_stats: Optional[PitStats] = None
         if friends is not None:
             self._set_friends(friends)
     
@@ -51,6 +53,11 @@ class Player:
         if not self._hypixel_object:
             self._hypixel_object = hypixel.Player(self.uuid())
         return self._hypixel_object
+    
+    def pit_stats_object(self) -> PitStats:
+        if not self._pit_stats:
+            self._pit_stats = PitStats(self.hypixel_object().getPitXP())
+        return self._pit_stats
     
     def player_JSON(self) -> dict:
         return self.hypixel_object().JSON
@@ -103,6 +110,24 @@ class Player:
     
     def get_bw_star(self) -> int:
         return self.hypixel_object().getBedwarsStar()
+    
+    def pit_xp(self) -> int:
+        return self.pit_stats_object().xp()
+    
+    def pit_prestige(self) -> int:
+        return self.pit_stats_object().prestige()
+    
+    def pit_prestige_roman(self) -> str:
+        return self.pit_stats_object().prestige_roman()
+    
+    def pit_level(self) -> int:
+        return self.pit_stats_object().level()
+    
+    def pit_rank_string(self) -> str:
+        prestige_part = self.pit_prestige_roman()
+        if prestige_part == "":
+            prestige_part = "0"
+        return prestige_part + "-" + str(self.pit_level())
     
     def specs_for_friends(self) -> Optional[Specs]:
         return self.specs().specs_for_friends()
@@ -200,7 +225,8 @@ class Player:
 
         report = {}
         if not self.specs().just_uuids():
-            report.update({'name': self.name(), 'fkdr': self.get_fkdr(), 'star': self.get_bw_star()})
+            report.update({'name': self.name(), 'fkdr': self.get_fkdr(), 'star': self.get_bw_star(),
+                           'pit_rank': self.pit_rank_string()})
         report['uuid'] = self.uuid()
         if time := self.time_friended_parent_player('ms' if Specs.does_program_display_time_as_unix_epoch() 
                                                     else 'date'):

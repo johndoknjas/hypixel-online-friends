@@ -168,3 +168,9 @@ class Player:
         if not self.JSON or 'achievements' not in self.JSON or 'bedwars_level' not in self.JSON['achievements']:
             return 0
         return self.JSON['achievements']['bedwars_level']
+    
+    def getPitXP(self) -> int:
+        if (not self.JSON or 'stats' not in self.JSON or 'Pit' not in self.JSON['stats'] or
+            'profile' not in self.JSON['stats']['Pit']):
+            return 0
+        return self.JSON['stats']['Pit']['profile'].get('xp', 0)
