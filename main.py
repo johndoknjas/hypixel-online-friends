@@ -11,7 +11,6 @@ from Args import Args
 import ProcessingResults
 import additional_friends
 import Utils
-from Pit import PitStats
 
 def intersect_player_lists(l1: List[Player], l2: List[Player]) -> List[Player]:
     return [p for p in l1 if p.in_player_list(l2)]

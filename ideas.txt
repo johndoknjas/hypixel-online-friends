@@ -1,5 +1,8 @@
 # CONTINUE HERE - todos:
 
+    # Add an option to just print a dictionary report for a player (fkdr, star, pit rank, etc),
+      and nothing to do with friends.
+
     # Add an option to sort friends by their pit rank.
 
     # Consider if there's a better algorithm for when to do second passes, due to the updated api rate limit of

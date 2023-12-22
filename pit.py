@@ -3,6 +3,7 @@ from typing import List
 
 import Utils
 
+# Got these values from: https://github.com/brooke-gill/pit/blob/307c126be78a5615b437205966dba13cbab3b787/xp2level.html#L93
 LVL_GROUP_MULTIPLIER = [15, 30, 50, 75, 125, 300, 600, 800, 900, 1000, 1200, 1500, 0]
 PRESTIGE_MULTIPLIER = [100, 110, 120, 130, 140, 150, 175, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000, 
              1200, 1400, 1600, 1800, 2000, 2400, 2800, 3200, 3600, 4000, 4500, 5000, 7500, 10000, 10100, 
