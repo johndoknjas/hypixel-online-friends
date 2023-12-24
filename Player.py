@@ -124,10 +124,7 @@ class Player:
         return self.pit_stats_object().level()
     
     def pit_rank_string(self) -> str:
-        prestige_part = self.pit_prestige_roman()
-        if prestige_part == "":
-            prestige_part = "0"
-        return prestige_part + "-" + str(self.pit_level())
+        return self.pit_prestige_roman() + "-" + str(self.pit_level())
     
     def specs_for_friends(self) -> Optional[Specs]:
         return self.specs().specs_for_friends()
@@ -214,7 +211,7 @@ class Player:
         """Returns whether the player is already represented in this players list."""
         return any(self.represents_same_person(p) for p in players)
     
-    def create_dictionary_report(self, sort_final_result_by_fkdr: bool = True, 
+    def create_dictionary_report(self, sort_key: str = "fkdr", 
                                  extra_online_check: bool = False, should_terminate: bool = True) -> dict:
         # CONTINUE HERE - later, could make a Report class and return an object of that, instead of a dict here.
         if self.root_player():
@@ -237,12 +234,12 @@ class Player:
             return report
         
         self.iterate_over_friends_for_report(report, self.friends(), not should_terminate, 
-                                             sort_final_result_by_fkdr, False, True)
+                                             sort_key, False, True)
 
-        return self.polish_dictionary_report(report, sort_final_result_by_fkdr) if self.root_player() else report
+        return self.polish_dictionary_report(report, sort_key) if self.root_player() else report
     
     def iterate_over_friends_for_report(self, report: dict, friends: List[Player],
-                                        do_additional_passes: bool, sort_final_result_by_fkdr: bool,
+                                        do_additional_passes: bool, sort_key: str,
                                         on_perpetual_pass: bool, on_first_pass: bool,
                                         end_index: Optional[int] = None) -> None:
         """Will modify `report`, which is passed by reference."""
@@ -266,7 +263,7 @@ class Player:
             if i in points_to_do_second_passes and on_first_pass and do_additional_passes:
                 # Do a 'second pass' from 0 until i-1 indexed players, checking if their stats
                 # have been updated (for players who don't have the online status shown):
-                self.iterate_over_friends_for_report(report, friends, False, sort_final_result_by_fkdr,
+                self.iterate_over_friends_for_report(report, friends, False, sort_key,
                                                      False, False, end_index=i-1)
             assert isinstance(report['friends'], list)
             friend: Player = friends[i]
@@ -278,10 +275,10 @@ class Player:
         if do_additional_passes:
             # Do perpetual passes:
             while True:
-                self.polish_dictionary_report(report, sort_final_result_by_fkdr)
+                self.polish_dictionary_report(report, sort_key)
                 report['friends'] = []
                 self.iterate_over_friends_for_report(report, friends, False,
-                                                     sort_final_result_by_fkdr, True, False)
+                                                     sort_key, True, False)
     
     def processed_msg(self, num_processed: int, on_perpetual_pass: bool, on_first_pass: bool) -> None:
         """Prints a message saying how many players have been processed, if the number is a multiple of 20,
@@ -296,11 +293,11 @@ class Player:
         else:
             print()
 
-    def polish_dictionary_report(self, report: dict, sort_by_fkdr: bool) -> dict:
+    def polish_dictionary_report(self, report: dict, sort_key: str) -> dict:
         report = deepcopy(report)
         if 'friends' in report:
             report['friends'] = sorted(report['friends'], 
-                                key=lambda d: d.get('fkdr' if sort_by_fkdr else 'star', 0), 
+                                key=lambda d: self._sort_func(d, sort_key),
                                 reverse=True)
             # Remove duplicates for any uuids (friends) - however, shouldn't be any:
             friends_copy = report['friends']
@@ -309,6 +306,11 @@ class Player:
         if self.specs().print_only_players_friends():
             Utils.print_list(report['friends'], prepended_msg="\n\n", separator="\n")
         return report
+    
+    def _sort_func(self, d: dict, sort_key: str) -> int:
+        if sort_key == "pit_rank":
+            return Utils.pit_rank_to_num_for_sort(d.get("pit_rank", "0-1"))
+        return d.get(sort_key, 0)
     
     def polish_friends_list(self, friends_to_exclude: Union[List[Player], Dict[str, Player]]) -> None:
         """Will sort friends, remove duplicates, and remove any who appear in the friends_to_exclude param.

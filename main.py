@@ -189,9 +189,10 @@ def main() -> None:
             assert type(time_friended) is str
             print(friend.name() + " was friended on " + time_friended)
 
-    report = player.create_dictionary_report(sort_final_result_by_fkdr = not args.sort_by_star(),
-                                             should_terminate=(args.do_file_output() or
-                                                               not args.just_online_friends()))
+    report = player.create_dictionary_report(
+        sort_key = "star" if args.sort_by_star() else "pit_rank" if args.sort_by_pit_rank() else "fkdr",
+        should_terminate = args.do_file_output() or not args.just_online_friends()
+    )
     if args.do_file_output():
         assert (args.date_cutoff() is None and not args.just_online_friends() and not args.minus_results())
         filename = ("Friends of " + 

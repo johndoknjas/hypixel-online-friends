@@ -9,7 +9,9 @@ class Args:
         args = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
         self._ARGS = Files.apply_aliases(args)
         self._ARG_KEYWORDS = ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
-                              'diff', 'diffl', 'diffr', 'sortstar', 'sortbystar', 'starsort',
+                              'diff', 'diffl', 'diffr', 
+                              'sortstar', 'sortbystar', 'starsort',
+                              'sortpit', 'sortbypit', 'pitsort',
                               'fileoutput', 'updateuuids', 'minusresults', 'trivial',
                               'matchingignsuuids', 'includemultiplayerfiles',
                               'keepfirstdictmultifiles', 'notallfromresults',
@@ -49,6 +51,9 @@ class Args:
     
     def sort_by_star(self) -> bool:
         return any(x in self._ARGS for x in ['sortstar', 'sortbystar', 'starsort'])
+    
+    def sort_by_pit_rank(self) -> bool:
+        return any(x in self._ARGS for x in ['sortpit', 'sortbypit', 'pitsort'])
     
     def epoch(self) -> bool:
         return 'epoch' in self._ARGS
