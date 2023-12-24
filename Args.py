@@ -9,13 +9,11 @@ class Args:
         args = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
         self._ARGS = Files.apply_aliases(args)
         self._ARG_KEYWORDS = ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
-                              'diff', 'diffl', 'diffr', 
-                              'sortstar', 'sortbystar', 'starsort',
-                              'sortpit', 'sortbypit', 'pitsort',
+                              'diff', 'diffl', 'diffr', 'starsort', 'pitsort',
                               'fileoutput', 'updateuuids', 'minusresults', 'trivial',
                               'matchingignsuuids', 'includemultiplayerfiles',
                               'keepfirstdictmultifiles', 'notallfromresults',
-                              'addadditionalfriends', 'addadditionals', '+additionals',
+                              'addadditionalfriends', 'addadditionals',
                               'noadditionalfriends', 'noadditionals', 'addaliases',
                               'getplayerjson', 'playerjson']
         # These keywords are possible options the user can specify for using the program. All of these are
@@ -50,10 +48,10 @@ class Args:
         return 'diff' in self._ARGS or 'diffl' in self._ARGS
     
     def sort_by_star(self) -> bool:
-        return any(x in self._ARGS for x in ['sortstar', 'sortbystar', 'starsort'])
+        return 'starsort' in self._ARGS
     
     def sort_by_pit_rank(self) -> bool:
-        return any(x in self._ARGS for x in ['sortpit', 'sortbypit', 'pitsort'])
+        return 'pitsort' in self._ARGS
     
     def epoch(self) -> bool:
         return 'epoch' in self._ARGS
@@ -99,7 +97,7 @@ class Args:
         return 'notallfromresults' not in self._ARGS
     
     def add_additional_friends(self) -> bool:
-        return any(x in self._ARGS for x in ['addadditionalfriends', 'addadditionals', '+additionals'])
+        return any(x in self._ARGS for x in ['addadditionalfriends', 'addadditionals'])
     
     def get_additional_friends(self) -> bool:
         return all(x not in self._ARGS for x in ['noadditionalfriends', 'noadditionals'])
