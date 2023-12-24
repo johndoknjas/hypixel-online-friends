@@ -134,7 +134,8 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
 
         if Utils.is_ign(arg):
             print("This player's uuid is " + player.uuid())
-        print("This player has " + str(len(player.friends())) + " unique friends total.\n")
+        print("This player has " + str(len(player.friends())) + " unique friends total.")
+        print(f"bw fkdr: {player.get_fkdr()}, bw star: {player.get_bw_star()}, pit rank: {player.pit_rank_string()}\n")
 
         player.set_will_exclude_friends(in_minus_symbol_section)
         player.set_will_intersect(is_intersect_player)

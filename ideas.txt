@@ -1,8 +1,5 @@
 # CONTINUE HERE - todos:
 
-    # Add an option to just print a dictionary report for a player (fkdr, star, pit rank, etc),
-      and nothing to do with friends.
-
     # Consider if there's a better algorithm for when to do second passes, due to the updated api rate limit of
       300 per 5 mins, rather than 60 per 1 min.
 
