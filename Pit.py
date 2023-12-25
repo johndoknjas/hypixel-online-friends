@@ -1,5 +1,4 @@
 import math
-from typing import List
 
 import Utils
 
@@ -34,16 +33,16 @@ class PitStats:
         return Utils.num_to_roman(self.prestige())
 
     def level(self) -> int:
-        levels_xp_reqs: List = [] # val at index i represents amount of total xp needed to get to level i+1
-                                  # for the player's current prestige.
-        for level in range(1, 121):
-            if level == 1:
-                prev_prestige = self.prestige() - 1
-                xp_to_prev_prestige = 0 if prev_prestige == -1 else PRESTIGE_XP[prev_prestige]
-                levels_xp_reqs.append(xp_to_prev_prestige)
-                continue
+        levels_xp_reqs = [] # val at index i represents amount of total xp needed to get to level i+1
+                            # for the player's current prestige.
+        prev_prestige = self.prestige() - 1
+        xp_to_prev_prestige = 0 if prev_prestige == -1 else PRESTIGE_XP[prev_prestige]
+        levels_xp_reqs.append(xp_to_prev_prestige) # amount of xp needed to get to level 1 of curr prestige.
+
+        for level in range(2, 121):
             prev_level_group_index = math.floor((level-1) / 10)
             additional_xp_needed_for_level = math.ceil(
                 LVL_GROUP_MULTIPLIER[prev_level_group_index] * PRESTIGE_MULTIPLIER[self.prestige()] / 100)
             levels_xp_reqs.append(additional_xp_needed_for_level + levels_xp_reqs[-1])
+
         return sum(1 for xp_req in levels_xp_reqs if self.xp() >= xp_req)

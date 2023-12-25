@@ -7,7 +7,7 @@ from random import choice
 from time import time, sleep
 from typing import List
 import re
-import requests # type: ignore
+import requests
 
 from MyClasses import UUID_Plus_Time
 import Files
