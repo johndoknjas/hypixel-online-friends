@@ -152,8 +152,6 @@ def output_player_jsons_to_file(players: List[Player]) -> None:
                                          "results/player-jsons")
 
 def main() -> None:
-    hypixel.set_api_keys()
-
     args = Args(sys.argv)
     assert set(args.get_keywords()).isdisjoint([pair[0] for pair in Files.get_aliases()])
     Utils.print_list(args.get_args(False, False), prepended_msg="self._ARGS list after applying aliases: ")

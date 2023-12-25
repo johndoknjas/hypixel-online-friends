@@ -7,7 +7,7 @@ from random import choice
 from time import time, sleep
 from typing import List
 import re
-import grequests # type: ignore
+import requests # type: ignore
 
 from MyClasses import UUID_Plus_Time
 import Files
@@ -30,39 +30,17 @@ class HypixelAPIError(Exception):
     """ Simple exception if something's gone very wrong and the program can't continue. """
     pass
 
-def getJSON(typeOfRequest, **kwargs) -> dict:
+def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
     """ This function is used for getting a JSON from Hypixel's Public API. """
     global num_api_calls_made
-
     num_api_calls_made += 1
     # print(str(num_api_calls_made) + '\n' + str(time() - TIME_STARTED) + '\n\n')
+    if typeOfRequest != 'player':
+        assert Utils.is_uuid(uuid_or_ign)
 
-    requestEnd = ''
-    if typeOfRequest == 'key':
-        api_key = kwargs['key']
-    else:
-        if not verified_api_keys:
-            set_api_keys()
-        api_key = choice(verified_api_keys) # Select a random API key from the list available.
-
-        if typeOfRequest == 'player':
-            UUIDType = 'uuid'
-            uuid = kwargs['uuid']
-            if Utils.is_ign(uuid):
-                UUIDType = 'name' # TODO: I could probably clean this up somehow.
-        if typeOfRequest == 'skyblockplayer':
-            typeOfRequest = "/skyblock/profiles"
-        conjunct_in_url = ''
-        for name, value in kwargs.items():
-            if typeOfRequest == "player" and name == "uuid":
-                name = UUIDType
-            requestEnd += (conjunct_in_url + '{}={}'.format(name, value))
-            conjunct_in_url = '&'
-
-    custom_headers = {"API-Key": api_key}
-    allURLS = [HYPIXEL_API_URL + '{}?{}'.format(typeOfRequest, requestEnd)] # Create request URL.
-    requests = (grequests.get(u, headers=custom_headers) for u in allURLS)
-    response = next(grequests.imap(requests))
+    requestEnd = '{}={}'.format('uuid' if Utils.is_uuid(uuid_or_ign) else 'name', uuid_or_ign)
+    requestURL = HYPIXEL_API_URL + '{}?{}'.format(typeOfRequest, requestEnd)
+    response = requests.get(requestURL, headers={"API-Key": get_api_key()})
     responseHeaders, responseJSON = response.headers, response.json()
 
     if 'RateLimit-Remaining' in responseHeaders:
@@ -73,7 +51,7 @@ def getJSON(typeOfRequest, **kwargs) -> dict:
     if not responseJSON['success']:
         raise HypixelAPIError(responseJSON)
     if typeOfRequest == 'player' and responseJSON['player'] is None:
-        raise PlayerNotFoundException(uuid)
+        raise PlayerNotFoundException(uuid_or_ign)
     try:
         return responseJSON[typeOfRequest]
     except KeyError:
@@ -101,9 +79,16 @@ def set_api_keys() -> None:
         function also checks that the api keys are all of the required length.
     """
     global verified_api_keys
+    assert not verified_api_keys
     with open('api-key.txt') as file:
         verified_api_keys = [line.rstrip() for line in file]
     assert all(len(api_key) == HYPIXEL_API_KEY_LENGTH for api_key in verified_api_keys)
+
+def get_api_key() -> str:
+    """This function returns a random api key from the ones stored in api-key.txt"""
+    if not verified_api_keys:
+        set_api_keys()
+    return choice(verified_api_keys)
 
 class Player:
     """ This class represents a player on Hypixel as a single object.
@@ -122,7 +107,7 @@ class Player:
 
     def __init__(self, uuid_or_ign: str) -> None:
         # print(uuid_or_ign)
-        self.JSON = getJSON('player', uuid=get_uuid(uuid_or_ign, call_api_last_resort=False))
+        self.JSON = getJSON('player', get_uuid(uuid_or_ign, call_api_last_resort=False))
 
     def getName(self, extra_safety_check=True) -> str:
         """ Just return player's name. """
@@ -140,9 +125,10 @@ class Player:
         return self.JSON['uuid']
     
     def getFriends(self) -> List[UUID_Plus_Time]:
-        """ This function returns a list of the UUIDs of all the player's friends."""
+        """ *Deprecated from Hypixel API*
+            This function returns a list of the UUIDs of all the player's friends."""
         friends = []
-        for friend in getJSON('friends', uuid=self.getUUID())['records']:
+        for friend in getJSON('friends', self.getUUID())['records']:
             friend_uuid = friend["uuidReceiver"] if friend["uuidReceiver"] != self.getUUID() else friend["uuidSender"]
             friends.append(UUID_Plus_Time(friend_uuid, friend['started']))
         return list(reversed(friends))
@@ -151,11 +137,11 @@ class Player:
         """ This function returns a bool representing whether the player is online. """
         if 'lastLogin' in self.JSON:
             return (self.JSON['lastLogin'] > self.JSON['lastLogout'] and
-                    getJSON('status', uuid=self.getUUID())['session']['online'])
+                    getJSON('status', self.getUUID())['session']['online'])
         if extra_online_check:
             # This player doesn't have the online status shown, but we can check if stats from
             # a few mins ago have updated:
-            return self.JSON != getJSON('player', uuid=self.getUUID())
+            return self.JSON != getJSON('player', self.getUUID())
         return False
     
     def getFKDR(self) -> float:
