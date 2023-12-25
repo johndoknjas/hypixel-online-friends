@@ -272,7 +272,7 @@ class Player:
                     report['friends'].append(friend_report)
             self.processed_msg(i+1, on_perpetual_pass, on_first_pass)
 
-        if do_additional_passes:
+        if do_additional_passes and friends:
             # Do perpetual passes:
             while True:
                 self.polish_dictionary_report(report, sort_key)
