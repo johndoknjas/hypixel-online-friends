@@ -1,5 +1,7 @@
 # CONTINUE HERE - todos:
 
+    # For friendedwhen, output when friended for all player(s) individually, if more than one entered.
+
     # Consider if there's a better algorithm for when to do second passes, due to the updated api rate limit of
       300 per 5 mins, rather than 60 per 1 min.
 

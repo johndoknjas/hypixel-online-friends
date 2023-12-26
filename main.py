@@ -153,19 +153,18 @@ def output_player_jsons_to_file(players: List[Player]) -> None:
 
 def main() -> None:
     args = Args(sys.argv)
-    assert set(args.get_keywords()).isdisjoint([pair[0] for pair in Files.get_aliases()])
-    Utils.print_list(args.get_args(False, False), prepended_msg="self._ARGS list after applying aliases: ")
+    ProcessingResults.set_args(args)
+
     if args.add_additional_friends():
         additional_friends.add_additional_friends_to_file_system(args.get_args(True, True)[0])
         sys.exit(0)
     if args.add_aliases():
         Files.add_aliases(args.get_keywords())
         sys.exit(0)
-
-    ProcessingResults.set_args(args)
     if args.get_player_json():
         output_player_jsons_to_file(get_players_from_args(args)[0])
         sys.exit(0)
+
     if args.find_matching_igns_or_uuids_in_results():
         ProcessingResults.print_all_matching_uuids_or_igns(args.get_args(True, True)[0])
     players_from_args, uuids_for_friended_when = get_players_from_args(args)
@@ -193,7 +192,6 @@ def main() -> None:
         should_terminate = args.do_file_output() or not args.just_online_friends()
     )
     if args.do_file_output():
-        assert (args.date_cutoff() is None and not args.just_online_friends() and not args.minus_results())
         filename = ("Friends of " + 
                     ("friends of " if args.find_friends_of_friends() else "") + 
                     player.name_for_file_output())

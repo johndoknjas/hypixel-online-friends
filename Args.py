@@ -20,6 +20,8 @@ class Args:
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'friendedwhen', 'intersect'). 
         # They don't appear in this class, but are instead used directly in the logic for main.py.
+        Utils.print_list(self.get_args(False, False), prepended_msg="self._ARGS list after applying aliases: ")
+        self._validation_checks()
     
     def get_args(self, remove_keywords: bool, remove_dates: bool) -> List[str]:
         args = copy.copy(self._ARGS)
@@ -74,13 +76,7 @@ class Args:
         return 'minusresults' in self._ARGS
     
     def get_trivial_dicts_in_results(self) -> bool:
-        if 'trivial' in self._ARGS:
-            assert (self.check_results() and not self.minus_results() and not self.update_uuids()
-                    and not self.find_matching_igns_or_uuids_in_results())
-            # The user should only be wanting to see how many total unique uuids are in results, if
-            # the 'trivial' command has been entered with check_results.
-            return True
-        return False
+        return 'trivial' in self._ARGS
     
     def find_matching_igns_or_uuids_in_results(self) -> bool:
         return 'matchingignsuuids' in self._ARGS
@@ -107,3 +103,24 @@ class Args:
     
     def get_player_json(self) -> bool:
         return 'getplayerjson' in self._ARGS or 'playerjson' in self._ARGS
+    
+    def _validation_checks(self) -> None:
+        assert set(self.get_keywords()).isdisjoint([pair[0] for pair in Files.get_aliases()])
+        if self.get_trivial_dicts_in_results():
+            assert (self.check_results() and not self.minus_results() and not self.update_uuids()
+                    and not self.find_matching_igns_or_uuids_in_results())
+            # The user should only be wanting to see how many total unique uuids are in results, if
+            # the 'trivial' command has been entered with check_results.
+        if self.do_file_output():
+            assert self.date_cutoff() is None and not self.just_online_friends() and not self.minus_results()
+        assert not (self.sort_by_pit_rank() and self.sort_by_star())
+        mini_programs = {'add_aliases': self.add_aliases(), 
+                         'add_additional_friends': self.add_additional_friends(),
+                         'get_player_json': self.get_player_json()}
+        assert sum(1 for x in mini_programs.values() if x) <= 1
+        if mini_programs['add_aliases']:
+            assert len(self.get_args(False, False)) == 1
+        if mini_programs['add_additional_friends']:
+            assert len(self.get_args(True, True)) == 1
+        if mini_programs['get_player_json']:
+            assert len(self.get_args(True, True)) >= 1
