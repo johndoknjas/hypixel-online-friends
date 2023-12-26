@@ -117,10 +117,10 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             all_friends: List[UUID_Plus_Time] = []
             standard_friends = ProcessingResults.get_best_f_list_for_player_in_results(uuid,
             must_have_times_friended=(FRIENDED_WHEN in args_no_keywords_or_date))
+            print("total number of friends in biggest single friends list/file for " + arg +
+                  (" (" + hypixel_obj.getName() + ")" if Utils.is_uuid(arg) else "") +
+                  ": " + str(len(standard_friends)))
             if args.get_additional_friends():
-                print("total number of friends in biggest single friends list/file for " + arg +
-                      (" (" + hypixel_obj.getName() + ")" if Utils.is_uuid(arg) else "") +
-                      ": " + str(len(standard_friends)))
                 all_friends = ProcessingResults.get_all_additional_friends_for_player(uuid)
                 print("total number of 'additional friends' is " + str(len(all_friends)))
                 for f in standard_friends:
@@ -150,6 +150,15 @@ def output_player_jsons_to_file(players: List[Player]) -> None:
     for player in players:
         Files.write_data_as_json_to_file(player.player_JSON(), "Player json for " + player.name(), 
                                          "results/player-jsons")
+        
+def friended_when_feature(players: List[Player], uuids_for_friended_when: List[str]) -> None:
+    for player in players:
+        for friend in player.friends():
+            if friend.uuid() not in uuids_for_friended_when:
+                continue
+            time_friended = friend.time_friended_parent_player('date')
+            assert type(time_friended) is str
+            print(f'{player.name()} became friends with {friend.name()} on {time_friended}')
 
 def main() -> None:
     args = Args(sys.argv)
@@ -170,7 +179,11 @@ def main() -> None:
     players_from_args, uuids_for_friended_when = get_players_from_args(args)
     if args.diff_left_to_right() or args.diff_right_to_left():
         diff_f_lists(players_from_args, args)
+    if uuids_for_friended_when:
+        friended_when_feature(players_from_args, uuids_for_friended_when)
+
     player = combine_players(players_from_args)
+
     if args.check_results():
         ProcessingResults.check_results(player, not args.get_trivial_dicts_in_results())
         if args.minus_results():
@@ -180,12 +193,6 @@ def main() -> None:
 
     if args.update_uuids():
         Files.update_uuids_file(ProcessingResults.ign_uuid_pairs_in_results())
-
-    for friend in player.friends():
-        if friend.uuid() in uuids_for_friended_when:
-            time_friended = friend.time_friended_parent_player('date')
-            assert type(time_friended) is str
-            print(friend.name() + " was friended on " + time_friended)
 
     report = player.create_dictionary_report(
         sort_key = "star" if args.sort_by_star() else "pit_rank" if args.sort_by_pit_rank() else "fkdr",
