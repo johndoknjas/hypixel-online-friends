@@ -1,6 +1,4 @@
-"""Contains functions for dealing with reading from the results folder.
-   No file (except main.py) should depend on this file, and this file should ideally not depend
-   on much in other files. This will make things easier if this file ends up being rewritten in C++ later on. """
+"""Contains functions for dealing with reading from the results folder."""
 
 import os
 import os.path
@@ -10,7 +8,6 @@ import copy
 
 import Utils
 import Files
-from Player import Player
 from MyClasses import UUID_Plus_Time
 import hypixel
 from Args import Args
@@ -19,6 +16,7 @@ _all_dicts_standard_files: Optional[List[dict]] = None
 _all_dicts_additional_friends_files: Optional[List[dict]] = None
 _all_dicts_unique_uuids: Optional[List[dict]] = None
 _ign_uuid_pairs_in_results: Optional[Dict[str, str]] = None
+_uuid_ign_pairs_in_results: Optional[Dict[str, str]] = None
 _player_uuids_with_f_list_in_results: Optional[List[str]] = None
 
 _NON_TRIVIAL_KEYS = ['friends', 'name', 'fkdr', 'star', 'pit_rank']
@@ -31,16 +29,26 @@ def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
 
     if not _ign_uuid_pairs_in_results:
         _ign_uuid_pairs_in_results = {}
-        for d in get_all_dicts_unique_uuids_in_results(True):
+        for d in (get_all_dicts_in_results(True, False, True) + get_all_dicts_in_results(True, False, False)):
             _ign_uuid_pairs_in_results.update(Utils.get_all_ign_uuid_pairs_in_dict(d))
     return deepcopy(_ign_uuid_pairs_in_results) if get_deepcopy else _ign_uuid_pairs_in_results
 
-def check_results(player: Optional[Player], only_non_trivial_dicts: bool) -> None:
-    """Traverses through the results folder and prints some stats and info. If a Player object is provided
-    for player, then some specific info about them will be outputted as well."""
+def uuid_ign_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
+    global _uuid_ign_pairs_in_results
+
+    if not _uuid_ign_pairs_in_results:
+        _uuid_ign_pairs_in_results = {}
+        for d in (get_all_dicts_in_results(True, False, True) + get_all_dicts_in_results(True, False, False)):
+            _uuid_ign_pairs_in_results.update(Utils.get_all_ign_uuid_pairs_in_dict(d, False, True))
+    return deepcopy(_uuid_ign_pairs_in_results) if get_deepcopy else _uuid_ign_pairs_in_results
+
+def check_results(only_non_trivial_dicts: bool, uuid: Optional[str], ign: Optional[str]) -> None:
+    """Traverses through the results folder and prints some stats and info. If a uuid and ign are provided,
+       then some specific info about that player will be outputted as well."""
     global _player_uuids_with_f_list_in_results
 
     _consistency_check_trivial_dicts_policy(only_non_trivial_dicts)
+    assert type(uuid) == type(ign)
 
     if not only_non_trivial_dicts:
         print(str(len(get_all_dicts_unique_uuids_in_results(False))) + 
@@ -57,10 +65,10 @@ def check_results(player: Optional[Player], only_non_trivial_dicts: bool) -> Non
         if k != 'friends':
             continue
         _player_uuids_with_f_list_in_results = [d['uuid'] for d in dicts_with_key]
-        if player:
+        if uuid:
             print(indent*2 + "Also, it's " + 
-                  Utils.bool_lowercase_str(player.uuid() in _player_uuids_with_f_list_in_results) +
-                  " that " + player.name() + "'s friends list is in the results folder.")
+                  Utils.bool_lowercase_str(uuid in _player_uuids_with_f_list_in_results) +
+                  " that " + ign + "'s friends list is in the results folder.")
     print('\n\n')
 
 def player_uuids_with_f_list_in_results(get_copy: bool = False) -> List[str]:
@@ -98,7 +106,8 @@ def get_all_dicts_in_results(only_non_trivial_dicts: bool, get_deepcopy: bool = 
 def get_all_dicts_unique_uuids_in_results(only_non_trivial_dicts: bool, get_deepcopy: bool = False,
                                           must_have_times_friended: bool = False) -> List[dict]:
     """Returns a flat list of dicts (no more than one per uuid), for all dicts/nested dicts found in the 
-    results folder. If multiple dicts have the same uuid, the one with the biggest friends list will be kept."""
+    results folder (excluding additional friends files). If multiple dicts have the same uuid, the one with 
+    the biggest friends list will be kept."""
     global _all_dicts_unique_uuids
 
     _consistency_check_trivial_dicts_policy(only_non_trivial_dicts)

@@ -8,6 +8,7 @@ import hypixel
 from MyClasses import UUID_Plus_Time, Specs
 import Files
 from Pit import PitStats
+import ProcessingResults
 
 class Player:
 
@@ -211,6 +212,15 @@ class Player:
         """Returns whether the player is already represented in this players list."""
         return any(self.represents_same_person(p) for p in players)
     
+    def print_dict_report(self, report: dict) -> None:
+        report = deepcopy(report)
+        if 'fkdr' in report:
+            report['fkdr'] = round(report['fkdr'], 3)
+        old_ign: str = ProcessingResults.uuid_ign_pairs_in_results()[report['uuid']]
+        if 'name' in report and report['name'].lower() != old_ign.lower():
+            report['name'] += f' ({old_ign})'
+        print(str(report))
+    
     def create_dictionary_report(self, sort_key: str = "fkdr", 
                                  extra_online_check: bool = False, should_terminate: bool = True) -> dict:
         # CONTINUE HERE - later, could make a Report class and return an object of that, instead of a dict here.
@@ -229,7 +239,7 @@ class Player:
                                                     else 'date'):
             report['time'] = time
         if self.specs().print_player_data_exclude_friends():
-            print(str(report))
+            self.print_dict_report(report)
         if not self.specs_for_friends():
             return report
         
@@ -304,7 +314,10 @@ class Player:
             report['friends'] = list({f['uuid']:f for f in report['friends']}.values())
             assert friends_copy == report['friends']
         if self.specs().print_only_players_friends():
-            Utils.print_list(report['friends'], prepended_msg="\n\n", separator="\n")
+            print()
+            for d in report['friends']:
+                self.print_dict_report(d)
+            print()
         return report
     
     def _sort_func(self, d: dict, sort_key: str) -> int:

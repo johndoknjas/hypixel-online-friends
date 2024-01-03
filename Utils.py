@@ -106,17 +106,22 @@ def is_ign(uuid_or_ign: str) -> bool:
        Precondition: uuid_or_ign must be either a uuid or ign."""
     return not is_uuid(uuid_or_ign)
 
-def get_all_ign_uuid_pairs_in_dict(d: dict, make_deepcopy: bool = False) -> dict:
+def get_all_ign_uuid_pairs_in_dict(d: dict, make_deepcopy: bool = False,
+                                   get_uuid_ign_pairs_instead: bool = False) -> dict:
     """Traverses the d param and returns a dict, where each key-value pair represents an ign-uuid 
-    pair found in d."""
+    pair found in d (unless `get_uuid_ign_pairs_instead` is True, in which case uuid-ign pairs are built)."""
     if make_deepcopy:
         d = deepcopy(d)
-    uuid_name_pairs = {}
+    ign_uuid_pairs = {}
     if 'name' in d:
-        uuid_name_pairs[d['name'].lower()] = d['uuid']
+        name_lower = d['name'].lower()
+        if get_uuid_ign_pairs_instead:
+            ign_uuid_pairs[d['uuid']] = name_lower
+        else:
+            ign_uuid_pairs[name_lower] = d['uuid']
     for friend_dict in d.get('friends', []):
-        uuid_name_pairs.update(get_all_ign_uuid_pairs_in_dict(friend_dict, make_deepcopy=False))
-    return uuid_name_pairs
+        ign_uuid_pairs.update(get_all_ign_uuid_pairs_in_dict(friend_dict, False, get_uuid_ign_pairs_instead))
+    return ign_uuid_pairs
 
 def get_all_nested_dicts_in_dict(d: dict, make_deepcopy: bool = False) -> List[dict]:
     """Traverses through d and returns a list of d and all its nested friend dicts."""
