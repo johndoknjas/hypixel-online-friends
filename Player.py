@@ -216,9 +216,10 @@ class Player:
         report = deepcopy(report)
         if 'fkdr' in report:
             report['fkdr'] = round(report['fkdr'], 3)
-        old_ign: str = ProcessingResults.uuid_ign_pairs_in_results()[report['uuid']]
-        if 'name' in report and report['name'].lower() != old_ign.lower():
-            report['name'] += f' ({old_ign})'
+        if report['uuid'] in (uuid_ign_pairs := ProcessingResults.uuid_ign_pairs_in_results()):
+            old_ign = uuid_ign_pairs[report['uuid']]
+            if 'name' in report and report['name'].lower() != old_ign.lower():
+                report['name'] += f' ({old_ign})'
         print(str(report))
     
     def create_dictionary_report(self, sort_key: str = "fkdr", 
