@@ -1,7 +1,7 @@
 """Contains functions for dealing with reading from the results folder."""
 
 import os
-import os.path
+from pathlib import Path
 from typing import Optional, List, Dict
 from copy import deepcopy
 import copy
@@ -170,8 +170,8 @@ def print_all_matching_uuids_or_igns(uuid_or_ign: str) -> None:
 def _get_all_jsons_in_results(get_additional_friends: bool = False) -> List[dict]:
     """Returns a list of dicts, where each dict represents the json each textfile stores."""
     all_jsons: List[dict] = []
-    all_files = os.listdir('results')
-    all_files = [f for f in all_files if _does_filename_meet_reqs(f, get_additional_friends)]
+    all_paths = sorted(Path('results').iterdir(), key=os.path.getmtime, reverse=True)
+    all_files = [f.name for f in all_paths if _does_filename_meet_reqs(f.name, get_additional_friends)]
     assert _args
     for f in all_files:
         filename = os.path.join('results', f)
