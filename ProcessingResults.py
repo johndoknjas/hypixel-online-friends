@@ -42,19 +42,14 @@ def uuid_ign_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
             _uuid_ign_pairs_in_results.update(Utils.get_all_ign_uuid_pairs_in_dict(d, False, True))
     return deepcopy(_uuid_ign_pairs_in_results) if get_deepcopy else _uuid_ign_pairs_in_results
 
-def check_results(only_non_trivial_dicts: bool, uuid: Optional[str], ign: Optional[str]) -> None:
+def check_results(uuid: Optional[str], ign: Optional[str]) -> None:
     """Traverses through the results folder and prints some stats and info. If a uuid and ign are provided,
        then some specific info about that player will be outputted as well."""
     global _player_uuids_with_f_list_in_results
 
-    _consistency_check_trivial_dicts_policy(only_non_trivial_dicts)
     assert type(uuid) == type(ign)
 
-    if not only_non_trivial_dicts:
-        print(str(len(get_all_dicts_unique_uuids_in_results(False))) + 
-              " total unique uuids recorded in the results folder.")
-        return
-
+    print(str(len(_get_all_unique_uuids_in_results())) + " total unique uuids recorded in the results folder.")
     all_dicts: List[dict] = get_all_dicts_unique_uuids_in_results(True)
     print(str(len(all_dicts)) + " total players with non-trivial data stored in the results folder.")
 
@@ -202,6 +197,23 @@ def _consistency_check_trivial_dicts_policy(get_non_trivial_dicts_param: bool) -
     elif _get_only_non_trivial_dicts != get_non_trivial_dicts_param:
         # Once set, the global should never be contradicted.
         raise ValueError('Already specified to either include/exclude trivial dicts.')
+    
+def _get_all_unique_uuids_in_results() -> List[str]:
+    """Returns all uuids written at some point in the results folder - most will be friends of friends."""
+    all_dicts = []
+    for d in (get_all_dicts_in_results(True, False, True) + get_all_dicts_in_results(True, False, False)):
+        all_dicts.extend(Utils.get_all_nested_dicts_in_dict(d))
+    return Utils.remove_duplicates([d['uuid'] for d in all_dicts])
+
+def _reset_static_fields() -> None:
+    """Should just be used for debugging purposes"""
+    global _all_dicts_additional_friends_files, _all_dicts_standard_files, _all_dicts_unique_uuids
+    global _ign_uuid_pairs_in_results, _get_only_non_trivial_dicts, _player_uuids_with_f_list_in_results
+    global _uuid_ign_pairs_in_results
+
+    (_all_dicts_additional_friends_files, _all_dicts_standard_files, _all_dicts_unique_uuids,
+     _ign_uuid_pairs_in_results, _get_only_non_trivial_dicts, _player_uuids_with_f_list_in_results,
+     _uuid_ign_pairs_in_results) = (None,) * 7
     
 def set_args(args: Args) -> None:
     global _args

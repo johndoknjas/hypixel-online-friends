@@ -7,7 +7,8 @@ from collections import OrderedDict, deque
 from copy import deepcopy
 
 def list_subtract(main_list: List, subtract_list: List) -> List:
-    return [x for x in main_list if x not in subtract_list]
+    subtract_set = set(subtract_list)
+    return [x for x in main_list if x not in subtract_set]
 
 def remove_duplicates(lst: List) -> List:
     return list(OrderedDict.fromkeys(deepcopy(lst))) # regular dict works to maintain order for python >= 3.7

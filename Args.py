@@ -10,7 +10,7 @@ class Args:
         self._ARGS = Files.apply_aliases(args)
         self._ARG_KEYWORDS = ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
                               'diff', 'diffl', 'diffr', 'starsort', 'pitsort',
-                              'fileoutput', 'updateuuids', 'minusresults', 'trivial',
+                              'fileoutput', 'updateuuids', 'minusresults',
                               'matchingignsuuids', 'includemultiplayerfiles',
                               'keepfirstdictmultifiles', 'notallfromresults',
                               'addadditionalfriends', 'addadditionals',
@@ -75,9 +75,6 @@ class Args:
         stored in the results folder."""
         return 'minusresults' in self._ARGS
     
-    def get_trivial_dicts_in_results(self) -> bool:
-        return 'trivial' in self._ARGS
-    
     def find_matching_igns_or_uuids_in_results(self) -> bool:
         return 'matchingignsuuids' in self._ARGS
     
@@ -106,11 +103,6 @@ class Args:
     
     def _validation_checks(self) -> None:
         assert set(self.get_keywords()).isdisjoint([pair[0] for pair in Files.get_aliases()])
-        if self.get_trivial_dicts_in_results():
-            assert (self.check_results() and not self.minus_results() and not self.update_uuids()
-                    and not self.find_matching_igns_or_uuids_in_results())
-            # The user should only be wanting to see how many total unique uuids are in results, if
-            # the 'trivial' command has been entered with check_results.
         if self.do_file_output():
             assert self.date_cutoff() is None and not self.just_online_friends() and not self.minus_results()
         assert not (self.sort_by_pit_rank() and self.sort_by_star())

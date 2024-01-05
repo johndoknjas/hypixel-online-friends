@@ -185,7 +185,7 @@ def main() -> None:
     player = combine_players(players_from_args)
 
     if args.check_results():
-        ProcessingResults.check_results(not args.get_trivial_dicts_in_results(), player.uuid(), player.name())
+        ProcessingResults.check_results(player.uuid(), player.name())
         if args.minus_results():
             player.polish_friends_list({uuid: Player(uuid) for uuid in 
                                         ProcessingResults.player_uuids_with_f_list_in_results()})
