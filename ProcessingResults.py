@@ -12,6 +12,7 @@ from MyClasses import UUID_Plus_Time
 import hypixel
 from Args import Args
 
+_args: Optional[Args] = None
 _all_dicts_standard_files: Optional[List[dict]] = None
 _all_dicts_additional_friends_files: Optional[List[dict]] = None
 _all_dicts_unique_uuids: Optional[List[dict]] = None
@@ -20,16 +21,13 @@ _uuid_ign_pairs_in_results: Optional[Dict[str, str]] = None
 _player_uuids_with_f_list_in_results: Optional[List[str]] = None
 
 _NON_TRIVIAL_KEYS = ['friends', 'name', 'fkdr', 'star', 'pit_rank']
-_get_only_non_trivial_dicts: Optional[bool] = None
-
-_args: Optional[Args] = None
 
 def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
     global _ign_uuid_pairs_in_results
 
     if not _ign_uuid_pairs_in_results:
         _ign_uuid_pairs_in_results = {}
-        for d in (get_all_dicts_in_results(True, False, True) + get_all_dicts_in_results(True, False, False)):
+        for d in (get_all_dicts_in_results(False, True) + get_all_dicts_in_results(False, False)):
             _ign_uuid_pairs_in_results.update(Utils.get_all_ign_uuid_pairs_in_dict(d))
     return deepcopy(_ign_uuid_pairs_in_results) if get_deepcopy else _ign_uuid_pairs_in_results
 
@@ -38,7 +36,7 @@ def uuid_ign_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
 
     if not _uuid_ign_pairs_in_results:
         _uuid_ign_pairs_in_results = {}
-        for d in (get_all_dicts_in_results(True, False, True) + get_all_dicts_in_results(True, False, False)):
+        for d in (get_all_dicts_in_results(False, True) + get_all_dicts_in_results(False, False)):
             _uuid_ign_pairs_in_results.update(Utils.get_all_ign_uuid_pairs_in_dict(d, False, True))
     return deepcopy(_uuid_ign_pairs_in_results) if get_deepcopy else _uuid_ign_pairs_in_results
 
@@ -49,9 +47,10 @@ def check_results(uuid: Optional[str], ign: Optional[str]) -> None:
 
     assert type(uuid) == type(ign)
 
+    print("\n\n")
     print(str(len(_get_all_unique_uuids_in_results())) + " total unique uuids recorded in the results folder.")
-    all_dicts: List[dict] = get_all_dicts_unique_uuids_in_results(True)
-    print(str(len(all_dicts)) + " total players with non-trivial data stored in the results folder.")
+    all_dicts: List[dict] = get_all_dicts_unique_uuids_in_results()
+    print(str(len(all_dicts)) + " total players with non-trivial data stored in the results folder (excluding additional friends files).")
 
     for k in _NON_TRIVIAL_KEYS:
         dicts_with_key = [d for d in all_dicts if k in d]
@@ -74,42 +73,35 @@ def player_uuids_with_f_list_in_results(get_copy: bool = False) -> List[str]:
     return (copy.copy(_player_uuids_with_f_list_in_results) if get_copy
             else _player_uuids_with_f_list_in_results)
 
-def get_all_dicts_in_results(only_non_trivial_dicts: bool, get_deepcopy: bool = False,
-                             get_additional_friends: bool = False) -> List[dict]:
+def get_all_dicts_in_results(get_deepcopy: bool = False, get_additional_friends: bool = False) -> List[dict]:
     """Returns a flat list of dicts, for all dicts/nested dicts found in the results folder. 
        Note that there can be multiple dicts with the same uuid."""
     global _all_dicts_standard_files
     global _all_dicts_additional_friends_files
-    
-    _consistency_check_trivial_dicts_policy(only_non_trivial_dicts)
-    all_dicts = _all_dicts_additional_friends_files if get_additional_friends else _all_dicts_standard_files
 
+    all_dicts = _all_dicts_additional_friends_files if get_additional_friends else _all_dicts_standard_files
     if not all_dicts:
         all_dicts = []
         for d in _get_all_jsons_in_results(get_additional_friends=get_additional_friends):
             all_dicts.extend(Utils.get_all_nested_dicts_in_dict(d, make_deepcopy=False))
-        if only_non_trivial_dicts:
-            all_dicts = _get_only_non_trivial_keys_in_dict(all_dicts)
+        all_dicts = _get_only_non_trivial_keys_in_dict(all_dicts)
         # Now save the result so that potential future calls won't have to recompute:
         if get_additional_friends:
             _all_dicts_additional_friends_files = all_dicts
         else:
             _all_dicts_standard_files = all_dicts
-
     return deepcopy(all_dicts) if get_deepcopy else all_dicts
 
-def get_all_dicts_unique_uuids_in_results(only_non_trivial_dicts: bool, get_deepcopy: bool = False,
+def get_all_dicts_unique_uuids_in_results(get_deepcopy: bool = False,
                                           must_have_times_friended: bool = False) -> List[dict]:
     """Returns a flat list of dicts (no more than one per uuid), for all dicts/nested dicts found in the 
     results folder (excluding additional friends files). If multiple dicts have the same uuid, the one with 
     the biggest friends list will be kept."""
     global _all_dicts_unique_uuids
 
-    _consistency_check_trivial_dicts_policy(only_non_trivial_dicts)
-
     if not _all_dicts_unique_uuids:
         _all_dicts_unique_uuids = Utils.remove_dicts_duplicate_uuids(
-            get_all_dicts_in_results(only_non_trivial_dicts),
+            get_all_dicts_in_results(),
             must_have_times_friended=must_have_times_friended
         )
 
@@ -118,7 +110,7 @@ def get_all_dicts_unique_uuids_in_results(only_non_trivial_dicts: bool, get_deep
 def get_best_f_list_for_player_in_results(uuid_or_ign: str,
                                           must_have_times_friended: bool = False) -> List[UUID_Plus_Time]:
     uuid = hypixel.get_uuid(uuid_or_ign)
-    for d in get_all_dicts_unique_uuids_in_results(True, must_have_times_friended=must_have_times_friended):
+    for d in get_all_dicts_unique_uuids_in_results(must_have_times_friended=must_have_times_friended):
         if d['uuid'] == uuid:
             # print(d['filename']) For debugging - will show you the filename the dict came from.
             return [UUID_Plus_Time(f['uuid'], f.get('time', None)) for f in d.get('friends', [])]
@@ -138,7 +130,7 @@ def update_list_if_applicable(lst: List[UUID_Plus_Time], new_elem: UUID_Plus_Tim
 def get_all_additional_friends_for_player(uuid_or_ign: str) -> List[UUID_Plus_Time]:
     uuid = hypixel.get_uuid(uuid_or_ign)
     additional_friends: List[UUID_Plus_Time] = []
-    for d in get_all_dicts_in_results(True, get_additional_friends=True):
+    for d in get_all_dicts_in_results(get_additional_friends=True):
         if d['uuid'] != uuid:
             continue
         for f in d.get('friends', []):
@@ -156,7 +148,7 @@ def print_all_matching_uuids_or_igns(uuid_or_ign: str) -> None:
 
     print('\nMatching ' + search_for + 's found in the results folder:')
     hits = []
-    for d in get_all_dicts_in_results(True):
+    for d in get_all_dicts_in_results():
         if 'name' in d and d[param_key].lower() == uuid_or_ign.lower() and d[search_for] not in hits:
             print(d[search_for])
             hits.append(d[search_for])
@@ -188,32 +180,21 @@ def _does_filename_meet_reqs(f: str, for_additional_friends: bool = False) -> bo
 
 def _get_only_non_trivial_keys_in_dict(dicts: List[dict]) -> List[dict]:
     return [d for d in dicts if any(k in d for k in _NON_TRIVIAL_KEYS)]
-
-def _consistency_check_trivial_dicts_policy(get_non_trivial_dicts_param: bool) -> None:
-    global _get_only_non_trivial_dicts
-
-    if _get_only_non_trivial_dicts is None:
-        _get_only_non_trivial_dicts = get_non_trivial_dicts_param
-    elif _get_only_non_trivial_dicts != get_non_trivial_dicts_param:
-        # Once set, the global should never be contradicted.
-        raise ValueError('Already specified to either include/exclude trivial dicts.')
     
 def _get_all_unique_uuids_in_results() -> List[str]:
     """Returns all uuids written at some point in the results folder - most will be friends of friends."""
     all_dicts = []
-    for d in (get_all_dicts_in_results(True, False, True) + get_all_dicts_in_results(True, False, False)):
+    for d in (get_all_dicts_in_results(False, True) + get_all_dicts_in_results(False, False)):
         all_dicts.extend(Utils.get_all_nested_dicts_in_dict(d))
     return Utils.remove_duplicates([d['uuid'] for d in all_dicts])
 
 def _reset_static_fields() -> None:
     """Should just be used for debugging purposes"""
     global _all_dicts_additional_friends_files, _all_dicts_standard_files, _all_dicts_unique_uuids
-    global _ign_uuid_pairs_in_results, _get_only_non_trivial_dicts, _player_uuids_with_f_list_in_results
-    global _uuid_ign_pairs_in_results
+    global _ign_uuid_pairs_in_results, _player_uuids_with_f_list_in_results, _uuid_ign_pairs_in_results
 
     (_all_dicts_additional_friends_files, _all_dicts_standard_files, _all_dicts_unique_uuids,
-     _ign_uuid_pairs_in_results, _get_only_non_trivial_dicts, _player_uuids_with_f_list_in_results,
-     _uuid_ign_pairs_in_results) = (None,) * 7
+     _ign_uuid_pairs_in_results, _player_uuids_with_f_list_in_results, _uuid_ign_pairs_in_results) = (None,) * 6
     
 def set_args(args: Args) -> None:
     global _args
