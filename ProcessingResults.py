@@ -42,7 +42,8 @@ def uuid_ign_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
 
 def check_results(uuid: Optional[str], ign: Optional[str]) -> None:
     """Traverses through the results folder and prints some stats and info. If a uuid and ign are provided,
-       then some specific info about that player will be outputted as well."""
+       then some specific info about that player will be outputted as well. Note that whether multiplayer
+       files are included depends on the cli args."""
     global _player_uuids_with_f_list_in_results
 
     assert type(uuid) == type(ign)
@@ -74,7 +75,7 @@ def player_uuids_with_f_list_in_results(get_copy: bool = False) -> List[str]:
             else _player_uuids_with_f_list_in_results)
 
 def get_all_dicts_in_results(get_deepcopy: bool = False, get_additional_friends: bool = False) -> List[dict]:
-    """Returns a flat list of dicts, for all dicts/nested dicts found in the results folder. 
+    """Returns a flat list of non-trivial dicts, for all dicts/nested dicts found in the results folder. 
        Note that there can be multiple dicts with the same uuid."""
     global _all_dicts_standard_files
     global _all_dicts_additional_friends_files
@@ -94,7 +95,7 @@ def get_all_dicts_in_results(get_deepcopy: bool = False, get_additional_friends:
 
 def get_all_dicts_unique_uuids_in_results(get_deepcopy: bool = False,
                                           must_have_times_friended: bool = False) -> List[dict]:
-    """Returns a flat list of dicts (no more than one per uuid), for all dicts/nested dicts found in the 
+    """Returns a flat list of non-trivial dicts (no more than one per uuid), for all dicts/nested dicts found in the 
     results folder (excluding additional friends files). If multiple dicts have the same uuid, the one with 
     the biggest friends list will be kept."""
     global _all_dicts_unique_uuids
