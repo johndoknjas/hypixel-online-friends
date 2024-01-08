@@ -6,6 +6,12 @@
     # For 'friendedwhen', if a friend appears as an additional friend and in an older standard friends list,
       display both dates.
 
+    # A bit under 8000 players (who aren't your friend) have their ign recorded in the results folder. So, if any
+      become your friend in the future, their old name will be displayed as the ign from this point 
+      (Dec/22-Jan/23 ish). This isn't a big deal since it'd be interesting to find out if we have a mutual 
+      friend, and 8000 players is a small fraction of the total player pool. But if there's a way to display
+      this oldest ign, as well as the ign for when you've now friended them going forward, that could be good.
+
     # Consider if there's a better algorithm for when to do second passes, due to the updated api rate limit of
       300 per 5 mins, rather than 60 per 1 min.
 
