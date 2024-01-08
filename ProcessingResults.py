@@ -60,7 +60,7 @@ def check_results(uuid: Optional[str], ign: Optional[str]) -> None:
         if k != 'friends':
             continue
         _player_uuids_with_f_list_in_results = [d['uuid'] for d in dicts_with_key]
-        if uuid:
+        if uuid and ign:
             print(indent*2 + "Also, it's " + 
                   Utils.bool_lowercase_str(uuid in _player_uuids_with_f_list_in_results) +
                   " that " + ign + "'s friends list is in the results folder.")
