@@ -20,11 +20,7 @@
     # Consider if there's a better algorithm for when to do second passes, due to the updated api rate limit of
       300 per 5 mins, rather than 60 per 1 min.
 
-    # Add type hinting to places in hypixel.py that don't have it.
-
-    # Clean up any misc code in hypixel.py that could benefit from it.
-
-    # Run pylint on the project.
+    # Run pylint on the project (`pylint *.py`).
 
     # Have a way to just output additional friends.
 
@@ -41,42 +37,12 @@
     # Add a way for the user to include parentheses in the cli args, if they want to control precedence.
       Could also add an option for a union symbol (e.g., 'v' or '\/' or 'union'), but this is already the
       default operation with just a space between args.
-    
-    # When the program starts, call the hypixel api to get the number of calls remaining for the current minute
-      for the api key (e.g., maybe you had just run the program). Then, set the num_api_calls_made global var
-      to 120 minus the value returned.
-        # See https://api.hypixel.net/#tag/API
-
-    # When an ign/uuid is given as a command line argument, update the uuids.txt file with its pair, if
-      the file doesn't already contain it.
-        # Also, when the getName() function of hypixel.py is called, you could update the uuids file if the
-          uuid-ign pair doesn't exist in it yet.
 
     # Make an arg keyword 'leaderboard', that if entered will get the igns of the top x (maybe 10?) players
       on some bw daily leaderboard, and puts their igns (or uuids) in the Args instance (as if they were entered
       by the user). This processing could be handled in main.py, since importing the hypixel.py file
       will be needed. Main.py can then send a list of igns/uuids to the Args instance via some member function
       you'll write.
-
-    # Added a textfile ('additional_friends.txt') where igns of people friended can be added. This is due to
-      Hypixel disabling the friends api endpoint.
-        # Implement a feature where, when specified by an argument, the program will get the igns from
-          this file and add them to the combined friends list to search.
-        # The friends in this textfile should be treated as the ones most recently added, in relation to
-          the friends retrieved through the api.
-            # If a friend in this textfile overlaps with the combined friends list, both duplicate uuids
-              obviously shouldn't be kept. The one in the textfile should override the other, and the friend
-              should be treated as recent (even if they were friended a long time ago via the combined
-              friends list).
-            # Can probably add these friends in this textfile to the combined friends list after the call
-              to combine_players / polish_friends_list or something.
-        # And within the textfile itself, friends added in the bottom/later lines should be treated as
-          more recently added.
-    
-    # Make a feature where for igns given after a certain command line arg (such as 'contains'?), the program
-      will check if they are in the f list (that it makes for the earlier arg(s)).
-        # Only positional args coming after 'contains' should be igns. I.e., if a '-' is present it should have
-          been before, and also no filenames after 'contains' (since it's just igns, not f lists for them).
 
     -----------------------------------
 
