@@ -16,10 +16,10 @@ _ign_uuid_pairs: Optional[dict] = None
 _aliases: Optional[List[Tuple[str, List[str]]]] = None
 
 def write_data_as_json_to_file(data: dict, description: str, folder_name: str = "results") -> None:
-    warning_msg = ("""About to output a player's friends list to a file. Note that for any additional
-                      friends not currently in such a 'standard list', their displayed old name in
-                      parentheses going forward will be their ign as of today.
-                      To proceed, press y: """)
+    warning_msg = """About to output a player's friends list to a file. Note that for any additional
+                     friends not currently in such a 'standard list', their displayed old name in
+                     parentheses going forward will be their ign as of today.
+                     To proceed, press y: """
     warning_msg = ' '.join(warning_msg.split()) + ' '
     if description.lower().startswith('friends of') and input(warning_msg).lower() != 'y':
         return

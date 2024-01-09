@@ -68,10 +68,9 @@ def find_value_of_nested_key(data, key):
     if isinstance(data, dict):
         if key in data:
             return data[key]
-        else:
-            for value in data.values():
-                if (result := find_value_of_nested_key(value, key)) is not None:
-                    return result
+        for value in data.values():
+            if (result := find_value_of_nested_key(value, key)) is not None:
+                return result
     elif isinstance(data, list):
         for element in data:
             if (result := find_value_of_nested_key(element, key)) is not None:

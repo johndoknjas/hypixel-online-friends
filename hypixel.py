@@ -24,11 +24,9 @@ num_api_calls_made: int = 0
 class PlayerNotFoundException(Exception):
     """ Simple exception if a player/UUID is not found. This exception can usually be ignored.
         You can catch this exception with ``except hypixel.PlayerNotFoundException:`` """
-    pass
 
 class HypixelAPIError(Exception):
     """ Simple exception if something's gone very wrong and the program can't continue. """
-    pass
 
 def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
     """ This function is used for getting a JSON from Hypixel's Public API. """
