@@ -18,8 +18,7 @@ def is_date_string(text: str) -> bool:
         datetime.strptime(text, '%Y-%m-%d')
     except ValueError:
         return False
-    else:
-        return True
+    return True
 
 def print_list(lst: List, prepended_msg: str = "", separator: str = " ", appended_msg: str = "\n\n") -> None:
     print(prepended_msg, end="")
@@ -261,7 +260,7 @@ def roman_to_num(roman: str) -> int:
     # https://stackoverflow.com/a/52426119/7743427:
     d = {'m': 1000, 'd': 500, 'c': 100, 'l': 50, 'x': 10, 'v': 5, 'i': 1}
     n = [d[i] for i in roman.lower() if i in d]
-    return sum([i if i>=n[min(j+1, len(n)-1)] else -i for j,i in enumerate(n)])
+    return sum(i if i>=n[min(j+1, len(n)-1)] else -i for j,i in enumerate(n))
 
 def pit_rank_to_num_for_sort(roman_rank: str) -> int:
     """roman_rank should be of the form: *roman_number*-*counting number from 1 to 120*

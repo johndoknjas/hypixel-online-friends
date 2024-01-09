@@ -20,7 +20,7 @@ class UUID_Plus_Time:
         if isinstance(time_val, str):
             assert Utils.is_date_string(time_val)
             self._unix_epoch_milliseconds = Utils.date_to_epoch(time_val, False)
-        elif isinstance(time_val, float) or isinstance(time_val, int):
+        elif isinstance(time_val, (float, int)):
             if Utils.is_in_milliseconds(time_val):
                 self._unix_epoch_milliseconds = time_val
             else:
