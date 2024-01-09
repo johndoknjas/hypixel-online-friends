@@ -6,6 +6,11 @@
     # For 'friendedwhen', if a friend appears as an additional friend and in an older standard friends list,
       display both dates.
 
+    # Add a new textfile called "old names" or something, which stores uuid-ign pairs for what you want a friend's
+      "old name" to be printed as. Could be used for friends whose outputted old name isn't one you recognize as
+      much as one of their other old names.
+        # You would also add a way for the user to update this textfile from the command line.
+
     # A bit under 8000 players (who aren't your friend) have their ign recorded in the results folder. So, if any
       become your friend in the future, their old name will be displayed as the ign from this point 
       (Dec/22-Jan/23 ish). This isn't a big deal since it'd be interesting to find out if we have a mutual 
