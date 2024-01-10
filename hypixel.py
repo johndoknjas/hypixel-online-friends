@@ -46,8 +46,8 @@ def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
         remaining_allowed_requests = int(responseHeaders['RateLimit-Remaining'])
         if remaining_allowed_requests <= 1:
             sleep_seconds = int(responseHeaders['RateLimit-Reset']) + 1
-            wake_up_time = (datetime.datetime.now() + datetime.timedelta(seconds=sleep_seconds)).time()
-            print("Sleeping until " + wake_up_time.strftime("%X") + " for rate limiting.")
+            wake_up_time = datetime.datetime.now() + datetime.timedelta(seconds=sleep_seconds)
+            print("Sleeping until " + wake_up_time.strftime("%I:%M:%S %p") + " for rate limiting.")
             sleep(sleep_seconds)
 
     if not responseJSON['success']:
