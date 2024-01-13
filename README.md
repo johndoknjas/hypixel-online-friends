@@ -2,7 +2,7 @@
 
 This program lets you find all the online friends of a certain player. In hypixel you can do this for your own account with '/f list', but afaik there's not an easy way to do this for accounts that you can't log in to.
 
-Note that hypixel.py is from https://github.com/Snuggle/hypixel.py/, with modifications made to it by myself.
+Note that hypixel.py and leveling.py are from https://github.com/Snuggle/hypixel.py/, with modifications made by myself to the former.
 
 Instructions for running:
 - Do pip3 install requests
