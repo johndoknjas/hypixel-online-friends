@@ -1,5 +1,14 @@
 # CONTINUE HERE - todos:
 
+    # Consider including network levels when outputting dict reports.
+
+    # For players in arguments, also include how close they are to the next prestige, both based off how much
+      xp they've gained within their current prestige, and how much xp they gained over all pit play time.
+        # Can also do something similar for bedwars stars.
+    
+    # Generalize the above so that as a feature, the user can input a network level or pit prestige/level, and
+      then the percent info is given for that.
+
     # Have a way to check whether someone is a friend. Similar to 'friendedwhen', but not requiring
       a date.
 

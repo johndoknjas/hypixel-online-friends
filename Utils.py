@@ -5,6 +5,7 @@ import time
 from typing import List, Optional, Union
 from collections import OrderedDict, deque
 from copy import deepcopy
+import math
 
 def list_subtract(main_list: List, subtract_list: List) -> List:
     subtract_set = set(subtract_list)
@@ -268,3 +269,12 @@ def pit_rank_to_num_for_sort(roman_rank: str) -> int:
     roman_prestige = roman_rank.split('-')[0]
     level_num = int(roman_rank.split('-')[1])
     return roman_to_num(roman_prestige) * 120 + level_num
+
+def round_up_to_closest_multiple(num: float, multiple_of: int) -> int:
+    """E.g., calling with args (101, 50) would return 150."""
+    return math.ceil(num / multiple_of) * multiple_of
+
+def sum_to_n(n: int) -> int:
+    """Returns the sum of 0 + ... + n."""
+    assert n >= 0
+    return n * (n + 1) // 2

@@ -13,6 +13,7 @@ import requests
 from MyClasses import UUID_Plus_Time
 import Files
 import Utils
+import leveling
 
 HYPIXEL_API_URL = 'https://api.hypixel.net/'
 
@@ -162,3 +163,9 @@ class Player:
             'profile' not in self.JSON['stats']['Pit']):
             return 0
         return self.JSON['stats']['Pit']['profile'].get('xp', 0)
+    
+    def getNetworkXP(self) -> float:
+        return self.JSON['networkExp']
+    
+    def getExactNWLevel(self) -> float:
+        return leveling.getExactLevel(self.getNetworkXP())

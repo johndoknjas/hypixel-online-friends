@@ -9,6 +9,7 @@ from MyClasses import UUID_Plus_Time, Specs
 import Files
 from Pit import PitStats
 import ProcessingResults
+import leveling
 
 class Player:
 
@@ -127,6 +128,18 @@ class Player:
     def pit_rank_string(self) -> str:
         return self.pit_prestige_roman() + "-" + str(self.pit_level())
     
+    def get_network_level(self) -> float:
+        return self.hypixel_object().getExactNWLevel()
+    
+    def get_network_xp(self) -> float:
+        return self.hypixel_object().getNetworkXP()
+    
+    def percent_way_to_next_network_level(self) -> float:
+        return leveling.getPercentageToNextLevel(self.get_network_xp())
+    
+    def percent_way_overall_to_given_network_level(self, target_level: int) -> float:
+        return self.get_network_xp() / leveling.getTotalExpToLevelFloor(target_level)
+    
     def specs_for_friends(self) -> Optional[Specs]:
         return self.specs().specs_for_friends()
     
@@ -221,6 +234,22 @@ class Player:
             if 'name' in report and report['name'].lower() != old_ign.lower():
                 report['name'] += f' ({old_ign})'
         print(str(report))
+
+    def print_player_info(self) -> None:
+        print(f"This player has {len(self.friends())} unique friends total.")
+        nw_level = self.get_network_level()
+        closest_multiple_50 = Utils.round_up_to_closest_multiple(nw_level, 50)
+        percent_to_next_level = round(self.percent_way_to_next_network_level() * 100, 2)
+        print(f"network xp: {self.get_network_xp()}, network level: {round(nw_level, 3)}, ", end="")
+        print(f"{percent_to_next_level}% of the way to the next network level")
+        for x in range(0,3):
+            multiple_50 = closest_multiple_50 + x*50
+            percent_overall_next_50_multiple = round(
+                self.percent_way_overall_to_given_network_level(multiple_50) * 100, 2
+                )
+            print(f"{percent_overall_next_50_multiple}% of the way overall to level {multiple_50}, ", end="")
+        print()
+        print(f"bw fkdr: {self.get_fkdr()}, bw star: {self.get_bw_star()}, pit rank: {self.pit_rank_string()}\n")
     
     def create_dictionary_report(self, sort_key: str = "fkdr", 
                                  extra_online_check: bool = False, should_terminate: bool = True) -> dict:
