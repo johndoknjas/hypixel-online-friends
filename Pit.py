@@ -18,6 +18,22 @@ PRESTIGE_XP = [65950, 138510, 217680, 303430, 395760, 494700, 610140, 742040, 90
 def convert_xp_to_prestige(pit_xp: int) -> int:
     return next(index for index, xp_req in enumerate(PRESTIGE_XP) if xp_req >= pit_xp)
 
+def get_xp_req_for_prestige(prestige: int) -> int:
+    """Returns the amount of total xp needed to get to level 1 of the specified prestige."""
+    return 0 if prestige == 0 else PRESTIGE_XP[prestige-1]
+
+def get_xp_reqs_for_levels(prestige: int) -> list[int]:
+    """Returns a list of size 120; the ith element is the total xp required to reach level i+1 of the
+       specified prestige."""
+    levels_xp_reqs = [get_xp_req_for_prestige(prestige)]
+    # This first element here is the amount of xp needed to get to level 1 of the specified prestige.
+    for level in range(2, 121):
+        prev_level_group_index = math.floor((level-1) / 10)
+        additional_xp_needed_for_level = math.ceil(
+            LVL_GROUP_MULTIPLIER[prev_level_group_index] * PRESTIGE_MULTIPLIER[prestige] / 100)
+        levels_xp_reqs.append(additional_xp_needed_for_level + levels_xp_reqs[-1])
+    return levels_xp_reqs
+
 class PitStats:
     def __init__(self, pit_xp: int):
         self._pit_xp = pit_xp
@@ -33,16 +49,4 @@ class PitStats:
         return Utils.num_to_roman(self.prestige())
 
     def level(self) -> int:
-        levels_xp_reqs = [] # val at index i represents amount of total xp needed to get to level i+1
-                            # for the player's current prestige.
-        prev_prestige = self.prestige() - 1
-        xp_to_prev_prestige = 0 if prev_prestige == -1 else PRESTIGE_XP[prev_prestige]
-        levels_xp_reqs.append(xp_to_prev_prestige) # amount of xp needed to get to level 1 of curr prestige.
-
-        for level in range(2, 121):
-            prev_level_group_index = math.floor((level-1) / 10)
-            additional_xp_needed_for_level = math.ceil(
-                LVL_GROUP_MULTIPLIER[prev_level_group_index] * PRESTIGE_MULTIPLIER[self.prestige()] / 100)
-            levels_xp_reqs.append(additional_xp_needed_for_level + levels_xp_reqs[-1])
-
-        return sum(1 for xp_req in levels_xp_reqs if self.xp() >= xp_req)
+        return sum(1 for xp_req in get_xp_reqs_for_levels(self.prestige()) if self.xp() >= xp_req)
