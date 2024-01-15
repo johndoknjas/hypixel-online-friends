@@ -256,7 +256,7 @@ class Player:
             print(f"{percent_overall_next_50_multiple} of the way overall to level {multiple_50}, ", end="")
         print("\n")
         print(f"bw fkdr: {self.get_fkdr()}, bw star: {self.get_bw_star()}\n") 
-        print(f"pit rank: {self.pit_rank_string()}")
+        print(f"pit rank: {self.pit_rank_string()}, pit xp: {self.pit_xp()}")
         print(f"percent through current prestige: {Utils.percentify(self.percent_through_curr_prestige())}")
         for i in range(1, 6):
             future_pres = self.pit_prestige() + i

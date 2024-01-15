@@ -9,6 +9,10 @@
     # Fix a minor bug in the program, where in some edge cases an off by one pit level error happens.
       E.g., trogador9555, I-73 but program outputs I-74. See brookeafk issue on github, try to figure out
       if that's what your program is doing right now.
+        - In the program you're treating the requirement xps for starting each new prestige according to
+          the PRESTIGE_XP list, rather than doing the calculations manually from 1 --> 120 --> 1
+          (which would fall slightly behind due to not including the automatic prestige bonus xp from lvl 0-->1), 
+          so not sure what's causing the problem.
     
     # Generalize the above so that as a feature, the user can input a network level or pit prestige/level, and
       then the percent info is given for that.
