@@ -278,3 +278,6 @@ def sum_to_n(n: int) -> int:
     """Returns the sum of 0 + ... + n."""
     assert n >= 0
     return n * (n + 1) // 2
+
+def percentify(d: float, decimal_places_to_round_to: int = 2) -> str:
+    return f"{round(100*d, decimal_places_to_round_to)}%"

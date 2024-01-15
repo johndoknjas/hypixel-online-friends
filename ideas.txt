@@ -2,9 +2,13 @@
 
     # Consider including network levels when outputting dict reports.
 
-    # For players in arguments, also include how close they are to the next prestige, both based off how much
-      xp they've gained within their current prestige, and how much xp they gained over all pit play time.
-        # Can also do something similar for bedwars stars.
+    # For players in arguments, do something similar to bedwars stars as you do with pit prestiges/levels.
+      E.g., how far through the current bw prestige a player is, how close a player is to a given prestige over
+      all their total playtime.
+
+    # Fix a minor bug in the program, where in some edge cases an off by one pit level error happens.
+      E.g., trogador9555, I-73 but program outputs I-74. See brookeafk issue on github, try to figure out
+      if that's what your program is doing right now.
     
     # Generalize the above so that as a feature, the user can input a network level or pit prestige/level, and
       then the percent info is given for that.

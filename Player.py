@@ -128,6 +128,12 @@ class Player:
     def pit_rank_string(self) -> str:
         return self.pit_prestige_roman() + "-" + str(self.pit_level())
     
+    def percent_through_curr_prestige(self) -> float:
+        return self.pit_stats_object().percent_through_curr_pres()
+    
+    def percent_way_overall_to_given_pres(self, prestige: int) -> float:
+        return self.pit_stats_object().percent_overall_to_given_pres(prestige)
+    
     def get_network_level(self) -> float:
         return self.hypixel_object().getExactNWLevel()
     
@@ -236,7 +242,7 @@ class Player:
         print(str(report))
 
     def print_player_info(self) -> None:
-        print(f"This player has {len(self.friends())} unique friends total.")
+        print(f"This player has {len(self.friends())} unique friends total.\n")
         nw_level = self.get_network_level()
         closest_multiple_50 = Utils.round_up_to_closest_multiple(nw_level, 50)
         percent_to_next_level = round(self.percent_way_to_next_network_level() * 100, 2)
@@ -244,12 +250,19 @@ class Player:
         print(f"{percent_to_next_level}% of the way to the next network level")
         for x in range(0,3):
             multiple_50 = closest_multiple_50 + x*50
-            percent_overall_next_50_multiple = round(
-                self.percent_way_overall_to_given_network_level(multiple_50) * 100, 2
-                )
-            print(f"{percent_overall_next_50_multiple}% of the way overall to level {multiple_50}, ", end="")
-        print()
-        print(f"bw fkdr: {self.get_fkdr()}, bw star: {self.get_bw_star()}, pit rank: {self.pit_rank_string()}\n")
+            percent_overall_next_50_multiple = Utils.percentify(
+                self.percent_way_overall_to_given_network_level(multiple_50)
+            )
+            print(f"{percent_overall_next_50_multiple} of the way overall to level {multiple_50}, ", end="")
+        print("\n")
+        print(f"bw fkdr: {self.get_fkdr()}, bw star: {self.get_bw_star()}\n") 
+        print(f"pit rank: {self.pit_rank_string()}")
+        print(f"percent through current prestige: {Utils.percentify(self.percent_through_curr_prestige())}")
+        for i in range(1, 6):
+            future_pres = self.pit_prestige() + i
+            print(f"Overall way through to prestige {future_pres}: ", end="")
+            print(Utils.percentify(self.percent_way_overall_to_given_pres(future_pres)), end=", ")
+        print("\n\n------------------------\n\n")
     
     def create_dictionary_report(self, sort_key: str = "fkdr", 
                                  extra_online_check: bool = False, should_terminate: bool = True) -> dict:

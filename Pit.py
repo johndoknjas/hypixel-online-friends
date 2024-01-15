@@ -15,9 +15,6 @@ PRESTIGE_XP = [65950, 138510, 217680, 303430, 395760, 494700, 610140, 742040, 90
                163605580, 213068080, 279018080, 361455580, 460380580,575793080, 707693080, 905543080, 
                1235293080, 1894793080, 5192293080,11787293080]
 
-def convert_xp_to_prestige(pit_xp: int) -> int:
-    return next(index for index, xp_req in enumerate(PRESTIGE_XP) if xp_req >= pit_xp)
-
 def get_xp_req_for_prestige(prestige: int) -> int:
     """Returns the amount of total xp needed to get to level 1 of the specified prestige."""
     return 0 if prestige == 0 else PRESTIGE_XP[prestige-1]
@@ -36,8 +33,9 @@ def get_xp_reqs_for_levels(prestige: int) -> list[int]:
 
 class PitStats:
     def __init__(self, pit_xp: int):
+        assert pit_xp >= 0
         self._pit_xp = pit_xp
-        self._prestige = convert_xp_to_prestige(self._pit_xp)
+        self._prestige = next(i for i, xp_req in enumerate(PRESTIGE_XP) if xp_req > self._pit_xp)
 
     def xp(self) -> int:
         return self._pit_xp
@@ -50,3 +48,13 @@ class PitStats:
 
     def level(self) -> int:
         return sum(1 for xp_req in get_xp_reqs_for_levels(self.prestige()) if self.xp() >= xp_req)
+    
+    def xp_gained_during_curr_pres(self) -> int:
+        return self.xp() - get_xp_req_for_prestige(self.prestige())
+    
+    def percent_through_curr_pres(self) -> float:
+        return self.xp_gained_during_curr_pres() / (get_xp_req_for_prestige(self.prestige()+1) -
+                                                    get_xp_req_for_prestige(self.prestige()))
+    
+    def percent_overall_to_given_pres(self, prestige: int) -> float:
+        return self.xp() / get_xp_req_for_prestige(prestige)
