@@ -260,6 +260,8 @@ class Player:
         print(f"percent through current prestige: {Utils.percentify(self.percent_through_curr_prestige())}")
         for i in range(1, 6):
             future_pres = self.pit_prestige() + i
+            if future_pres > 51:
+                break
             print(f"Overall way through to prestige {future_pres}: ", end="")
             print(Utils.percentify(self.percent_way_overall_to_given_pres(future_pres)), end=", ")
         print("\n\n------------------------\n\n")
