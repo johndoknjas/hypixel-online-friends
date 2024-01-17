@@ -159,9 +159,13 @@ def friended_when_feature(players: List[Player], uuids_for_friended_when: List[s
             assert type(time_friended) is str
             print(f'{player.name()} became friends with {friend.name()} on {time_friended}')
 
+def set_args_in_files(args: Args) -> None:
+    ProcessingResults.set_args(args)
+    hypixel.set_verify_requests(args.verify_requests())
+
 def main() -> None:
     args = Args(sys.argv)
-    ProcessingResults.set_args(args)
+    set_args_in_files(args)
 
     if args.add_additional_friends():
         additional_friends.add_additional_friends_to_file_system(args.get_args(True, True)[0])

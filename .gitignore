@@ -7,3 +7,4 @@ __pycache__/
 /debugging
 /additional_friends.txt
 /aliases.txt
+*.pem

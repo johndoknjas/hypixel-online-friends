@@ -157,6 +157,8 @@ def print_all_matching_uuids_or_igns(uuid_or_ign: str) -> None:
 
 def _get_all_jsons_in_results(get_additional_friends: bool = False) -> List[dict]:
     """Returns a list of dicts, where each dict represents the json each textfile stores."""
+    if not os.path.isdir('results'):
+        return []
     all_jsons: List[dict] = []
     all_paths = sorted(Path('results').iterdir(), key=os.path.getmtime, reverse=True)
     all_files = [f.name for f in all_paths if _does_filename_meet_reqs(f.name, get_additional_friends)]

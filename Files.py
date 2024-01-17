@@ -12,6 +12,8 @@ import ntpath
 
 import Utils
 
+_ALIASES_FILENAME = "aliases.txt"
+
 _ign_uuid_pairs: Optional[dict] = None
 _aliases: Optional[List[Tuple[str, List[str]]]] = None
 
@@ -85,7 +87,7 @@ def add_aliases(keywords: List[str]) -> None:
         aliases.append((curr_alias, curr_meaning))
         print()
 
-    with open('aliases.txt', 'a+') as file:
+    with open(_ALIASES_FILENAME, 'a+') as file:
         for alias_pair in aliases:
             file.write('"' + alias_pair[0] + '" = "' + alias_pair[1] + '"\n')
 
@@ -94,16 +96,20 @@ def get_aliases() -> List[Tuple[str, List[str]]]:
         will be a tuple, where the first element is a string (the alias), and the second element
         is a list (what the alias stands for). """
     global _aliases
-    
-    if _aliases is None:
-        _aliases = []
-        lines: List[str]
-        with open('aliases.txt', 'r') as file:
-            lines = file.read().splitlines()
-        for line in lines:
-            split_line = [x.strip('" ') for x in line.split('=')]
-            assert line.count('=') == 1 and len(split_line) == 2 and line == line.lower()
-            _aliases.append((split_line[0], split_line[1].split(' ')))
+
+    if _aliases is not None:
+        return _aliases
+    _aliases = []
+    if not os.path.isfile(_ALIASES_FILENAME):
+        return _aliases
+
+    lines: List[str]
+    with open(_ALIASES_FILENAME, 'r') as file:
+        lines = file.read().splitlines()
+    for line in lines:
+        split_line = [x.strip('" ') for x in line.split('=')]
+        assert line.count('=') == 1 and len(split_line) == 2 and line == line.lower()
+        _aliases.append((split_line[0], split_line[1].split(' ')))
     return _aliases
 
 def apply_aliases(lst: List[str]) -> List[str]:

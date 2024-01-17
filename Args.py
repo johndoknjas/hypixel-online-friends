@@ -15,7 +15,7 @@ class Args:
                               'keepfirstdictmultifiles', 'notallfromresults',
                               'addadditionalfriends', 'addadditionals',
                               'noadditionalfriends', 'noadditionals', 'addaliases',
-                              'getplayerjson', 'playerjson']
+                              'getplayerjson', 'playerjson', 'noverify', 'dontverify']
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'friendedwhen', 'intersect'). 
@@ -100,6 +100,9 @@ class Args:
     
     def get_player_json(self) -> bool:
         return 'getplayerjson' in self._ARGS or 'playerjson' in self._ARGS
+    
+    def verify_requests(self) -> bool:
+        return 'noverify' not in self._ARGS and 'dontverify' not in self._ARGS
     
     def _validation_checks(self) -> None:
         assert set(self.get_keywords()).isdisjoint([pair[0] for pair in Files.get_aliases()])

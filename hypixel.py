@@ -6,7 +6,7 @@ __version__ = '0.8.0'
 from random import choice
 from time import time, sleep
 import datetime
-from typing import List
+from typing import List, Optional
 import re
 import requests
 
@@ -23,6 +23,8 @@ verified_api_keys: List[str] = []
 TIME_STARTED: float = time()
 num_api_calls_made: int = 0
 
+_verify_requests: Optional[bool] = None
+
 class PlayerNotFoundException(Exception):
     """ Simple exception if a player/UUID is not found. This exception can usually be ignored.
         You can catch this exception with ``except hypixel.PlayerNotFoundException:`` """
@@ -37,10 +39,11 @@ def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
     # print(str(num_api_calls_made) + '\n' + str(time() - TIME_STARTED) + '\n\n')
     if typeOfRequest != 'player':
         assert Utils.is_uuid(uuid_or_ign)
+    assert _verify_requests is not None
 
     requestEnd = '{}={}'.format('uuid' if Utils.is_uuid(uuid_or_ign) else 'name', uuid_or_ign)
     requestURL = HYPIXEL_API_URL + '{}?{}'.format(typeOfRequest, requestEnd)
-    response = requests.get(requestURL, headers={"API-Key": get_api_key()})
+    response = requests.get(requestURL, headers={"API-Key": get_api_key()}, verify=_verify_requests)
     responseHeaders, responseJSON = response.headers, response.json()
 
     if 'RateLimit-Remaining' in responseHeaders:
@@ -92,6 +95,11 @@ def get_api_key() -> str:
     if not verified_api_keys:
         set_api_keys()
     return choice(verified_api_keys)
+
+def set_verify_requests(b: bool) -> None:
+    global _verify_requests
+    assert _verify_requests is None
+    _verify_requests = b
 
 class Player:
     """ This class represents a player on Hypixel as a single object.
