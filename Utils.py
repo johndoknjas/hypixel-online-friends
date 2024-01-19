@@ -263,12 +263,21 @@ def roman_to_num(roman: str) -> int:
     n = [d[i] for i in roman.lower() if i in d]
     return sum(i if i>=n[min(j+1, len(n)-1)] else -i for j,i in enumerate(n))
 
-def pit_rank_to_num_for_sort(roman_rank: str) -> int:
-    """roman_rank should be of the form: *roman_number*-*counting number from 1 to 120*
-    Will return an int equal to the roman number conversion * 120 + counting number"""
-    roman_prestige = roman_rank.split('-')[0]
-    level_num = int(roman_rank.split('-')[1])
-    return roman_to_num(roman_prestige) * 120 + level_num
+def get_prestige_from_pit_rank(pit_rank: str) -> int:
+    """pit_rank should be of the form: *roman number/decimal number* *-* *decimal number from 1 to 120*
+    Will return an int representing the prestige number."""
+    prestige = pit_rank.split('-')[0]
+    return int(prestige) if prestige.isdigit() else roman_to_num(prestige)
+
+def get_level_from_pit_rank(pit_rank: str) -> int:
+    """pit_rank should be of the form: *roman number/decimal number* *-* *decimal number from 1 to 120*
+    Will return an int representing the level number."""
+    return int(pit_rank.split('-')[1])
+
+def pit_rank_to_num_for_sort(pit_rank: str) -> int:
+    """pit_rank should be of the form: *roman number/decimal number* *-* *decimal number from 1 to 120*
+    Will return an int equal to the prestige number * 120 + level number"""
+    return get_prestige_from_pit_rank(pit_rank) * 120 + get_level_from_pit_rank(pit_rank)
 
 def round_up_to_closest_multiple(num: float, multiple_of: int) -> int:
     """E.g., calling with args (101, 50) would return 150."""
