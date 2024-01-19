@@ -104,18 +104,19 @@ class Args:
     def verify_requests(self) -> bool:
         return 'noverify' not in self._ARGS and 'dontverify' not in self._ARGS
     
+    def do_mini_program(self) -> bool:
+        mini_programs = [self.add_aliases(), self.add_additional_friends(), self.get_player_json()]
+        assert (bool_sum := sum(1 for x in mini_programs if x)) <= 1
+        return bool_sum == 1
+    
     def _validation_checks(self) -> None:
         assert set(self.get_keywords()).isdisjoint([pair[0] for pair in Files.get_aliases()])
         if self.do_file_output():
             assert self.date_cutoff() is None and not self.just_online_friends() and not self.minus_results()
         assert not (self.sort_by_pit_rank() and self.sort_by_star())
-        mini_programs = {'add_aliases': self.add_aliases(), 
-                         'add_additional_friends': self.add_additional_friends(),
-                         'get_player_json': self.get_player_json()}
-        assert sum(1 for x in mini_programs.values() if x) <= 1
-        if mini_programs['add_aliases']:
+        if self.add_aliases():
             assert len(self.get_args(False, False)) == 1
-        if mini_programs['add_additional_friends']:
+        if self.add_additional_friends():
             assert len(self.get_args(True, True)) == 1
-        if mini_programs['get_player_json']:
+        if self.get_player_json():
             assert len(self.get_args(True, True)) >= 1

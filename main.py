@@ -163,18 +163,22 @@ def set_args_in_files(args: Args) -> None:
     ProcessingResults.set_args(args)
     hypixel.set_verify_requests(args.verify_requests())
 
+def do_mini_program(args: Args) -> None:
+    if args.add_additional_friends():
+        additional_friends.add_additional_friends_to_file_system(args.get_args(True, True)[0])
+    elif args.add_aliases():
+        Files.add_aliases(args.get_keywords())
+    elif args.get_player_json():
+        output_player_jsons_to_file(get_players_from_args(args)[0])
+    else:
+        assert False
+
 def main() -> None:
     args = Args(sys.argv)
     set_args_in_files(args)
 
-    if args.add_additional_friends():
-        additional_friends.add_additional_friends_to_file_system(args.get_args(True, True)[0])
-        sys.exit(0)
-    if args.add_aliases():
-        Files.add_aliases(args.get_keywords())
-        sys.exit(0)
-    if args.get_player_json():
-        output_player_jsons_to_file(get_players_from_args(args)[0])
+    if args.do_mini_program():
+        do_mini_program(args)
         sys.exit(0)
 
     if args.find_matching_igns_or_uuids_in_results():
