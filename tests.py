@@ -1,10 +1,6 @@
 import pytest
-from copy import deepcopy
 
-from Utils import *
-from Files import *
-from MyClasses import *
-from Player import *
+from MyClasses import Specs
 
 Specs.set_common_specs(False, False)
 

@@ -5,9 +5,11 @@
     # For players in arguments, do something similar to bedwars stars as you do with pit prestiges/levels.
       E.g., how far through the current bw prestige a player is, how close a player is to a given prestige over
       all their total playtime.
-    
-    # Generalize the above so that as a feature, the user can input a network level or pit prestige/level, and
-      then the percent info is given for that.
+
+    # Do something similar to the pit percent feature, but for nw levels and possibly bw stars. I.e., just
+      a rank value is given by the user, no player igns required.
+
+    # Add a feature (such as 'pitplot') that uses matplotlib to plot graphs for xp vs level, and xp vs prestige.
 
     # Have a way to check whether someone is a friend. Similar to 'friendedwhen', but not requiring
       a date.

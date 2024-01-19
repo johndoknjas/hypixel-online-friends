@@ -266,13 +266,17 @@ def roman_to_num(roman: str) -> int:
 def get_prestige_from_pit_rank(pit_rank: str) -> int:
     """pit_rank should be of the form: *roman number/decimal number* *-* *decimal number from 1 to 120*
     Will return an int representing the prestige number."""
-    prestige = pit_rank.split('-')[0]
-    return int(prestige) if prestige.isdigit() else roman_to_num(prestige)
+    prestige_str = pit_rank.split('-')[0]
+    prestige = int(prestige_str) if prestige_str.isdigit() else roman_to_num(prestige_str)
+    assert 0 <= prestige <= 50
+    return prestige
 
 def get_level_from_pit_rank(pit_rank: str) -> int:
     """pit_rank should be of the form: *roman number/decimal number* *-* *decimal number from 1 to 120*
     Will return an int representing the level number."""
-    return int(pit_rank.split('-')[1])
+    level = int(pit_rank.split('-')[1])
+    assert 1 <= level <= 120
+    return level
 
 def pit_rank_to_num_for_sort(pit_rank: str) -> int:
     """pit_rank should be of the form: *roman number/decimal number* *-* *decimal number from 1 to 120*

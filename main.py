@@ -11,6 +11,7 @@ from Args import Args
 import ProcessingResults
 import additional_friends
 import Utils
+import Pit
 
 def intersect_player_lists(l1: List[Player], l2: List[Player]) -> List[Player]:
     return [p for p in l1 if p.in_player_list(l2)]
@@ -170,6 +171,9 @@ def do_mini_program(args: Args) -> None:
         Files.add_aliases(args.get_keywords())
     elif args.get_player_json():
         output_player_jsons_to_file(get_players_from_args(args)[0])
+    elif args.pit_percent():
+        for arg in args.get_args(True, True):
+            Pit.PitStats(Pit.get_xp_req_for_rank(arg)).print_info()
     else:
         assert False
 

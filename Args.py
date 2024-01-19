@@ -15,7 +15,8 @@ class Args:
                               'keepfirstdictmultifiles', 'notallfromresults',
                               'addadditionalfriends', 'addadditionals',
                               'noadditionalfriends', 'noadditionals', 'addaliases',
-                              'getplayerjson', 'playerjson', 'noverify', 'dontverify']
+                              'getplayerjson', 'playerjson', 'noverify', 'dontverify',
+                              'pitpercent', 'pit%']
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'friendedwhen', 'intersect'). 
@@ -104,8 +105,12 @@ class Args:
     def verify_requests(self) -> bool:
         return 'noverify' not in self._ARGS and 'dontverify' not in self._ARGS
     
+    def pit_percent(self) -> bool:
+        return 'pitpercent' in self._ARGS or 'pit%' in self._ARGS
+    
     def do_mini_program(self) -> bool:
-        mini_programs = [self.add_aliases(), self.add_additional_friends(), self.get_player_json()]
+        mini_programs = [self.add_aliases(), self.add_additional_friends(), self.get_player_json(),
+                         self.pit_percent()]
         assert (bool_sum := sum(1 for x in mini_programs if x)) <= 1
         return bool_sum == 1
     
@@ -118,5 +123,5 @@ class Args:
             assert len(self.get_args(False, False)) == 1
         if self.add_additional_friends():
             assert len(self.get_args(True, True)) == 1
-        if self.get_player_json():
+        if self.get_player_json() or self.pit_percent():
             assert len(self.get_args(True, True)) >= 1

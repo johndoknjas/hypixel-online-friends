@@ -113,26 +113,8 @@ class Player:
     def get_bw_star(self) -> int:
         return self.hypixel_object().getBedwarsStar()
     
-    def pit_xp(self) -> int:
-        return self.pit_stats_object().xp()
-    
-    def pit_prestige(self) -> int:
-        return self.pit_stats_object().prestige()
-    
-    def pit_prestige_roman(self) -> str:
-        return self.pit_stats_object().prestige_roman()
-    
-    def pit_level(self) -> int:
-        return self.pit_stats_object().level()
-    
     def pit_rank_string(self) -> str:
-        return self.pit_prestige_roman() + "-" + str(self.pit_level())
-    
-    def percent_through_curr_prestige(self) -> float:
-        return self.pit_stats_object().percent_through_curr_pres()
-    
-    def percent_way_overall_to_given_pres(self, prestige: int) -> float:
-        return self.pit_stats_object().percent_overall_to_given_pres(prestige)
+        return self.pit_stats_object().rank_string()
     
     def get_network_level(self) -> float:
         return self.hypixel_object().getExactNWLevel()
@@ -255,16 +237,9 @@ class Player:
             )
             print(f"{percent_overall_next_50_multiple} of the way overall to level {multiple_50}, ", end="")
         print("\n")
-        print(f"bw fkdr: {self.get_fkdr()}, bw star: {self.get_bw_star()}\n") 
-        print(f"pit rank: {self.pit_rank_string()}, pit xp: {self.pit_xp()}")
-        print(f"percent through current prestige: {Utils.percentify(self.percent_through_curr_prestige())}")
-        for i in range(1, 6):
-            future_pres = self.pit_prestige() + i
-            if future_pres > 51:
-                break
-            print(f"Overall way through to prestige {future_pres}: ", end="")
-            print(Utils.percentify(self.percent_way_overall_to_given_pres(future_pres)), end=", ")
-        print("\n\n------------------------\n\n")
+        print(f"bw fkdr: {self.get_fkdr()}, bw star: {self.get_bw_star()}\n")
+        self.pit_stats_object().print_info()
+        print("------------------------\n\n")
     
     def create_dictionary_report(self, sort_key: str = "fkdr", 
                                  extra_online_check: bool = False, should_terminate: bool = True) -> dict:

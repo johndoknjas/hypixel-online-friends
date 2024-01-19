@@ -42,6 +42,12 @@ def get_xp_reqs_for_levels(prestige: int) -> list[int]:
     assert len(levels_xp_reqs) == 121
     return levels_xp_reqs[1:]
 
+def get_xp_req_for_rank(pit_rank: str) -> int:
+    """pit_rank should be of the form: *roman number/decimal number* *-* *decimal number from 1 to 120*
+    Will return an int representing the total xp needed to reach it."""
+    pres, lvl = Utils.get_prestige_from_pit_rank(pit_rank), Utils.get_level_from_pit_rank(pit_rank)
+    return get_xp_reqs_for_levels(pres)[lvl-1]
+
 class PitStats:
     def __init__(self, pit_xp: int):
         assert pit_xp >= 0
@@ -54,8 +60,8 @@ class PitStats:
     def prestige(self) -> int:
         return self._prestige
     
-    def prestige_roman(self) -> str:
-        return Utils.num_to_roman(self.prestige())
+    def rank_string(self) -> str:
+        return f"{Utils.num_to_roman(self.prestige())}-{self.level()}"
 
     def level(self) -> int:
         xp_reqs_levels = get_xp_reqs_for_levels(self.prestige())
@@ -73,3 +79,14 @@ class PitStats:
     
     def percent_overall_to_given_pres(self, prestige: int) -> float:
         return self.xp() / get_xp_req_for_prestige(prestige)
+    
+    def print_info(self) -> None:
+        print(f"pit rank: {self.rank_string()}, pit xp: {self.xp()}")
+        print(f"percent through current prestige: {Utils.percentify(self.percent_through_curr_pres())}")
+        for i in range(1, 6):
+            future_pres = self.prestige() + i
+            if future_pres > 51:
+                break
+            print(f"Overall way through to prestige {future_pres}: ", end="")
+            print(Utils.percentify(self.percent_overall_to_given_pres(future_pres)), end=", ")
+        print("\n")
