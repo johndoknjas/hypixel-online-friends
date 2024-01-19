@@ -220,12 +220,6 @@ def is_older(time_one: Union[str, float, int, None], time_two: Union[str, float,
 def get_current_date() -> str:
     return datetime.now().strftime('%Y-%m-%d')
 
-def remove_first_n_elem_fast(l: list, n: int) -> list:
-    deque_l = deque(l)
-    for _ in range(n):
-        deque_l.popleft()
-    return list(deque_l)
-
 def replace_in_list(lst: List[str], elem_to_remove: str, list_to_insert: List[str]) -> List[str]:
     """Returns a new list, where any occurrences of `elem_to_remove` in `lst` are replaced with the
        elements in `list_to_insert`. `lst` will not be modified."""
