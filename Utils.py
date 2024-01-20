@@ -2,10 +2,12 @@
 
 from datetime import datetime
 import time
-from typing import List, Optional, Union
-from collections import OrderedDict, deque
+from typing import List, Optional, Union, Iterable
+from collections import OrderedDict
 from copy import deepcopy
 import math
+import matplotlib.pyplot as plt
+import mplcursors # type: ignore
 
 def list_subtract(main_list: List, subtract_list: List) -> List:
     subtract_set = set(subtract_list)
@@ -288,3 +290,25 @@ def sum_to_n(n: int) -> int:
 
 def percentify(d: float, decimal_places_to_round_to: int = 2) -> str:
     return f"{round(100*d, decimal_places_to_round_to)}%"
+
+def normalize_against_max_val(l: Iterable[float]) -> List[float]:
+    max_val = max(l)
+    return [i / max_val for i in l]
+
+class ScatterplotInfo:
+    def __init__(self, x_vals: Iterable[float], y_vals: Iterable[float],
+                 title: str, x_label: str, y_label: str):
+        self.x_vals, self.y_vals, self.title = list(x_vals), list(y_vals), title
+        self.x_label, self.y_label = x_label, y_label
+
+def output_scatterplots(info_for_figs: Iterable[ScatterplotInfo]) -> None:
+    for i, fig_info in enumerate(info_for_figs):
+        f = plt.figure(i+1)
+        plt.scatter(fig_info.x_vals, fig_info.y_vals, marker='o')
+        mplcursors.cursor(hover=True)
+        plt.title(fig_info.title)
+        plt.xlabel(fig_info.x_label)
+        plt.ylabel(fig_info.y_label)
+        plt.grid(True)
+        f.show()
+    input("Enter any key to exit: ")

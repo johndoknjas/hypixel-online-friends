@@ -7,9 +7,7 @@
       all their total playtime.
 
     # Do something similar to the pit percent feature, but for nw levels and possibly bw stars. I.e., just
-      a rank value is given by the user, no player igns required.
-
-    # Add a feature (such as 'pitplot') that uses matplotlib to plot graphs for xp vs level, and xp vs prestige.
+      a rank value is given by the user, no player igns required. Also do something similar to pitplot.
 
     # Have a way to check whether someone is a friend. Similar to 'friendedwhen', but not requiring
       a date.

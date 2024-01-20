@@ -11,6 +11,7 @@ from Args import Args
 import ProcessingResults
 import additional_friends
 import Utils
+from Utils import ScatterplotInfo
 import Pit
 
 def intersect_player_lists(l1: List[Player], l2: List[Player]) -> List[Player]:
@@ -174,6 +175,13 @@ def do_mini_program(args: Args) -> None:
     elif args.pit_percent():
         for arg in args.get_args(True, True):
             Pit.PitStats(Pit.get_xp_req_for_rank(arg)).print_info()
+    elif args.pit_plot():
+        fig1 = ScatterplotInfo(Pit.xp_percent_levels(), range(1, 121), 'Levels',
+                               'XP % Through a Prestige', 'Level')
+        prestige_xps = Pit.PRESTIGE_XP[:50]
+        fig2 = ScatterplotInfo(prestige_xps, range(1, len(prestige_xps)+1),
+                               'XP vs Prestige', 'XP', 'Prestige')
+        Utils.output_scatterplots([fig1, fig2])
     else:
         assert False
 

@@ -25,13 +25,13 @@ PRESTIGE_XP = [65950, 138510, 217680, 303430, 395760, 494700, 610140, 742040, 90
                1235293080, 1894793080, 5192293080,11787293080]
 # https://github.com/brooke-gill/pit/blob/307c126be78a5615b437205966dba13cbab3b787/xp2level.html#L93
 
-def get_xp_req_for_prestige(prestige: int) -> int:
+def total_xp_req_for_pres(prestige: int) -> int:
     """Returns the amount of total xp that must be earned before the specified prestige."""
     return 0 if prestige == 0 else PRESTIGE_XP[prestige-1]
 
-def get_xp_reqs_for_levels(prestige: int) -> list[int]:
+def total_xp_reqs_for_levels(prestige: int) -> list[int]:
     """Returns a list of size 120, containing the total xp to reach levels 1-120 of the specified prestige."""
-    levels_xp_reqs = [get_xp_req_for_prestige(prestige)] # this first element will be removed at the end of the function.
+    levels_xp_reqs = [total_xp_req_for_pres(prestige)] # this first element will be removed at the end of the function.
     for level in range(1, 121):
         prev_level_group_index = math.floor((level-1) / 10)
         additional_xp_needed_for_level = math.ceil(
@@ -42,11 +42,18 @@ def get_xp_reqs_for_levels(prestige: int) -> list[int]:
     assert len(levels_xp_reqs) == 121
     return levels_xp_reqs[1:]
 
+def xp_percent_levels() -> list[float]:
+    """Returns a list of size 120, containing the percent through a prestige (in terms of xp)
+       to reach a certain level."""
+    pres = 1 # Any greater prestige works as well.
+    xp_for_lvls = [xp - PRESTIGE_XP[pres-1] for xp in total_xp_reqs_for_levels(pres)]
+    return [d * 100 for d in Utils.normalize_against_max_val(xp_for_lvls)]
+
 def get_xp_req_for_rank(pit_rank: str) -> int:
     """pit_rank should be of the form: *roman number/decimal number* *-* *decimal number from 1 to 120*
     Will return an int representing the total xp needed to reach it."""
     pres, lvl = Utils.get_prestige_from_pit_rank(pit_rank), Utils.get_level_from_pit_rank(pit_rank)
-    return get_xp_reqs_for_levels(pres)[lvl-1]
+    return total_xp_reqs_for_levels(pres)[lvl-1]
 
 class PitStats:
     def __init__(self, pit_xp: int):
@@ -64,21 +71,21 @@ class PitStats:
         return f"{Utils.num_to_roman(self.prestige())}-{self.level()}"
 
     def level(self) -> int:
-        xp_reqs_levels = get_xp_reqs_for_levels(self.prestige())
+        xp_reqs_levels = total_xp_reqs_for_levels(self.prestige())
         for i in range(len(xp_reqs_levels)-1, -1, -1):
             if self.xp() >= xp_reqs_levels[i]:
                 return i+1
         assert False
     
     def xp_gained_during_curr_pres(self) -> int:
-        return self.xp() - get_xp_req_for_prestige(self.prestige())
+        return self.xp() - total_xp_req_for_pres(self.prestige())
     
     def percent_through_curr_pres(self) -> float:
-        return self.xp_gained_during_curr_pres() / (get_xp_req_for_prestige(self.prestige()+1) -
-                                                    get_xp_req_for_prestige(self.prestige()))
+        return self.xp_gained_during_curr_pres() / (total_xp_req_for_pres(self.prestige()+1) -
+                                                    total_xp_req_for_pres(self.prestige()))
     
     def percent_overall_to_given_pres(self, prestige: int) -> float:
-        return self.xp() / get_xp_req_for_prestige(prestige)
+        return self.xp() / total_xp_req_for_pres(prestige)
     
     def print_info(self) -> None:
         print(f"pit rank: {self.rank_string()}, pit xp: {self.xp()}")
