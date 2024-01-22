@@ -6,8 +6,6 @@ from typing import List, Optional, Union, Iterable
 from collections import OrderedDict
 from copy import deepcopy
 import math
-import matplotlib.pyplot as plt
-import mplcursors # type: ignore
 
 def list_subtract(main_list: List, subtract_list: List) -> List:
     subtract_set = set(subtract_list)
@@ -302,6 +300,8 @@ class ScatterplotInfo:
         self.x_label, self.y_label = x_label, y_label
 
 def output_scatterplots(info_for_figs: Iterable[ScatterplotInfo]) -> None:
+    import matplotlib.pyplot as plt
+    import mplcursors # type: ignore
     for i, fig_info in enumerate(info_for_figs):
         f = plt.figure(i+1)
         plt.scatter(fig_info.x_vals, fig_info.y_vals, marker='o')
