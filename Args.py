@@ -16,7 +16,7 @@ class Args:
                               'addadditionalfriends', 'addadditionals',
                               'noadditionalfriends', 'noadditionals', 'addaliases',
                               'getplayerjson', 'playerjson', 'noverify', 'dontverify',
-                              'pitpercent', 'pit%', 'pitplot']
+                              'pitpercent', 'pit%', 'pitplot', 'nwplot']
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'friendedwhen', 'intersect'). 
@@ -111,9 +111,12 @@ class Args:
     def pit_plot(self) -> bool:
         return 'pitplot' in self._ARGS
     
+    def network_plot(self) -> bool:
+        return 'nwplot' in self._ARGS
+    
     def do_mini_program(self) -> bool:
         mini_programs = [self.add_aliases(), self.add_additional_friends(), self.get_player_json(),
-                         self.pit_percent(), self.pit_plot()]
+                         self.pit_percent(), self.pit_plot(), self.network_plot()]
         assert (bool_sum := sum(1 for x in mini_programs if x)) <= 1
         return bool_sum == 1
     
@@ -122,7 +125,7 @@ class Args:
         if self.do_file_output():
             assert self.date_cutoff() is None and not self.just_online_friends() and not self.minus_results()
         assert not (self.sort_by_pit_rank() and self.sort_by_star())
-        if self.add_aliases() or self.pit_plot():
+        if self.add_aliases() or self.pit_plot() or self.network_plot():
             assert len(self.get_args(False, False)) == 1
         if self.add_additional_friends():
             assert len(self.get_args(True, True)) == 1
