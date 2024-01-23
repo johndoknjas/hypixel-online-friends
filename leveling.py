@@ -13,6 +13,11 @@ def getExactLevel(exp: float) -> float:
 
 def getLevelFloor(exp: float) -> int:
     return floor(1-_PQ_PREFIX + sqrt(_PQ_PREFIX**2+(2/_GROWTH)*exp))
+    """Expression in floor() finds the positive root of a quadratic equation:
+       1250*level**2 + 6250*level - 7500 - exp = 0. However, the expression is simpler than the
+       quadratic forumla expression I generated for this (though equivalent) - not sure how it was 
+       derived.
+    """
 
 def getPercentageToNextLevel(exp: float):
     lv = getLevelFloor(exp)
@@ -23,7 +28,10 @@ def getTotalExpToLevelFloor(level: int) -> float:
     assert level >= 1
     return _BASE*(level-1) + _GROWTH * (Utils.sum_to_n(level-2) if level > 1 else 0)
     """Equivalent to:
-    return sum(getExpFromLevelToNext(lvl) for lvl in range(1, level))"""
+    `return sum(getExpFromLevelToNext(lvl) for lvl in range(1, level))`
+    as well as
+    `return 1250*level**2 + 6250*level - 7500`
+    """
 
 def getExpFromLevelToNext(level: int):
     assert level >= 1
