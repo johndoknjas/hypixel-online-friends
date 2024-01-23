@@ -333,3 +333,22 @@ def fit_to_polynomial(fig: ScatterplotInfo, degree: int = 2) -> str:
         elif exp == 1:
             poly_string += 'x'
     return poly_string
+
+class QuadraticFunc:
+    def __init__(self, a: float, b: float, c: float):
+        "Represents some function: y = ax^2 + bx + c"
+        self.a, self.b, self.c = a, b, c
+
+    def y_val(self, x_val: float) -> float:
+        return self.a*x_val**2 + self.b*x_val + self.c
+    
+    def x_vals(self, y_val: float, no_negative_root: bool = False) -> List[float]:
+        """Returns the root(s) of the equation when substituting `y_val` for y."""
+        # Need to make a quadratic equation. Do this by substituting y_val for y,
+        # then subtracting it from both sides. This just makes c become self.c - y.
+        a, b, c = self.a, self.b, self.c - y_val
+        sqrt_exp = math.sqrt(b**2 - 4*a*c)
+        roots = [(-b+sqrt_exp)/(2*a), (-b-sqrt_exp)/(2*a)]
+        if no_negative_root:
+            roots = [r for r in roots if r >= 0]
+        return roots

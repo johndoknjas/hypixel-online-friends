@@ -1,23 +1,22 @@
 # Based off https://github.com/Plancke/hypixel-php/blob/master/src/util/Leveling.php
 
-from math import sqrt, floor
+from math import floor
 
 import Utils
 
 _BASE = 10000
 _GROWTH = 2500
-_PQ_PREFIX = _BASE/_GROWTH - 0.5
+_QUADRATIC_FUNC = Utils.QuadraticFunc(_GROWTH/2, _BASE - 1.5*_GROWTH, _GROWTH - _BASE)
+"""Represents the total xp as a function of level. Note that for decimal values of level in this
+   function, they won't be the 'exact' level hypixel records. So for finding the level, this
+   object should only be used to find the floor. Conversely for finding xp, only int values
+   for level should be supplied."""
 
 def getExactLevel(exp: float) -> float:
     return getLevelFloor(exp) + getPercentageToNextLevel(exp)
 
 def getLevelFloor(exp: float) -> int:
-    return floor(1-_PQ_PREFIX + sqrt(_PQ_PREFIX**2+(2/_GROWTH)*exp))
-    """Expression in floor() finds the positive root of a quadratic equation:
-       1250*level**2 + 6250*level - 7500 - exp = 0. However, the expression is simpler than the
-       quadratic forumla expression I generated for this (though equivalent) - not sure how it was 
-       derived.
-    """
+    return floor(_QUADRATIC_FUNC.x_vals(exp, True)[0])
 
 def getPercentageToNextLevel(exp: float):
     lv = getLevelFloor(exp)
@@ -26,12 +25,7 @@ def getPercentageToNextLevel(exp: float):
 
 def getTotalExpToLevelFloor(level: int) -> float:
     assert level >= 1
-    return _BASE*(level-1) + _GROWTH * (Utils.sum_to_n(level-2) if level > 1 else 0)
-    """Equivalent to:
-    `return sum(getExpFromLevelToNext(lvl) for lvl in range(1, level))`
-    as well as
-    `return 1250*level**2 + 6250*level - 7500`
-    """
+    return _QUADRATIC_FUNC.y_val(level)
 
 def getExpFromLevelToNext(level: int):
     assert level >= 1
