@@ -189,7 +189,7 @@ def do_mini_program(args: Args) -> None:
                               "XP vs Network Level", "XP", "Level")
         fig_inverted = fig.invert()
         Utils.output_scatterplots((fig, fig_inverted))
-        print(f"level vs xp fit to a polynomial: {Utils.fit_to_polynomial(fig_inverted, 2)}")
+        print(f"level vs xp data fit to a quadratic: {Utils.fit_to_polynomial(fig_inverted, 2)}")
     else:
         assert False
 

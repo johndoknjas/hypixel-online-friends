@@ -3,7 +3,7 @@
 from __future__ import annotations
 from datetime import datetime
 import time
-from typing import List, Optional, Union, Iterable
+from typing import List, Optional, Union, Iterable, Callable, Tuple
 from collections import OrderedDict
 from copy import deepcopy
 import math
@@ -282,11 +282,6 @@ def round_up_to_closest_multiple(num: float, multiple_of: int) -> int:
     """E.g., calling with args (101, 50) would return 150."""
     return math.ceil(num / multiple_of) * multiple_of
 
-def sum_to_n(n: int) -> int:
-    """Returns the sum of 0 + ... + n."""
-    assert n >= 0
-    return n * (n + 1) // 2
-
 def percentify(d: float, decimal_places_to_round_to: int = 2) -> str:
     return f"{round(100*d, decimal_places_to_round_to)}%"
 
@@ -335,20 +330,24 @@ def fit_to_polynomial(fig: ScatterplotInfo, degree: int = 2) -> str:
     return poly_string
 
 class QuadraticFunc:
-    def __init__(self, a: float, b: float, c: float):
+    def __init__(self, a: float, b: float, c: float, 
+                 req_for_x_vals: Optional[Callable[[float], bool]] = None,
+                 req_for_y_vals: Optional[Callable[[float], bool]] = None):
         "Represents some function: y = ax^2 + bx + c"
         self.a, self.b, self.c = a, b, c
+        self.req_for_x_vals, self.req_for_y_vals = req_for_x_vals, req_for_y_vals
 
     def y_val(self, x_val: float) -> float:
+        if self.req_for_x_vals:
+            assert self.req_for_x_vals(x_val)
         return self.a*x_val**2 + self.b*x_val + self.c
     
-    def x_vals(self, y_val: float, no_negative_root: bool = False) -> List[float]:
-        """Returns the root(s) of the equation when substituting `y_val` for y."""
+    def x_vals(self, y_val: float) -> Tuple[float, float]:
+        """Returns the roots of the equation when substituting `y_val` for y."""
         # Need to make a quadratic equation. Do this by substituting y_val for y,
         # then subtracting it from both sides. This just makes c become self.c - y.
+        if self.req_for_y_vals:
+            assert self.req_for_y_vals(y_val)
         a, b, c = self.a, self.b, self.c - y_val
         sqrt_exp = math.sqrt(b**2 - 4*a*c)
-        roots = [(-b+sqrt_exp)/(2*a), (-b-sqrt_exp)/(2*a)]
-        if no_negative_root:
-            roots = [r for r in roots if r >= 0]
-        return roots
+        return ((-b+sqrt_exp)/(2*a), (-b-sqrt_exp)/(2*a))
