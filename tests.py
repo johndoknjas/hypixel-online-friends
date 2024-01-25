@@ -21,20 +21,28 @@ class Tests:
         xps = [leveling.getTotalExpToLevelFloor(l) for l in level_range]
         assert xps[0] == 0 and xps[1] == 10000 and xps[2] == 22500 and xps[-1] == 125037487500
         assert all(isinstance(xp, int) for xp in xps)
+        expected_xp = 0
         for i, xp in enumerate(xps):
+            assert xp == expected_xp
             lvl = level_range[i]
             assert leveling.getLevelFloor(xp) == lvl
             if xp > 0:
                 assert leveling.getLevelFloor(xp-1) == lvl-1
             assert leveling.getLevelFloor(xp+1) == lvl
+            with pytest.raises(AssertionError):
+                leveling.getLevelFloor(xp-0.00001)
+            with pytest.raises(AssertionError):
+                leveling.getLevelFloor(xp+0.00001)
+            expected_xp += (10000 + 2500*i)
 
     def test_leveling_errors(self):
         with pytest.raises(AssertionError):
-            leveling.getLevelFloor(0.0001)
-        with pytest.raises(AssertionError):
-            leveling.getLevelFloor(10000-0.0001)
-        with pytest.raises(AssertionError):
             leveling.getTotalExpToLevelFloor(0)
+        with pytest.raises(AssertionError):
+            leveling.getLevelFloor(-1)
+        leveling.getLevelFloor(1000000000000)
+        with pytest.raises(AssertionError):
+            leveling.getLevelFloor(1000000000001)
         with pytest.raises(AssertionError):
             leveling.getTotalExpToLevelFloor(10000)
         with pytest.raises(AssertionError):
