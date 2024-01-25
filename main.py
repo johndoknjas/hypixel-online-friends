@@ -11,9 +11,10 @@ from Args import Args
 import ProcessingResults
 import additional_friends
 import Utils
-from Utils import ScatterplotInfo
 import Pit
 import leveling
+import Graphing
+from Graphing import ScatterplotInfo
 
 def intersect_player_lists(l1: List[Player], l2: List[Player]) -> List[Player]:
     return [p for p in l1 if p.in_player_list(l2)]
@@ -182,14 +183,14 @@ def do_mini_program(args: Args) -> None:
         prestige_xps = Pit.PRESTIGE_XP[:50]
         fig2 = ScatterplotInfo(prestige_xps, range(1, len(prestige_xps)+1),
                                'XP vs Prestige', 'XP', 'Prestige')
-        Utils.output_scatterplots((fig1, fig1.invert(), fig2, fig2.invert()))
+        Graphing.output_scatterplots((fig1, fig1.invert(), fig2, fig2.invert()))
     elif args.network_plot():
         level_range = range(1, 1001)
         fig = ScatterplotInfo((leveling.getTotalExpToLevelFloor(l) for l in level_range), level_range,
                               "XP vs Network Level", "XP", "Level")
         fig_inverted = fig.invert()
-        Utils.output_scatterplots((fig, fig_inverted))
-        print(f"level vs xp data fit to a quadratic: {Utils.fit_to_polynomial(fig_inverted, 2)}")
+        Graphing.output_scatterplots((fig, fig_inverted))
+        print(f"level vs xp data fit to a quadratic: {fig_inverted.fit_to_polynomial(2)}")
     else:
         assert False
 

@@ -2,13 +2,12 @@
 
 from math import floor
 
-import Utils
+from Graphing import QuadraticFunc
 
 _BASE = 10000
 _GROWTH = 2500
-_QUADRATIC_FUNC = Utils.QuadraticFunc(_GROWTH/2, _BASE - 1.5*_GROWTH, _GROWTH - _BASE,
-                                      lambda x: x in range(1,10000),
-                                      lambda y: int(y) == y >= 0)
+_QUADRATIC_FUNC = QuadraticFunc(_GROWTH/2, _BASE - 1.5*_GROWTH, _GROWTH - _BASE,
+                                lambda x: x in range(1,10000), lambda y: int(y) == y >= 0)
 """Represents the total xp as a function of level. Note that for decimal values of level in this
    function, they won't be the 'exact' level hypixel records. So for finding the level, this
    object should only be used to find the floor. Conversely for finding xp, only int values
