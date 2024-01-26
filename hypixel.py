@@ -167,9 +167,10 @@ class Player:
     def getPitXP(self) -> int:
         return Utils.nested_get(self.JSON, ['stats', 'Pit', 'profile', 'xp'], 0, int)
     
-    def getNetworkXP(self) -> float:
-        # continue here - return int?
-        return self.JSON['networkExp']
+    def getNetworkXP(self) -> int:
+        xp = self.JSON['networkExp']
+        assert int(xp) == xp
+        return int(xp)
     
     def getExactNWLevel(self) -> float:
         return leveling.getExactLevel(self.getNetworkXP())

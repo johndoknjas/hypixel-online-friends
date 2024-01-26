@@ -119,7 +119,7 @@ class Player:
     def get_network_level(self) -> float:
         return self.hypixel_object().getExactNWLevel()
     
-    def get_network_xp(self) -> float:
+    def get_network_xp(self) -> int:
         return self.hypixel_object().getNetworkXP()
     
     def percent_way_to_next_network_level(self) -> float:
