@@ -44,7 +44,13 @@ def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
     requestEnd = '{}={}'.format('uuid' if Utils.is_uuid(uuid_or_ign) else 'name', uuid_or_ign)
     requestURL = HYPIXEL_API_URL + '{}?{}'.format(typeOfRequest, requestEnd)
     response = requests.get(requestURL, headers={"API-Key": get_api_key()}, verify=_verify_requests)
-    responseHeaders, responseJSON = response.headers, response.json()
+    try:
+        responseHeaders, responseJSON = response.headers, response.json()
+    except Exception as e:
+        raise Exception(
+            f'{response.content}\nresponse content ^\nuuid_or_ign: {uuid_or_ign}\n'
+            f'typeOfRequest: {typeOfRequest}\nthere was a problem with response.json()'
+        ) from e
 
     if 'RateLimit-Remaining' in responseHeaders:
         remaining_allowed_requests = int(responseHeaders['RateLimit-Remaining'])
