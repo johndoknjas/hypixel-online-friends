@@ -17,9 +17,9 @@ class Tests:
         assert not friends_specs._just_uuids
     
     def test_network_levels(self):
-        level_range = range(1, 10000)
+        level_range = range(1, 10001)
         xps = [leveling.getTotalExpToLevelFloor(l) for l in level_range]
-        assert xps[0] == 0 and xps[1] == 10000 and xps[2] == 22500 and xps[-1] == 125037487500
+        assert xps[0] == 0 and xps[1] == 10000 and xps[2] == 22500 and xps[-1] == 125062492500
         assert all(isinstance(xp, int) for xp in xps)
         expected_xp = 0
         for i, xp in enumerate(xps):
@@ -44,7 +44,7 @@ class Tests:
         with pytest.raises(AssertionError):
             leveling.getLevelFloor(1000000000001)
         with pytest.raises(AssertionError):
-            leveling.getTotalExpToLevelFloor(10000)
+            leveling.getTotalExpToLevelFloor(10001)
         with pytest.raises(AssertionError):
             leveling.getTotalExpToLevelFloor(1.00001)
         with pytest.raises(AssertionError):

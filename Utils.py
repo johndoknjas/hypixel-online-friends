@@ -2,7 +2,7 @@
 
 from datetime import datetime
 import time
-from typing import List, Optional, Union, Iterable
+from typing import List, Optional, Union, Iterable, Any, Type
 from collections import OrderedDict
 from copy import deepcopy
 import math
@@ -287,3 +287,13 @@ def percentify(d: float, decimal_places_to_round_to: int = 2) -> str:
 def normalize_against_max_val(l: Iterable[float]) -> List[float]:
     max_val = max(l)
     return [i / max_val for i in l]
+
+def nested_get(d: dict, nested_keys: list, default_val: Any, expected_type: Optional[Type] = None) -> Any:
+    try:
+        for k in nested_keys:
+            d = d[k]
+        return_val = d
+    except:
+        return_val = default_val
+    assert expected_type is None or type(return_val) == expected_type
+    return return_val

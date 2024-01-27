@@ -162,24 +162,21 @@ class Player:
         return False
     
     def getFKDR(self) -> float:
-        if not self.JSON or 'stats' not in self.JSON or 'Bedwars' not in self.JSON['stats']:
-            return 0
-        return Utils.fkdr_division(self.JSON['stats']['Bedwars'].get('final_kills_bedwars', 0), 
-                                   self.JSON['stats']['Bedwars'].get('final_deaths_bedwars', 0))
+        return Utils.fkdr_division(
+            Utils.nested_get(self.JSON, ['stats', 'Bedwars', 'final_kills_bedwars'], 0, int),
+            Utils.nested_get(self.JSON, ['stats', 'Bedwars', 'final_deaths_bedwars'], 0, int)
+        )
     
     def getBedwarsStar(self) -> int:
-        if not self.JSON or 'achievements' not in self.JSON or 'bedwars_level' not in self.JSON['achievements']:
-            return 0
-        return self.JSON['achievements']['bedwars_level']
+        return Utils.nested_get(self.JSON, ['achievements', 'bedwars_level'], 0, int)
     
     def getPitXP(self) -> int:
-        if (not self.JSON or 'stats' not in self.JSON or 'Pit' not in self.JSON['stats'] or
-            'profile' not in self.JSON['stats']['Pit']):
-            return 0
-        return self.JSON['stats']['Pit']['profile'].get('xp', 0)
+        return Utils.nested_get(self.JSON, ['stats', 'Pit', 'profile', 'xp'], 0, int)
     
-    def getNetworkXP(self) -> float:
-        return self.JSON['networkExp']
+    def getNetworkXP(self) -> int:
+        xp = self.JSON['networkExp']
+        assert int(xp) == xp
+        return int(xp)
     
     def getExactNWLevel(self) -> float:
         return leveling.getExactLevel(self.getNetworkXP())
