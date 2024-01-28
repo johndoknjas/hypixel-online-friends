@@ -16,6 +16,9 @@
         friends endpoint of hypixel's api has been removed for about a year now.
       - Add an Arg keyword for just getting additional friends.
       - Consider making the positional arg keywords (in main.py) be encapsulated within Args.py.
+        - Then, functions like get_arguments could have an additional param for 'remove_positional_keywords'.
+        - Could also make a function for 'get_positional_keywords'.
+        - And update current usage of 'keywords' related stuff in Args to be 'global_keywords'.
 
     # Have a way to check whether someone is a friend. Similar to 'friendedwhen', but not requiring
       a date.
