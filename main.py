@@ -191,6 +191,15 @@ def do_mini_program(args: Args) -> None:
         fig_inverted = fig.invert()
         Graphing.output_scatterplots((fig, fig_inverted))
         print(f"level vs xp data fit to a quadratic: {fig_inverted.fit_to_polynomial(2)}")
+    elif args.contains_substr():
+        for substr in args.get_args(False, False)[1:]:
+            substr = substr.lower()
+            keyword_matches = sorted([keyword for keyword in args.get_keywords()
+                                      if substr in keyword.lower()])
+            print(f"Keyword matches for '{substr}':\n" + '\n'.join(keyword_matches))
+            ign_matches = sorted([ign for ign in ProcessingResults.ign_uuid_pairs_in_results()
+                                  if substr in ign.lower()])
+            print(f"\nPlayer name matches for '{substr}':\n" + '\n'.join(ign_matches) + '\n')
     else:
         assert False
 

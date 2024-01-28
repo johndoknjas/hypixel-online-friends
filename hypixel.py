@@ -48,7 +48,7 @@ def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
         responseHeaders, responseJSON = response.headers, response.json()
     except Exception as e:
         raise Exception(
-            f'{response.content}\nresponse content ^\nuuid_or_ign: {uuid_or_ign}\n'
+            f'{response.content.decode()}\nresponse content ^\nuuid_or_ign: {uuid_or_ign}\n'
             f'typeOfRequest: {typeOfRequest}\nthere was a problem with response.json()'
         ) from e
 

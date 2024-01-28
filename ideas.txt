@@ -9,10 +9,13 @@
     # Do something similar to the pit percent feature, but for nw levels and possibly bw stars. I.e., just
       a rank value is given by the user, no player igns required.
 
-    # Add a feature where the user can input the start of an ign or arg keyword, and then the 
-      program outputs all possibilities. For igns, it could go through the results folder.
-
     # Add plot functionality for BW stars.
+
+    # Make some updates to Args related stuff:
+      - Consider getting rid of the 'fromresults'/'notallfromresults' stuff, since the 
+        friends endpoint of hypixel's api has been removed for about a year now.
+      - Add an Arg keyword for just getting additional friends.
+      - Consider making the positional arg keywords (in main.py) be encapsulated within Args.py.
 
     # Have a way to check whether someone is a friend. Similar to 'friendedwhen', but not requiring
       a date.
