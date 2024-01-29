@@ -160,8 +160,11 @@ def friended_when_feature(players: List[Player], uuids_for_friended_when: List[s
             if friend.uuid() not in uuids_for_friended_when:
                 continue
             time_friended = friend.time_friended_parent_player('date')
-            assert type(time_friended) is str
-            print(f'{player.name()} became friends with {friend.name()} on {time_friended}')
+            if time_friended is not None:
+                assert type(time_friended) is str
+                print(f'{player.name()} became friends with {friend.name()} on {time_friended}')
+            else:
+                print(f'{player.name()} is friends with {friend.name()}, but no date recorded.')
 
 def set_args_in_files(args: Args) -> None:
     ProcessingResults.set_args(args)

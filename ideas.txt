@@ -22,6 +22,12 @@
 
     # Have a way to check whether someone is a friend. Similar to 'friendedwhen', but not requiring
       a date.
+        # Note that this is now kind of already done with the friendedwhen feature (if a player is 
+          friends but the date isn't recorded in the list, a note is outputted). However, it's still
+          best to do an 'isfriend' feature, since the 'friendedwhen' feature makes having
+          dates in the friends list it selects a top priority.
+        # Although the best solution more generally might just be not picking the 'best' standard 
+          friends list in ProcessingResults, and instead combining them like you do with additionals.
 
     # For 'friendedwhen', if a friend appears as an additional friend and in an older standard friends list,
       display both dates.

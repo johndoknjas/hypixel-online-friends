@@ -325,14 +325,12 @@ class Player:
 
     def polish_dictionary_report(self, report: dict, sort_key: str) -> dict:
         report = deepcopy(report)
-        if 'friends' in report:
-            report['friends'] = sorted(report['friends'], 
-                                key=lambda d: self._sort_func(d, sort_key),
-                                reverse=True)
-            # Remove duplicates for any uuids (friends) - however, shouldn't be any:
-            friends_copy = report['friends']
-            report['friends'] = list({f['uuid']:f for f in report['friends']}.values())
-            assert friends_copy == report['friends']
+        if not report.get('friends', None): # if friends list doesn't exist or is empty:
+            return report
+        report['friends'] = sorted(report['friends'], key=lambda d: self._sort_func(d, sort_key),
+                                   reverse=True)
+        # Assert that there are no duplicate uuids:
+        assert report['friends'] == list({f['uuid']:f for f in report['friends']}.values())
         if self.specs().print_only_players_friends():
             print()
             for d in report['friends']:
