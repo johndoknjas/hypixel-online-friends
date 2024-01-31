@@ -81,9 +81,9 @@ def add_aliases(keywords: List[str]) -> None:
             break
         if curr_alias in forbidden_as_aliases:
             raise ValueError(f'{curr_alias} is either already an alias, or is a keyword')
-        if Utils.contains_whitespace(curr_alias):
-            raise ValueError('An alias cannot contain any whitespace')
+        assert not Utils.contains_whitespace(curr_alias)
         curr_meaning = input("Enter the text this alias stands for: ").lower()
+        assert '.txt' not in curr_meaning
         aliases.append((curr_alias, curr_meaning))
         print()
 
@@ -94,7 +94,7 @@ def add_aliases(keywords: List[str]) -> None:
 def get_aliases() -> List[Tuple[str, List[str]]]:
     """ Returns a list representing the aliases stored in aliases.txt. Each element of this list
         will be a tuple, where the first element is a string (the alias), and the second element
-        is a list (what the alias stands for). """
+        is a list of strings (what the alias stands for). """
     global _aliases
 
     if _aliases is not None:
