@@ -130,6 +130,8 @@ class Args:
         return bool_sum == 1
     
     def _validation_checks(self) -> None:
+        assert all(arg.endswith('.txt') or arg.lower() == arg
+                   for arg in self.get_args(False, False))
         assert set(self.get_keywords()).isdisjoint([pair[0] for pair in Files.get_aliases()])
         if self.do_file_output():
             assert self.date_cutoff() is None and not self.just_online_friends() and not self.minus_results()
