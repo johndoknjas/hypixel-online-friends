@@ -13,6 +13,7 @@ import additional_friends
 import Utils
 import Pit
 import leveling
+import bedwars
 import Graphing
 from Graphing import ScatterplotInfo
 
@@ -199,6 +200,12 @@ def do_mini_program(args: Args) -> None:
         fig_inverted = fig.invert()
         Graphing.output_scatterplots((fig, fig_inverted))
         print(f"level vs xp data fit to a quadratic: {fig_inverted.fit_to_polynomial(2)}")
+    elif args.bedwars_plot():
+        level_range = range(0, 3001)
+        fig = ScatterplotInfo(level_range, (bedwars.totalExpForLevel(l) for l in level_range),
+                              "Bedwars Level vs XP", "Level", "XP")
+        Graphing.output_scatterplots([fig])
+        print(f"level vs xp data fit to a linear function: {fig.fit_to_polynomial(1)}")
     elif args.contains_substr():
         for substr in args.get_args(False, False)[1:]:
             substr = substr.lower()
