@@ -37,8 +37,6 @@ def expDiffForLevel(lvl: int) -> int:
     return XP_PER_EASY_LEVEL[respectedLevel-1] if respectedLevel <= NUM_EASY_LEVELS else XP_PER_LEVEL
 
 def lvlRespectingPres(lvl: int) -> int:
-    # continue here - if not accurate for players > rainbow pres for levels 1-4,
-    # use original implementation from Plancke with the if-else.
     """
     E.g., for level 102, this function would return 2.
     """

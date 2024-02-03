@@ -113,6 +113,9 @@ class Player:
     def get_bw_star(self) -> int:
         return self.hypixel_object().getBedwarsStar()
     
+    def get_bw_xp(self) -> int:
+        return self.hypixel_object().getBedwarsXP()
+    
     def pit_rank_string(self) -> str:
         return self.pit_stats_object().rank_string()
     
@@ -237,7 +240,7 @@ class Player:
             )
             print(f"{percent_overall_next_50_multiple} of the way overall to level {multiple_50}, ", end="")
         print("\n")
-        print(f"bw fkdr: {self.get_fkdr()}, bw star: {self.get_bw_star()}\n")
+        print(f"bw fkdr: {self.get_fkdr()}, bw star: {self.get_bw_star()}, bw xp: {self.get_bw_xp()}\n")
         self.pit_stats_object().print_info()
         print("------------------------\n\n")
     

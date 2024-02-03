@@ -170,6 +170,11 @@ class Player:
     def getBedwarsStar(self) -> int:
         return Utils.nested_get(self.JSON, ['achievements', 'bedwars_level'], 0, int)
     
+    def getBedwarsXP(self) -> int:
+        xp = Utils.nested_get(self.JSON, ['stats', 'Bedwars', 'Experience'], 0)
+        assert int(xp) == xp
+        return int(xp)
+    
     def getPitXP(self) -> int:
         return Utils.nested_get(self.JSON, ['stats', 'Pit', 'profile', 'xp'], 0, int)
     

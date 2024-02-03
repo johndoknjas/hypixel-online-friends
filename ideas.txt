@@ -9,8 +9,6 @@
     # Do something similar to the pit percent feature, but for nw levels and possibly bw stars. I.e., just
       a rank value is given by the user, no player igns required.
 
-    # Add plot functionality for BW stars.
-
     # Make some updates to Args related stuff:
       - Consider getting rid of the 'fromresults'/'notallfromresults' stuff, since the 
         friends endpoint of hypixel's api has been removed for about a year now.
