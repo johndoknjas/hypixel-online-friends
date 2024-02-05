@@ -1,6 +1,18 @@
 # CONTINUE HERE - todos:
 
     # Consider including network levels when outputting dict reports.
+      # And/or could output the rank of a player, if they have one. And if their rank has '+',
+        maybe colour it depending on the nw level. Will need to import a colour library to do this.
+      # Colour brackets can be used for pit ranks too.
+      # To save room get rid of unimportant text when printing dict reports. E.g., 'name': isn't
+        needed before the name, and maybe only print the first few chars of the uuids. Can also
+        try to do a star emoji for bw stars, instead of 'star'. Also 'pit_rank' is superfluous.
+
+    # Make a function in hypixel.py that returns a number of leaderboards, obtained from
+      https://api.hypixel.net/#tag/Other/paths/~1v2~1leaderboards/get. Then, the user can enter
+      which leaderboard they want to see, and it can be outputted with each player's stats per row.
+      All the igns/uuids of these players can be outputted after as well, in one big chunk (same 
+      kind of format your player-name project does).
 
     # Do something similar to the pit percent feature, but for nw levels. I.e., just
       a level value is given by the user, no player igns required.
