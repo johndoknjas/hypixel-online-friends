@@ -198,8 +198,8 @@ def do_mini_program(args: Args) -> None:
         fig = ScatterplotInfo((leveling.getTotalExpToLevelFloor(l) for l in level_range), level_range,
                               "XP vs Network Level", "XP", "Level")
         fig_inverted = fig.invert()
+        print(f"level vs xp data fit to a quadratic: {fig_inverted.fit_to_polynomial(2)}\n")
         Graphing.output_scatterplots((fig, fig_inverted))
-        print(f"level vs xp data fit to a quadratic: {fig_inverted.fit_to_polynomial(2)}")
     elif args.bedwars_plot():
         print("Note that for some players, they may get to some levels with slightly less xp "
               "than required on the graph. Not exactly sure why this is. Made a bug report to "
@@ -207,8 +207,8 @@ def do_mini_program(args: Args) -> None:
         level_range = range(0, 3001)
         fig = ScatterplotInfo(level_range, (bedwars.totalExpForLevel(l) for l in level_range),
                               "Bedwars Level vs XP", "Level", "XP")
+        print(f"\nlevel vs xp data fit to a linear function: {fig.fit_to_polynomial(1)}\n")
         Graphing.output_scatterplots([fig])
-        print(f"level vs xp data fit to a linear function: {fig.fit_to_polynomial(1)}")
     elif args.contains_substr():
         for substr in args.get_args(False, False)[1:]:
             substr = substr.lower()
