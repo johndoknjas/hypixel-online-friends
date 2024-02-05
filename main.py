@@ -201,6 +201,9 @@ def do_mini_program(args: Args) -> None:
         Graphing.output_scatterplots((fig, fig_inverted))
         print(f"level vs xp data fit to a quadratic: {fig_inverted.fit_to_polynomial(2)}")
     elif args.bedwars_plot():
+        print("Note that for some players, they may get to some levels with slightly less xp "
+              "than required on the graph. Not exactly sure why this is. Made a bug report to "
+              "hypixel, see if they get back to you with a reason for it.")
         level_range = range(0, 3001)
         fig = ScatterplotInfo(level_range, (bedwars.totalExpForLevel(l) for l in level_range),
                               "Bedwars Level vs XP", "Level", "XP")
