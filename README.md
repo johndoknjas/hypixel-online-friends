@@ -5,7 +5,7 @@ This program lets you find all the online friends of a certain player. In hypixe
 Note that hypixel.py and leveling.py are from https://github.com/Snuggle/hypixel.py/, with modifications made by myself.
 
 Instructions for running:
-- Install the python library `requests`.
+- Install the python libraries `requests` and `rich`.
 - Make a textfile called 'api-key.txt', and paste your hypixel api key as the first line.
   - To get this api key, log in on hypixel's server and do the command '/api'
 - Run with python3 main.py "username"

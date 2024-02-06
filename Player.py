@@ -10,6 +10,7 @@ import Files
 from Pit import PitStats
 import ProcessingResults
 import leveling
+from datetime import datetime
 
 class Player:
 
@@ -224,7 +225,25 @@ class Player:
             old_ign = uuid_ign_pairs[report['uuid']]
             if 'name' in report and report['name'].lower() != old_ign.lower():
                 report['name'] += f' ({old_ign})'
-        print(str(report))
+        assert set(report.keys()) <= {'name', 'fkdr', 'star', 'pit_rank', 'uuid', 'time'}
+        if 'name' in report:
+            print(f"{report['name']}".ljust(36), end='')
+        if 'fkdr' in report:
+            magnitude = len(str(int(report['fkdr'])))
+            print(f" {report['fkdr']}".ljust(6) + " fkdr".ljust(11-magnitude), end='')
+        if 'star' in report:
+            num_digits = len(str(report['star']))
+            print(f" [{report['star']}", end='')
+            Utils.emoji_print('star', ']'.ljust(8-num_digits))
+        if 'pit_rank' in report:
+            print(f" [{report['pit_rank']}]".ljust(13), end='')
+        show = 5
+        print(f" uuid {report['uuid'][:show]}...{report['uuid'][-show:]}".ljust(14+show*2), end='')
+        if 'time' in report:
+            if Utils.is_date_string(report['time']):
+                date_obj = datetime.strptime(report['time'], '%Y-%m-%d')
+                report['time'] = date_obj.strftime('%b ') + date_obj.strftime('%d/%y').lstrip('0')
+            print(f" friended {report['time']}")
 
     def print_player_info(self) -> None:
         print(f"This player has {len(self.friends())} unique friends total.\n")

@@ -297,3 +297,14 @@ def nested_get(d: dict, nested_keys: list, default_val: Any, expected_type: Opti
         return_val = default_val
     assert expected_type is None or type(return_val) == expected_type
     return return_val
+
+def colour_print(text: str, colour_name: str, end: str = "") -> None:
+    """`colour_name` must be one of the 'Name' strings listed here:
+    https://rich.readthedocs.io/en/stable/appendix/colors.html"""
+    import rich
+    rich.print(f"[{colour_name}]{text}[/{colour_name}]", end=end)
+
+def emoji_print(emoji_name: str, end: str = "") -> None:
+    """`emoji_name` must be one of the options that are listed by `python -m rich.emoji`."""
+    import rich
+    rich.print(f":{emoji_name.strip(':')}:", end=end)

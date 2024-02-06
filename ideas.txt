@@ -3,10 +3,8 @@
     # Consider including network levels when outputting dict reports.
       # And/or could output the rank of a player, if they have one. And if their rank has '+',
         maybe colour it depending on the nw level. Will need to import a colour library to do this.
-      # Colour brackets can be used for pit ranks too.
-      # To save room get rid of unimportant text when printing dict reports. E.g., 'name': isn't
-        needed before the name, and maybe only print the first few chars of the uuids. Can also
-        try to do a star emoji for bw stars, instead of 'star'. Also 'pit_rank' is superfluous.
+      # Also, colour brackets can be used for pit ranks, and the level can be in the 
+        colour corresponding to its 10 group. Same for bw ranks.
 
     # Make a function in hypixel.py that returns a number of leaderboards, obtained from
       https://api.hypixel.net/#tag/Other/paths/~1v2~1leaderboards/get. Then, the user can enter
