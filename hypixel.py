@@ -75,7 +75,7 @@ def get_uuid(uuid_or_ign: str, call_api_last_resort: bool = True) -> str:
        by using a temp hypixel object). Finally if this fails, a temp hypixel object is created in order to call
        getUUID() - unless `call_api_last_resort` is False, in which case the ign is just returned."""
     
-    assert uuid_or_ign == uuid_or_ign.lower()
+    uuid_or_ign = uuid_or_ign.lower()
     if Utils.is_uuid(uuid_or_ign):
         return uuid_or_ign
     ign = uuid_or_ign

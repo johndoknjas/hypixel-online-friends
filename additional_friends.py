@@ -6,22 +6,23 @@ from MyClasses import Specs
 import Files
 from Player import Player
 
+def get_friends_from_user(friends_specs: Specs) -> List[Player]:
+    friends: List[Player] = []
+    INPUT_MSG = "Enter the igns/uuids of additional friends, separated by spaces (or enter 'done' to stop): "
+    for i, user_input in enumerate(inputs := input(INPUT_MSG).split()):
+        if user_input.lower() in ('done', 'stop'):
+            assert i == len(inputs)-1
+            return friends
+        if not (friend_uuid := hypixel.get_uuid(user_input)):
+            raise RuntimeError(f"Bad input '{user_input}', but not sure how `friend_uuid` could ever end up falsy.")
+        friends.append(Player(friend_uuid, specs=friends_specs, time_friended_parent_player=Utils.get_current_date()))
+    return friends + get_friends_from_user(friends_specs)
+
 def make_player_with_friends(player_name: str) -> Player:
     """Creates a player with friends, from user input."""
-    player_uuid = hypixel.get_uuid(player_name)
     friends_specs = Specs(False, False, None, 1)
-    player_specs = Specs(False, False, friends_specs, 0)
-    friends: List[Player] = []
-    user_input = input("Enter the ign/uuid of an additional friend (or 'done' to stop): ")
-    while user_input not in ('done', 'stop'):
-        current_friend_uuid = hypixel.get_uuid(user_input)
-        if not current_friend_uuid:
-            user_input = input("Nothing found for that ign - please enter the uuid instead: ")
-        else:
-            friends.append(Player(current_friend_uuid, specs=friends_specs,
-                                  time_friended_parent_player=Utils.get_current_date()))
-            user_input = input("Enter the ign/uuid of an additional friend (or 'done' to stop): ")
-    player = Player(player_uuid, friends=friends, specs=player_specs)
+    player = Player(hypixel.get_uuid(player_name), friends=get_friends_from_user(friends_specs),
+                    specs=Specs(False, False, friends_specs, 0))
     player.set_name_for_file_output(player.name())
     return player
 
