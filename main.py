@@ -88,6 +88,9 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
     uuids_for_friended_when: List[str] = []
 
     for i, arg in enumerate(args_no_keywords_or_date):
+        if in_minus_symbol_section or in_friended_when_section or is_intersect_player:
+            assert not args.do_mini_program()
+
         if arg.endswith('.txt') or arg == FROM_RESULTS:
             assert not in_friended_when_section
             continue
