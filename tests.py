@@ -5,6 +5,10 @@ import leveling
 
 Specs.set_common_specs(False, False)
 
+ranks = ["0-84", "II-40", "VI-39", "XIV-16", "XV-113", "XXII-1", "XXVIII-98",
+         "XXXI-62", "XXXIX-101", "XLII-56", "XLVI-25", "XLIX-77", "L-120"]
+"""All prestige and level colours, can maybe be used to test colour output somehow."""
+
 class Tests:
     @pytest.fixture
     def example_fixture(self):

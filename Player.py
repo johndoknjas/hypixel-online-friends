@@ -236,7 +236,18 @@ class Player:
             print(f" [{report['star']}", end='')
             Utils.emoji_print('star', ']'.ljust(8-num_digits))
         if 'pit_rank' in report:
-            print(f" [{report['pit_rank']}]".ljust(13), end='')
+            rank = report['pit_rank']
+            pres_hex_colour = Utils.pres_hex_colour(pres := Utils.get_prestige_from_pit_rank(rank))
+            background = '#ffffff' if (45 <= pres <= 47) else None
+            print(' ', end='')
+            Utils.colour_print("[", pres_hex_colour, background=background)
+            if pres > 0:
+                Utils.colour_print(Utils.num_to_roman(pres), Utils.roman_letters_hex_colour(), background=background)
+                Utils.colour_print('-', pres_hex_colour, background=background)
+            lvl = Utils.get_level_from_pit_rank(rank)
+            Utils.colour_print(lvl, Utils.lvl_hex_colour(lvl), background=background, bold=(lvl >= 60))
+            Utils.colour_print("]", pres_hex_colour, background=background)
+            print(' ' * (10 - len(rank) + (2 if pres == 0 else 0)), end='')
         show = 5
         print(f" uuid {report['uuid'][:show]}...{report['uuid'][-show:]}".ljust(14+show*2), end='')
         if 'time' in report:

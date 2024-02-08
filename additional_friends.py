@@ -13,9 +13,8 @@ def get_friends_from_user(friends_specs: Specs) -> List[Player]:
         if user_input.lower() in ('done', 'stop'):
             assert i == len(inputs)-1
             return friends
-        if not (friend_uuid := hypixel.get_uuid(user_input)):
-            raise RuntimeError(f"Bad input '{user_input}', but not sure how `friend_uuid` could ever end up falsy.")
-        friends.append(Player(friend_uuid, specs=friends_specs, time_friended_parent_player=Utils.get_current_date()))
+        friends.append(Player(hypixel.get_uuid(user_input), specs=friends_specs, 
+                              time_friended_parent_player=Utils.get_current_date()))
     return friends + get_friends_from_user(friends_specs)
 
 def make_player_with_friends(player_name: str) -> Player:

@@ -3,8 +3,10 @@
     # Consider including network levels when outputting dict reports.
       # And/or could output the rank of a player, if they have one. And if their rank has '+',
         maybe colour it depending on the nw level. Will need to import a colour library to do this.
-      # Also, colour brackets can be used for pit ranks, and the level can be in the 
-        colour corresponding to its 10 group. Same for bw ranks.
+      # bw ranks can be printed in colour too.
+
+    # Check for updates to https://github.com/Textualize/rich/issues/3275. If it turns out you were missing something
+      for printing in bold for certain colours, fix the issue in your code so that levels >= 60 are bold.
 
     # Make a function in hypixel.py that returns a number of leaderboards, obtained from
       https://api.hypixel.net/#tag/Other/paths/~1v2~1leaderboards/get. Then, the user can enter
