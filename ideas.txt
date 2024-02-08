@@ -3,10 +3,11 @@
     # Consider including network levels when outputting dict reports.
       # And/or could output the rank of a player, if they have one. And if their rank has '+',
         maybe colour it depending on the nw level. Will need to import a colour library to do this.
-      # bw ranks can be printed in colour too.
+      # See https://github.com/HypixelDev/PublicAPI/wiki/Common-Questions#how-do-i-get-a-players-rank-prefix
+    
+    # Print bw ranks in colour.
 
-    # Check for updates to https://github.com/Textualize/rich/issues/3275. If it turns out you were missing something
-      for printing in bold for certain colours, fix the issue in your code so that levels >= 60 are bold.
+    # Consider doing the colour printing stuff for info printed at the beginning on players in args too.
 
     # Make a function in hypixel.py that returns a number of leaderboards, obtained from
       https://api.hypixel.net/#tag/Other/paths/~1v2~1leaderboards/get. Then, the user can enter
