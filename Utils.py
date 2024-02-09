@@ -6,11 +6,6 @@ from typing import List, Optional, Union, Iterable, Any, Type
 from collections import OrderedDict
 from copy import deepcopy
 import math
-import rich
-import rich.console
-import rich.style
-
-console = rich.console.Console()
 
 def list_subtract(main_list: List, subtract_list: List) -> List:
     subtract_set = set(subtract_list)
@@ -302,42 +297,3 @@ def nested_get(d: dict, nested_keys: list, default_val: Any, expected_type: Opti
         return_val = default_val
     assert expected_type is None or type(return_val) == expected_type
     return return_val
-
-def generate_rich_style(text_colour: str, background: Optional[str], bold: bool) -> rich.style.Style:
-    return rich.style.Style(color=text_colour, bgcolor=background, bold=bold)
-
-def colour_print(text: str, colour_hex: str, background: Optional[str] = None, 
-                 bold: bool = False, end: str = "") -> None:
-    console.print(text, style=generate_rich_style(colour_hex, background, bold), end=end, highlight=False)
-
-def emoji_print(emoji_name: str, end: str = "") -> None:
-    """`emoji_name` must be one of the options that are listed by `python -m rich.emoji`."""
-    rich.print(f":{emoji_name.strip(':')}:", end=end)
-
-def html_hex_to_6_digit_hex(hex: str) -> str:
-    """Takes a 3-digit html hex colour, and returns the 6-digit equivalent."""
-    assert len(hex) == 4 and hex[0] == '#'
-    return f"#{hex[1]*2}{hex[2]*2}{hex[3]*2}"
-
-# Got the following hex codes from https://github.com/brooke-gill/pit/blob/main/levels.html
-PRES_HEXES = [html_hex_to_6_digit_hex(hex) for hex in ("#aaa", "#55f", "#ff5", "#fa0", "#f55", "#a0a", "#f5f",
-                                                       "#fff", "#5ff", "#00a", "#000", "#a00", "#555")]
-LVL_HEXES = [html_hex_to_6_digit_hex(hex) for hex in ("#aaa", "#55f", "#0aa", "#0a0", "#5f5", "#ff5", "#fa0",
-                                                      "#f55", "#a00", "#a0a", "#f5f", "#fff", "#5ff")]
-assert len(PRES_HEXES) == len(LVL_HEXES) == 13
-
-def pres_hex_colour(pres: int) -> str:
-    if pres == 0:
-        return PRES_HEXES[0]
-    elif pres == 50:
-        return PRES_HEXES[-1]
-    elif pres in (48, 49):
-        return PRES_HEXES[-2]
-    else:
-        return PRES_HEXES[pres // 5 + 1]
-
-def lvl_hex_colour(lvl: int) -> str:
-    return LVL_HEXES[lvl // 10]
-
-def roman_letters_hex_colour() -> str:
-    return PRES_HEXES[2]

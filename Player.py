@@ -218,6 +218,8 @@ class Player:
         return any(self.represents_same_person(p) for p in players)
     
     def print_dict_report(self, report: dict) -> None:
+        import Colours
+        from Colours import colour_print
         report = deepcopy(report)
         if 'fkdr' in report:
             report['fkdr'] = round(report['fkdr'], 3)
@@ -234,19 +236,19 @@ class Player:
         if 'star' in report:
             num_digits = len(str(report['star']))
             print(f" [{report['star']}", end='')
-            Utils.emoji_print('star', ']'.ljust(8-num_digits))
+            Colours.emoji_print('star', ']'.ljust(8-num_digits))
         if 'pit_rank' in report:
             rank = report['pit_rank']
-            pres_hex_colour = Utils.pres_hex_colour(pres := Utils.get_prestige_from_pit_rank(rank))
+            pres_hex_colour = Colours.pres_hex_colour(pres := Utils.get_prestige_from_pit_rank(rank))
             background = '#ffffff' if (45 <= pres <= 47) else None
             print(' ', end='')
-            Utils.colour_print("[", pres_hex_colour, background=background)
+            colour_print("[", pres_hex_colour, background=background)
             if pres > 0:
-                Utils.colour_print(Utils.num_to_roman(pres), Utils.roman_letters_hex_colour(), background=background)
-                Utils.colour_print('-', pres_hex_colour, background=background)
+                colour_print(Utils.num_to_roman(pres), Colours.roman_letters_hex_colour(), background=background)
+                colour_print('-', pres_hex_colour, background=background)
             lvl = Utils.get_level_from_pit_rank(rank)
-            Utils.colour_print(lvl, Utils.lvl_hex_colour(lvl), background=background, bold=(lvl >= 60))
-            Utils.colour_print("]", pres_hex_colour, background=background)
+            colour_print(str(lvl), Colours.lvl_hex_colour(lvl), background=background, bold=(lvl >= 60))
+            colour_print("]", pres_hex_colour, background=background)
             print(' ' * (10 - len(rank) + (2 if pres == 0 else 0)), end='')
         show = 5
         print(f" uuid {report['uuid'][:show]}...{report['uuid'][-show:]}".ljust(14+show*2), end='')
