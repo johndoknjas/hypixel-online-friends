@@ -1,13 +1,24 @@
+if __name__ != '__main__':
+    raise ImportError("This module is not meant to be imported.") # https://stackoverflow.com/questions/51298123/
+
 import pytest
 
 from MyClasses import Specs
 import leveling
+import Colours
 
 Specs.set_common_specs(False, False)
 
-ranks = ["0-84", "II-40", "VI-39", "XIV-16", "XV-113", "XXII-1", "XXVIII-98",
-         "XXXI-62", "XXXIX-101", "XLII-56", "XLVI-25", "XLIX-77", "L-120"]
-"""All prestige and level colours, can maybe be used to test colour output somehow."""
+def test_pit_colours() -> None:
+    """Tests all the 13 pit ranks shown in the image here: https://pit.wiki/Prestige.
+       These contain all prestige and level colours."""
+    ranks = ["0-84", "II-40", "VI-39", "XIV-16", "XV-113", "XXII-1", "XXVIII-98",
+             "XXXI-62", "XXXIX-101", "XLII-56", "XLVI-25", "XLIX-77", "L-120"]
+    for rank in ranks:
+        Colours.print_pit_rank(rank)
+
+def non_automated_tests() -> None:
+    test_pit_colours()
 
 class Tests:
     @pytest.fixture
@@ -53,3 +64,6 @@ class Tests:
             leveling.getTotalExpToLevelFloor(1.00001)
         with pytest.raises(AssertionError):
             leveling.getTotalExpToLevelFloor(1.9999)
+
+if __name__ == '__main__':
+    non_automated_tests()

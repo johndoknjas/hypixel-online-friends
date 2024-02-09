@@ -4,6 +4,8 @@ import rich
 import rich.console
 import rich.style
 
+import Utils
+
 console = rich.console.Console()
 
 # Got the equivalent 3-digit hex codes from https://github.com/brooke-gill/pit/blob/main/levels.html
@@ -57,3 +59,16 @@ def lvl_hex_colour(lvl: int) -> str:
 
 def roman_letters_hex_colour() -> str:
     return PRES_HEXES[2]
+
+def print_pit_rank(rank: str) -> None:
+    pres_colour = pres_hex_colour(pres := Utils.get_prestige_from_pit_rank(rank))
+    background = '#ffffff' if 45 <= pres <= 47 else None
+    print(' ', end='')
+    colour_print("[", pres_colour, background=background)
+    if pres > 0:
+        colour_print(Utils.num_to_roman(pres), roman_letters_hex_colour(), background=background)
+        colour_print('-', pres_colour, background=background)
+    lvl = Utils.get_level_from_pit_rank(rank)
+    colour_print(str(lvl), lvl_hex_colour(lvl), background=background, bold=(lvl >= 60))
+    colour_print("]", pres_colour, background=background)
+    print(' ' * (10 - len(rank) + (2 if pres == 0 else 0)), end='')

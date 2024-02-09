@@ -217,9 +217,9 @@ class Player:
         """Returns whether the player is already represented in this players list."""
         return any(self.represents_same_person(p) for p in players)
     
-    def print_dict_report(self, report: dict) -> None:
+    @staticmethod
+    def print_dict_report(report: dict) -> None:
         import Colours
-        from Colours import colour_print
         report = deepcopy(report)
         if 'fkdr' in report:
             report['fkdr'] = round(report['fkdr'], 3)
@@ -238,18 +238,7 @@ class Player:
             print(f" [{report['star']}", end='')
             Colours.emoji_print('star', ']'.ljust(8-num_digits))
         if 'pit_rank' in report:
-            rank = report['pit_rank']
-            pres_hex_colour = Colours.pres_hex_colour(pres := Utils.get_prestige_from_pit_rank(rank))
-            background = '#ffffff' if (45 <= pres <= 47) else None
-            print(' ', end='')
-            colour_print("[", pres_hex_colour, background=background)
-            if pres > 0:
-                colour_print(Utils.num_to_roman(pres), Colours.roman_letters_hex_colour(), background=background)
-                colour_print('-', pres_hex_colour, background=background)
-            lvl = Utils.get_level_from_pit_rank(rank)
-            colour_print(str(lvl), Colours.lvl_hex_colour(lvl), background=background, bold=(lvl >= 60))
-            colour_print("]", pres_hex_colour, background=background)
-            print(' ' * (10 - len(rank) + (2 if pres == 0 else 0)), end='')
+            Colours.print_pit_rank(report['pit_rank'])
         show = 5
         print(f" uuid {report['uuid'][:show]}...{report['uuid'][-show:]}".ljust(14+show*2), end='')
         if 'time' in report:
@@ -276,8 +265,8 @@ class Player:
         self.pit_stats_object().print_info()
         print("------------------------\n\n")
     
-    def create_dictionary_report(self, sort_key: str = "fkdr", 
-                                 extra_online_check: bool = False, should_terminate: bool = True) -> dict:
+    def create_dictionary_report(self, sort_key: str = "fkdr", extra_online_check: bool = False, 
+                                 should_terminate: bool = True) -> dict:
         # CONTINUE HERE - later, could make a Report class and return an object of that, instead of a dict here.
         if self.root_player():
             assert not self.time_friended_parent_player('date')
