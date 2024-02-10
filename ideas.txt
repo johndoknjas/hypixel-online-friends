@@ -1,8 +1,15 @@
 # CONTINUE HERE - todos:
 
     # Consider including network levels when outputting dict reports.
-      # And/or could output the rank of a player, if they have one. And if their rank has '+',
-        maybe colour it depending on the nw level. Will need to import a colour library to do this.
+      # And/or could output the rank of a player, if they have one (will need to make function in hypixel.py).
+        # Then, add an optional param to print_dict_report(report), which can take a rank string.
+        # In `polish_dictionary_report`, at the start iterate through self.friends and generate a dict of
+          (uuid: f) pairs for each f in self.friends.
+            # In the for loop can use this dict to quickly get the Player that is the current friend, and then
+            # get their rank string, etc.
+            # Before doing this check if it's expected each friend will require an api call. E.g.,
+              for the 'justuuids' feature, don't do this.
+      # And if their rank has MVP+/MVP++, maybe colour it depending on the nw level.
       # See https://github.com/HypixelDev/PublicAPI/wiki/Common-Questions#how-do-i-get-a-players-rank-prefix
     
     # Print bw ranks in colour.

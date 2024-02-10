@@ -221,31 +221,30 @@ class Player:
     def print_dict_report(report: dict) -> None:
         import Colours
         report = deepcopy(report)
-        if 'fkdr' in report:
-            report['fkdr'] = round(report['fkdr'], 3)
-        if report['uuid'] in (uuid_ign_pairs := ProcessingResults.uuid_ign_pairs_in_results()):
-            old_ign = uuid_ign_pairs[report['uuid']]
-            if 'name' in report and report['name'].lower() != old_ign.lower():
-                report['name'] += f' ({old_ign})'
-        assert set(report.keys()) <= {'name', 'fkdr', 'star', 'pit_rank', 'uuid', 'time'}
-        if 'name' in report:
-            print(f"{report['name']}".ljust(36), end='')
-        if 'fkdr' in report:
-            magnitude = len(str(int(report['fkdr'])))
-            print(f" {report['fkdr']}".ljust(6) + " fkdr".ljust(11-magnitude), end='')
-        if 'star' in report:
-            num_digits = len(str(report['star']))
-            print(f" [{report['star']}", end='')
-            Colours.emoji_print('star', ']'.ljust(8-num_digits))
-        if 'pit_rank' in report:
-            Colours.print_pit_rank(report['pit_rank'])
-        show = 5
-        print(f" uuid {report['uuid'][:show]}...{report['uuid'][-show:]}".ljust(14+show*2), end='')
-        if 'time' in report:
-            if Utils.is_date_string(report['time']):
-                date_obj = datetime.strptime(report['time'], '%Y-%m-%d')
-                report['time'] = date_obj.strftime('%b ') + date_obj.strftime('%d/%y').lstrip('0')
-            print(f" friended {report['time']}")
+        assert all(isinstance(v, (str,float,int)) for v in report.values())
+        possible_keys = ('name', 'fkdr', 'star', 'pit_rank', 'uuid', 'time')
+        assert set(report.keys()) <= set(possible_keys)
+        name, fkdr, star, pit_rank, uuid, time = [report.get(k) for k in possible_keys]
+
+        if name is not None:
+            old_name = ProcessingResults.uuid_ign_pairs_in_results().get(uuid)
+            if old_name is not None and old_name.lower() != name.lower():
+                name += f' ({old_name})'
+            print(f"{name}".ljust(36), end='')
+        if fkdr is not None:
+            magnitude = len(str(int(fkdr := round(fkdr, 3))))
+            print(f" {fkdr}".ljust(6) + " fkdr".ljust(11-magnitude), end='')
+        if star is not None:
+            print(f" [{star}", end='')
+            Colours.emoji_print('star', ']'.ljust(8 - len(str(star))))
+        if pit_rank is not None:
+            Colours.print_pit_rank(pit_rank)
+        print(f" uuid {uuid[:(show := 5)]}...{uuid[-show:]}".ljust(14+show*2), end='')
+        if time is not None:
+            if Utils.is_date_string(time):
+                date_obj = datetime.strptime(time, '%Y-%m-%d')
+                time = date_obj.strftime('%b ') + date_obj.strftime('%d/%y').lstrip('0')
+            print(f" friended {time}")
 
     def print_player_info(self) -> None:
         print(f"This player has {len(self.friends())} unique friends total.\n")
