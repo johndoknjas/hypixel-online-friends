@@ -225,6 +225,7 @@ class Player:
         possible_keys = ('name', 'fkdr', 'star', 'pit_rank', 'uuid', 'time')
         assert set(report.keys()) <= set(possible_keys)
         name, fkdr, star, pit_rank, uuid, time = [report.get(k) for k in possible_keys]
+        assert isinstance(uuid, str) # for mypy
 
         if name is not None:
             old_name = ProcessingResults.uuid_ign_pairs_in_results().get(uuid)
@@ -235,8 +236,7 @@ class Player:
             magnitude = len(str(int(fkdr := round(fkdr, 3))))
             print(f" {fkdr}".ljust(6) + " fkdr".ljust(11-magnitude), end='')
         if star is not None:
-            print(f" [{star}", end='')
-            Colours.emoji_print('star', ']'.ljust(8 - len(str(star))))
+            Colours.print_bw_star(star)
         if pit_rank is not None:
             Colours.print_pit_rank(pit_rank)
         print(f" uuid {uuid[:(show := 5)]}...{uuid[-show:]}".ljust(14+show*2), end='')

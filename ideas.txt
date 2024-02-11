@@ -12,7 +12,7 @@
       # And if their rank has MVP+/MVP++, maybe colour it depending on the nw level.
       # See https://github.com/HypixelDev/PublicAPI/wiki/Common-Questions#how-do-i-get-a-players-rank-prefix
     
-    # Print bw ranks in colour.
+    # For bw stars >= 1000, print in the actual colours they should be, rather than yellow and blinking.
 
     # Consider doing the colour printing stuff for info printed at the beginning on players in args too.
 
