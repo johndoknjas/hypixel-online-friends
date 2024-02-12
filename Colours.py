@@ -27,30 +27,25 @@ class Hex(Enum):
     WHITE = "#ffffff"
     BLACK = "#000000"
 
-PIT_PRES_HEXES = [hex.value for hex in (
-    Hex.GRAY, Hex.BLUE, Hex.YELLOW, Hex.ORANGE, Hex.RED, Hex.PURPLE, Hex.PINK, 
-    Hex.WHITE, Hex.AQUA, Hex.DARK_BLUE, Hex.BLACK, Hex.DARK_RED, Hex.DARK_GRAY)
-]
-PIT_LVL_HEXES = [hex.value for hex in (
-    Hex.GRAY, Hex.BLUE, Hex.DARK_AQUA, Hex.DARK_GREEN, Hex.GREEN, Hex.YELLOW, 
-    Hex.ORANGE, Hex.RED, Hex.DARK_RED, Hex.PURPLE, Hex.PINK, Hex.WHITE, Hex.AQUA)
-]
-BW_PRES_HEXES = [hex.value for hex in (
-    Hex.GRAY, Hex.WHITE, Hex.ORANGE, Hex.AQUA, Hex.DARK_GREEN, Hex.DARK_AQUA, 
-    Hex.DARK_RED, Hex.PINK, Hex.BLUE, Hex.PURPLE)
-]
+PIT_PRES_HEXES = (Hex.GRAY, Hex.BLUE, Hex.YELLOW, Hex.ORANGE, Hex.RED, Hex.PURPLE, Hex.PINK,
+                  Hex.WHITE, Hex.AQUA, Hex.DARK_BLUE, Hex.BLACK, Hex.DARK_RED, Hex.DARK_GRAY)
+PIT_LVL_HEXES = (Hex.GRAY, Hex.BLUE, Hex.DARK_AQUA, Hex.DARK_GREEN, Hex.GREEN, Hex.YELLOW,
+                 Hex.ORANGE, Hex.RED, Hex.DARK_RED, Hex.PURPLE, Hex.PINK, Hex.WHITE, Hex.AQUA)
+BW_PRES_HEXES = (Hex.GRAY, Hex.WHITE, Hex.ORANGE, Hex.AQUA, Hex.DARK_GREEN, Hex.DARK_AQUA,
+                 Hex.DARK_RED, Hex.PINK, Hex.BLUE, Hex.PURPLE)
 assert (13,13,10) == (len(PIT_PRES_HEXES), len(PIT_LVL_HEXES), len(BW_PRES_HEXES))
 
-def generate_rich_style(text_colour: str, background: Optional[str],
+def generate_rich_style(text_colour: Hex, background: Optional[Hex],
                         bold: bool, blink: bool) -> rich.style.Style:
-    return rich.style.Style(color=text_colour, bgcolor=background, bold=bold, blink=blink)
+    return rich.style.Style(color=text_colour.value, bold=bold, blink=blink,
+                            bgcolor = background.value if background is not None else None)
 
-def colour_print(text: str, colour_hex: str, background: Optional[str] = None, 
+def colour_print(text: str, colour_hex: Hex, background: Optional[Hex] = None,
                  bold: bool = False, blink: bool = False, end: str = "") -> None:
     console.print(text, style=generate_rich_style(colour_hex, background, bold, blink),
                   end=end, highlight=False)
 
-def pit_pres_hex_colour(pres: int) -> str:
+def pit_pres_hex_colour(pres: int) -> Hex:
     if pres == 0:
         return PIT_PRES_HEXES[0]
     elif pres == 50:
@@ -60,20 +55,20 @@ def pit_pres_hex_colour(pres: int) -> str:
     else:
         return PIT_PRES_HEXES[pres // 5 + 1]
 
-def pit_lvl_hex_colour(lvl: int) -> str:
+def pit_lvl_hex_colour(lvl: int) -> Hex:
     return PIT_LVL_HEXES[lvl // 10]
 
-def bw_star_hex_colour(star: int) -> str:
+def bw_star_hex_colour(star: int) -> Hex:
     if star >= 1000:
-        return Hex.YELLOW.value
+        return Hex.YELLOW
     return BW_PRES_HEXES[star // 100]
 
-def roman_letters_hex_colour() -> str:
-    return Hex.YELLOW.value
+def roman_letters_hex_colour() -> Hex:
+    return Hex.YELLOW
 
 def print_pit_rank(rank: str) -> None:
     pres_colour = pit_pres_hex_colour(pres := Utils.get_prestige_from_pit_rank(rank))
-    background = '#ffffff' if 45 <= pres <= 47 else None
+    background = Hex.WHITE if 45 <= pres <= 47 else None
     print(' ', end='')
     colour_print("[", pres_colour, background=background)
     if pres > 0:
