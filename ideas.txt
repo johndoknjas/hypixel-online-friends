@@ -10,6 +10,8 @@
             # Before doing this check if it's expected each friend will require an api call. E.g.,
               for the 'justuuids' feature, don't do this.
       # And if their rank has MVP+/MVP++, maybe colour it depending on the nw level.
+      # Can also colour the player's name depending on their rank (e.g., green for VIP, gold/aqua for
+        some mvps or something).
       # See https://github.com/HypixelDev/PublicAPI/wiki/Common-Questions#how-do-i-get-a-players-rank-prefix
     
     # For bw stars >= 1000, print in the actual colours they should be, rather than yellow and blinking.

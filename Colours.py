@@ -7,7 +7,8 @@ import Utils
 
 console = rich.console.Console()
 
-# Got the equivalent 3-digit hex codes from https://github.com/brooke-gill/pit/blob/main/levels.html
+# Got the equivalent 3-digit hex codes for pit prestiges and levels from
+# https://github.com/brooke-gill/pit/blob/main/levels.html
 class Hex(Enum):
     RED = "#ff5555"
     DARK_RED = "#aa0000"
@@ -85,4 +86,4 @@ def print_pit_rank(rank: str) -> None:
 
 def print_bw_star(star: int) -> None:
     colour_print(f" [{star}:star:]", bw_star_hex_colour(star), bold = True, blink=(star >= 1000))
-    print(' ' * (7 - len(str(star))), end='')
+    print(' ' * (4 - len(str(star))), end='')

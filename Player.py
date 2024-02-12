@@ -231,15 +231,15 @@ class Player:
             old_name = ProcessingResults.uuid_ign_pairs_in_results().get(uuid)
             if old_name is not None and old_name.lower() != name.lower():
                 name += f' ({old_name})'
-            print(f"{name}".ljust(36), end='')
+            print(f"{name}".rjust(31), end='')
         if fkdr is not None:
             magnitude = len(str(int(fkdr := round(fkdr, 3))))
-            print(f" {fkdr}".ljust(6) + " fkdr".ljust(11-magnitude), end='')
+            print(f" {fkdr:.3f}".ljust(6) + " fkdr".ljust(7-magnitude), end='')
         if star is not None:
             Colours.print_bw_star(star)
         if pit_rank is not None:
             Colours.print_pit_rank(pit_rank)
-        print(f" uuid {uuid[:(show := 5)]}...{uuid[-show:]}".ljust(14+show*2), end='')
+        print(f" uuid {uuid[:(show := 5)]}...{uuid[-show:]}".ljust(10+show*2), end='')
         if time is not None:
             if Utils.is_date_string(time):
                 date_obj = datetime.strptime(time, '%Y-%m-%d')
@@ -334,17 +334,16 @@ class Player:
                                                      sort_key, True, False)
     
     def processed_msg(self, num_processed: int, on_perpetual_pass: bool, on_first_pass: bool) -> None:
-        """Prints a message saying how many players have been processed, if the number is a multiple of 20,
+        """Prints a message saying how many players have been processed, if the number is a multiple of 50,
            and if the player is the root player."""
-        if num_processed % 20 != 0 or not self.root_player():
+        if num_processed % 50 != 0 or not self.root_player():
             return
-        print("Processed " + str(num_processed), end="")
-        if on_perpetual_pass:
-            print(" for a perpetual pass")
-        elif not on_first_pass:
-            print(" for a 'second pass'")
-        else:
-            print()
+        msg = f"Processed {num_processed}" + (
+            " for a perpetual pass\n" if on_perpetual_pass else
+            " for a 'second pass'\n" if not on_first_pass else "\n"
+        )
+        import Colours
+        Colours.colour_print(msg, Colours.Hex.DARK_GRAY.value)
 
     def polish_dictionary_report(self, report: dict, sort_key: str) -> dict:
         report = deepcopy(report)
