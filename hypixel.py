@@ -185,3 +185,15 @@ class Player:
     
     def getExactNWLevel(self) -> float:
         return leveling.getExactLevel(self.getNetworkXP())
+    
+    def getNetworkRank(self) -> Optional[str]:
+        keys = ('prefix', 'rank', 'monthlyPackageRank', 'newPackageRank', 'packageRank')
+        none_vals = (None, 'NONE', 'NORMAL')
+        json_rank = next((x for x in (self.JSON.get(k) for k in keys) if x not in none_vals), None)
+        if json_rank is None:
+            return None
+        assert isinstance(json_rank, str)
+        rank_map = {'§c[OWNER]': 'OWNER', 'GAME_MASTER': 'GM', 'YOUTUBER': 'YOUTUBE', 
+                    'SUPERSTAR': 'MVP++', 'VIP_PLUS': 'VIP+', 'MVP_PLUS': 'MVP+'}
+        assert json_rank in {'VIP', 'MVP', 'ADMIN'}.union(rank_map.keys())
+        return rank_map.get(json_rank, json_rank)

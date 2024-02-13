@@ -126,6 +126,9 @@ class Player:
     def get_network_xp(self) -> int:
         return self.hypixel_object().getNetworkXP()
     
+    def get_network_rank(self) -> Optional[str]:
+        return self.hypixel_object().getNetworkRank()
+    
     def percent_way_to_next_network_level(self) -> float:
         return leveling.getPercentageToNextLevel(self.get_network_xp())
     
@@ -218,7 +221,7 @@ class Player:
         return any(self.represents_same_person(p) for p in players)
     
     @staticmethod
-    def print_dict_report(report: dict) -> None:
+    def print_dict_report(report: Dict, rank_info: Dict[str, Optional[str]] = {}) -> None:
         import Colours
         report = deepcopy(report)
         assert all(isinstance(v, (str,float,int)) for v in report.values())
@@ -231,7 +234,10 @@ class Player:
             old_name = ProcessingResults.uuid_ign_pairs_in_results().get(uuid)
             if old_name is not None and old_name.lower() != name.lower():
                 name += f' ({old_name})'
-            print(f"{name}".rjust(31), end='')
+            if rank_info and rank_info['rank']:
+                assert set(rank_info.keys()) == {'rank'}
+                name = f"[{rank_info['rank']}] {name}"
+            print(f"{name}".rjust(38), end='')
         if fkdr is not None:
             magnitude = len(str(int(fkdr := round(fkdr, 3))))
             print(f" {fkdr:.3f}".ljust(6) + " fkdr".ljust(7-magnitude), end='')
@@ -244,7 +250,8 @@ class Player:
             if Utils.is_date_string(time):
                 date_obj = datetime.strptime(time, '%Y-%m-%d')
                 time = date_obj.strftime('%b ') + date_obj.strftime('%d/%y').lstrip('0')
-            print(f" friended {time}")
+            print(f" friended {time}", end='')
+        print()
 
     def print_player_info(self) -> None:
         print(f"This player has {len(self.friends())} unique friends total.\n")
@@ -282,14 +289,17 @@ class Player:
                                                     else 'date'):
             report['time'] = time
         if self.specs().print_player_data_exclude_friends():
-            self.print_dict_report(report)
+            self.print_dict_report(
+                report, {'rank': self.get_network_rank()} if not self.specs().just_uuids() else {}
+            )
         if not self.specs_for_friends():
             return report
         
         self.iterate_over_friends_for_report(report, self.friends(), not should_terminate, 
                                              sort_key, False, True)
 
-        return self.polish_dictionary_report(report, sort_key) if self.root_player() else report
+        return (self.polish_dictionary_report(report, sort_key, self.friends()) 
+                if self.root_player() else report)
     
     def iterate_over_friends_for_report(self, report: dict, friends: List[Player],
                                         do_additional_passes: bool, sort_key: str,
@@ -328,7 +338,7 @@ class Player:
         if do_additional_passes and friends:
             # Do perpetual passes:
             while True:
-                self.polish_dictionary_report(report, sort_key)
+                self.polish_dictionary_report(report, sort_key, friends)
                 report['friends'] = []
                 self.iterate_over_friends_for_report(report, friends, False,
                                                      sort_key, True, False)
@@ -345,7 +355,7 @@ class Player:
         import Colours
         Colours.colour_print(msg, Colours.Hex.DARK_GRAY)
 
-    def polish_dictionary_report(self, report: dict, sort_key: str) -> dict:
+    def polish_dictionary_report(self, report: dict, sort_key: str, friends: List[Player]) -> dict:
         report = deepcopy(report)
         if not report.get('friends', None): # if friends list doesn't exist or is empty:
             return report
@@ -355,8 +365,12 @@ class Player:
         assert report['friends'] == list({f['uuid']:f for f in report['friends']}.values())
         if self.specs().print_only_players_friends():
             print()
+            uuid_friend_map = {f.uuid():f for f in friends}
             for d in report['friends']:
-                self.print_dict_report(d)
+                friend = uuid_friend_map[d['uuid']]
+                self.print_dict_report(
+                    d, {'rank': friend.get_network_rank()} if not friend.specs().just_uuids() else {}
+                )
             print()
         return report
     
