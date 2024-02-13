@@ -106,6 +106,9 @@ def set_verify_requests(b: bool) -> None:
     global _verify_requests
     assert _verify_requests is None
     _verify_requests = b
+    if not _verify_requests:
+        import urllib3
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class Player:
     """ This class represents a player on Hypixel as a single object.
