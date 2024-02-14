@@ -353,7 +353,7 @@ class Player:
             " for a 'second pass'\n" if not on_first_pass else "\n"
         )
         import Colours
-        Colours.colour_print(msg, Colours.Hex.DARK_GRAY)
+        Colours.colour_print(Colours.ColourSpecs(msg, Colours.Hex.DARK_GRAY))
 
     def polish_dictionary_report(self, report: dict, sort_key: str, friends: List[Player]) -> dict:
         report = deepcopy(report)

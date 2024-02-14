@@ -35,15 +35,19 @@ BW_PRES_HEXES = (Hex.GRAY, Hex.WHITE, Hex.ORANGE, Hex.AQUA, Hex.DARK_GREEN, Hex.
                  Hex.DARK_RED, Hex.PINK, Hex.BLUE, Hex.PURPLE)
 assert (13,13,10) == (len(PIT_PRES_HEXES), len(PIT_LVL_HEXES), len(BW_PRES_HEXES))
 
+class ColourSpecs:
+    def __init__(self, text: str, text_colour: Hex, bg_colour: Optional[Hex] = None, 
+                 bold: bool = False, blink: bool = False):
+        self.text, self.style = text, rich.style.Style(color=text_colour.value, bold=bold, blink=blink,
+                                                       bgcolor = bg_colour.value if bg_colour else None)
+
 def generate_rich_style(text_colour: Hex, background: Optional[Hex],
                         bold: bool, blink: bool) -> rich.style.Style:
     return rich.style.Style(color=text_colour.value, bold=bold, blink=blink,
                             bgcolor = background.value if background is not None else None)
 
-def colour_print(text: str, colour_hex: Hex, background: Optional[Hex] = None,
-                 bold: bool = False, blink: bool = False, end: str = "") -> None:
-    console.print(text, style=generate_rich_style(colour_hex, background, bold, blink),
-                  end=end, highlight=False)
+def colour_print(msg: ColourSpecs) -> None:
+    console.print(msg.text, style=msg.style, end='', highlight=False)
 
 def pit_pres_hex_colour(pres: int) -> Hex:
     if pres == 0:
@@ -63,22 +67,19 @@ def bw_star_hex_colour(star: int) -> Hex:
         return Hex.YELLOW
     return BW_PRES_HEXES[star // 100]
 
-def roman_letters_hex_colour() -> Hex:
-    return Hex.YELLOW
-
 def print_pit_rank(rank: str) -> None:
     pres_colour = pit_pres_hex_colour(pres := Utils.get_prestige_from_pit_rank(rank))
     background = Hex.WHITE if 45 <= pres <= 47 else None
     print(' ', end='')
-    colour_print("[", pres_colour, background=background)
+    colour_print(ColourSpecs("[", pres_colour, bg_colour=background))
     if pres > 0:
-        colour_print(Utils.num_to_roman(pres), roman_letters_hex_colour(), background=background)
-        colour_print('-', pres_colour, background=background)
+        colour_print(ColourSpecs(Utils.num_to_roman(pres), Hex.YELLOW, bg_colour=background))
+        colour_print(ColourSpecs('-', pres_colour, bg_colour=background))
     lvl = Utils.get_level_from_pit_rank(rank)
-    colour_print(str(lvl), pit_lvl_hex_colour(lvl), background=background, bold=(lvl >= 60))
-    colour_print("]", pres_colour, background=background)
+    colour_print(ColourSpecs(str(lvl), pit_lvl_hex_colour(lvl), bg_colour=background, bold=(lvl >= 60)))
+    colour_print(ColourSpecs("]", pres_colour, bg_colour=background))
     print(' ' * (10 - len(rank) + (2 if pres == 0 else 0)), end='')
 
 def print_bw_star(star: int) -> None:
-    colour_print(f" [{star}:star:]", bw_star_hex_colour(star), bold = True, blink=(star >= 1000))
+    colour_print(ColourSpecs(f" [{star}:star:]", bw_star_hex_colour(star), bold = True, blink=(star >= 1000)))
     print(' ' * (4 - len(str(star))), end='')
