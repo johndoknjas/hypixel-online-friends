@@ -19,21 +19,21 @@ class Hex(Enum):
     DARK_GREEN = "#00aa00"
     AQUA = "#55ffff"
     DARK_AQUA = "#00aaaa"
-    PURPLE = "#aa00aa"
-    ORANGE = "#ffaa00"
-    PINK = "#ff55ff"
+    DARK_PURPLE = "#aa00aa"
+    GOLD = "#ffaa00"
+    LIGHT_PURPLE = "#ff55ff"
     GRAY = "#aaaaaa"
     DARK_GRAY = "#555555"
     WHITE = "#ffffff"
     BLACK = "#000000"
     UNKNOWN = "used for cases where there is a colour, but it's not known at the moment"
 
-PIT_PRES_HEXES = (Hex.GRAY, Hex.BLUE, Hex.YELLOW, Hex.ORANGE, Hex.RED, Hex.PURPLE, Hex.PINK,
+PIT_PRES_HEXES = (Hex.GRAY, Hex.BLUE, Hex.YELLOW, Hex.GOLD, Hex.RED, Hex.DARK_PURPLE, Hex.LIGHT_PURPLE,
                   Hex.WHITE, Hex.AQUA, Hex.DARK_BLUE, Hex.BLACK, Hex.DARK_RED, Hex.DARK_GRAY)
 PIT_LVL_HEXES = (Hex.GRAY, Hex.BLUE, Hex.DARK_AQUA, Hex.DARK_GREEN, Hex.GREEN, Hex.YELLOW,
-                 Hex.ORANGE, Hex.RED, Hex.DARK_RED, Hex.PURPLE, Hex.PINK, Hex.WHITE, Hex.AQUA)
-BW_PRES_HEXES = (Hex.GRAY, Hex.WHITE, Hex.ORANGE, Hex.AQUA, Hex.DARK_GREEN, Hex.DARK_AQUA,
-                 Hex.DARK_RED, Hex.PINK, Hex.BLUE, Hex.PURPLE)
+                 Hex.GOLD, Hex.RED, Hex.DARK_RED, Hex.DARK_PURPLE, Hex.LIGHT_PURPLE, Hex.WHITE, Hex.AQUA)
+BW_PRES_HEXES = (Hex.GRAY, Hex.WHITE, Hex.GOLD, Hex.AQUA, Hex.DARK_GREEN, Hex.DARK_AQUA,
+                 Hex.DARK_RED, Hex.LIGHT_PURPLE, Hex.BLUE, Hex.DARK_PURPLE)
 assert (13,13,10) == (len(PIT_PRES_HEXES), len(PIT_LVL_HEXES), len(BW_PRES_HEXES))
 
 class ColourSpecs:

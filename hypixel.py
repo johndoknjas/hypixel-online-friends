@@ -51,7 +51,7 @@ class Rank:
         'GAME_MASTER': ('GM', RankColours(None, Hex.DARK_GREEN, Hex.DARK_GREEN)),
         'YOUTUBER': ('YOUTUBE', RankColours(None, Hex.RED, Hex.WHITE)),
         'VIP': ('VIP', RankColours(None, Hex.GREEN, Hex.GREEN)),
-        'VIP_PLUS': ('VIP+', RankColours(Hex.ORANGE, Hex.GREEN, Hex.GREEN)),
+        'VIP_PLUS': ('VIP+', RankColours(Hex.GOLD, Hex.GREEN, Hex.GREEN)),
         'MVP': ('MVP', RankColours(None, Hex.AQUA, Hex.AQUA)),
         'MVP_PLUS': ('MVP+', RankColours(Hex.UNKNOWN, Hex.AQUA, Hex.AQUA)),
         'SUPERSTAR': ('MVP++', RankColours(Hex.UNKNOWN, Hex.UNKNOWN, Hex.UNKNOWN)),
@@ -77,7 +77,7 @@ class Rank:
         if self._colours.rank_colour == Hex.UNKNOWN:
             assert self._display_rank == 'MVP++'
             self._colours.rank_colour = (
-                Hex.AQUA if self._json.get('monthlyRankColor') == 'AQUA' else Hex.ORANGE
+                Hex.AQUA if self._json.get('monthlyRankColor') == 'AQUA' else Hex.GOLD
             )
         return self._colours.rank_colour
     
