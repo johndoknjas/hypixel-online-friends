@@ -26,6 +26,7 @@ class Hex(Enum):
     DARK_GRAY = "#555555"
     WHITE = "#ffffff"
     BLACK = "#000000"
+    UNKNOWN = "used for cases where there is a colour, but it's not known at the moment"
 
 PIT_PRES_HEXES = (Hex.GRAY, Hex.BLUE, Hex.YELLOW, Hex.ORANGE, Hex.RED, Hex.PURPLE, Hex.PINK,
                   Hex.WHITE, Hex.AQUA, Hex.DARK_BLUE, Hex.BLACK, Hex.DARK_RED, Hex.DARK_GRAY)

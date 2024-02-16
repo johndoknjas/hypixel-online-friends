@@ -126,7 +126,7 @@ class Player:
     def get_network_xp(self) -> int:
         return self.hypixel_object().getNetworkXP()
     
-    def get_network_rank(self) -> Optional[str]:
+    def get_network_rank(self) -> hypixel.Rank:
         return self.hypixel_object().getNetworkRank()
     
     def percent_way_to_next_network_level(self) -> float:
@@ -221,7 +221,7 @@ class Player:
         return any(self.represents_same_person(p) for p in players)
     
     @staticmethod
-    def print_dict_report(report: Dict, rank_info: Dict[str, Optional[str]] = {}) -> None:
+    def print_dict_report(report: Dict, rank: Optional[hypixel.Rank] = None) -> None:
         import Colours
         report = deepcopy(report)
         assert all(isinstance(v, (str,float,int)) for v in report.values())
@@ -231,13 +231,18 @@ class Player:
         assert isinstance(uuid, str) # for mypy
 
         if name is not None:
-            old_name = ProcessingResults.uuid_ign_pairs_in_results().get(uuid)
-            if old_name is not None and old_name.lower() != name.lower():
-                name += f' ({old_name})'
-            if rank_info and rank_info['rank']:
-                assert set(rank_info.keys()) == {'rank'}
-                name = f"[{rank_info['rank']}] {name}"
-            print(f"{name}".rjust(38), end='')
+            assert isinstance(name, str)
+            if old_name := ProcessingResults.uuid_ign_pairs_in_results().get(uuid, ''):
+                old_name = '' if old_name.lower() == name.lower() else f' ({old_name})'
+            print_length = (len(rank.rank(True)) if rank else 0) + len(name) + len(old_name)
+            print(' ' * max(0, 38 - print_length), end='')
+            if rank and rank.rank(True):
+                rank.print_rank()
+                assert (name_colour := rank.name_and_bracket_colour())
+                Colours.colour_print(Colours.ColourSpecs(name, name_colour))
+            else:
+                print(name, end='')
+            print(old_name, end='')
         if fkdr is not None:
             magnitude = len(str(int(fkdr := round(fkdr, 3))))
             print(f" {fkdr:.3f}".ljust(6) + " fkdr".ljust(7-magnitude), end='')
@@ -290,7 +295,7 @@ class Player:
             report['time'] = time
         if self.specs().print_player_data_exclude_friends():
             self.print_dict_report(
-                report, {'rank': self.get_network_rank()} if not self.specs().just_uuids() else {}
+                report, self.get_network_rank() if not self.specs().just_uuids() else None
             )
         if not self.specs_for_friends():
             return report
@@ -369,7 +374,7 @@ class Player:
             for d in report['friends']:
                 friend = uuid_friend_map[d['uuid']]
                 self.print_dict_report(
-                    d, {'rank': friend.get_network_rank()} if not friend.specs().just_uuids() else {}
+                    d, friend.get_network_rank() if not friend.specs().just_uuids() else None
                 )
             print()
         return report

@@ -2,15 +2,11 @@
 
     # Consider including network levels when outputting dict reports.
 
-    # Colour a player's name depending on their rank (e.g., red for ADMIN, green with orange plus for
-      VIP+, gold/aqua for some mvps or something).
-      And if their rank has MVP+/MVP++, colour the plus depending on the nw level.
-      # See https://github.com/HypixelDev/PublicAPI/wiki/Common-Questions#how-do-i-get-a-players-rank-prefix
-      #     https://hypixel.fandom.com/wiki/Ranks
-
     # For bw stars >= 1000, print in the actual colours they should be, rather than yellow and blinking.
 
     # Consider doing the colour printing stuff for info printed at the beginning on players in args too.
+
+    # Consider refactoring to not need the HEX.UNKNOWN hacky stuff used in hypixel.py.
 
     # Make a function in hypixel.py that returns a number of leaderboards, obtained from
       https://api.hypixel.net/#tag/Other/paths/~1v2~1leaderboards/get. Then, the user can enter
