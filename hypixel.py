@@ -10,6 +10,7 @@ from typing import List, Optional, Dict, Tuple
 import re
 import requests
 from dataclasses import dataclass
+from copy import deepcopy
 
 from MyClasses import UUID_Plus_Time
 import Files
@@ -44,8 +45,8 @@ class RankColours:
     rank_colour: Optional[Colours.Hex]
     """Represents the colour of the rank, excluding any potential '+' chars."""
 
-class Rank:
-    rank_map: Dict[Optional[str], Tuple[str, RankColours]] = {
+class RankMap:
+    _rank_map: Dict[Optional[str], Tuple[str, RankColours]] = {
         '§c[OWNER]': ('OWNER', RankColours(None, Hex.RED, Hex.RED)),
         'ADMIN': ('ADMIN', RankColours(None, Hex.RED, Hex.RED)),
         'GAME_MASTER': ('GM', RankColours(None, Hex.DARK_GREEN, Hex.DARK_GREEN)),
@@ -57,14 +58,20 @@ class Rank:
         'SUPERSTAR': ('MVP++', RankColours(Hex.UNKNOWN, Hex.UNKNOWN, Hex.UNKNOWN)),
         None: ('', RankColours(None, None, None))
     }
+    @classmethod
+    def json_rank_info(cls, key: Optional[str]) -> Tuple[str, RankColours]:
+        """Returns the display string for a rank (without the brackets), as well as a RankColours
+           object detailing the colours to print in."""
+        return deepcopy(cls._rank_map[key])
 
+class Rank:
     def __init__(self, json: dict) -> None:
         keys = ('prefix', 'rank', 'monthlyPackageRank', 'newPackageRank', 'packageRank')
         none_vals = (None, 'NONE', 'NORMAL')
         rank_map_key = next(
             (v for v in (json.get(k) for k in keys) if v not in none_vals), None
         )
-        self._display_rank, self._colours = Rank.rank_map[rank_map_key]
+        self._display_rank, self._colours = RankMap.json_rank_info(rank_map_key)
         self._json = json
 
     def rank(self, with_brackets_and_space: bool) -> str:
