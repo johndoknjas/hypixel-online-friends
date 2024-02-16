@@ -8,6 +8,9 @@
 
     # Consider refactoring to not need the HEX.UNKNOWN hacky stuff used in hypixel.py.
 
+    # https://hypixel.fandom.com/wiki/Ranks
+      Consider handling the other 'Special' ranks (only handle 'YOUTUBE' right now).
+
     # Make a function in hypixel.py that returns a number of leaderboards, obtained from
       https://api.hypixel.net/#tag/Other/paths/~1v2~1leaderboards/get. Then, the user can enter
       which leaderboard they want to see, and it can be outputted with each player's stats per row.
