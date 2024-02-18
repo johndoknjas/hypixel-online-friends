@@ -4,8 +4,6 @@
 
     # For bw stars >= 1000, print in the actual colours they should be, rather than yellow and blinking.
 
-    # Consider doing the colour printing stuff for info printed at the beginning on players in args too.
-
     # Consider refactoring to not need the HEX.UNKNOWN hacky stuff used in hypixel.py.
 
     # https://hypixel.fandom.com/wiki/Ranks

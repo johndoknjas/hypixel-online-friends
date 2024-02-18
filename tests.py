@@ -21,9 +21,11 @@ def non_automated_tests() -> None:
     test_pit_colours()
 
 class Tests:
+    """
     @pytest.fixture
     def example_fixture(self):
         pass
+    """
     
     def test_deep_copy_Specs_constructor(self):
         friends_specs = Specs(False, True, None, 1)

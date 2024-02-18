@@ -123,8 +123,9 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             hypixel_obj = hypixel.Player(arg)
             uuid = hypixel_obj.getUUID()
             all_friends: List[UUID_Plus_Time] = []
-            standard_friends = ProcessingResults.get_best_f_list_for_player_in_results(uuid,
-            must_have_times_friended = FRIENDED_WHEN in args_no_keywords_or_date)
+            standard_friends = ProcessingResults.get_best_f_list_for_player_in_results(
+                uuid, must_have_times_friended=FRIENDED_WHEN in args_no_keywords_or_date
+            )
             num_friends_msgs[0] = (str(len(standard_friends)) 
                                    + " friends in biggest single friends list/file\n")
             if args.get_additional_friends():

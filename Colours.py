@@ -42,11 +42,6 @@ class ColourSpecs:
         self.text, self.style = text, rich.style.Style(color=text_colour.value, bold=bold, blink=blink,
                                                        bgcolor = bg_colour.value if bg_colour else None)
 
-def generate_rich_style(text_colour: Hex, background: Optional[Hex],
-                        bold: bool, blink: bool) -> rich.style.Style:
-    return rich.style.Style(color=text_colour.value, bold=bold, blink=blink,
-                            bgcolor = background.value if background is not None else None)
-
 def colour_print(msg: ColourSpecs) -> None:
     console.print(msg.text, style=msg.style, end='', highlight=False)
 
