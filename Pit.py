@@ -1,4 +1,5 @@
 import math
+from typing import List
 
 import Utils
 
@@ -29,7 +30,7 @@ def total_xp_req_for_pres(prestige: int) -> int:
     """Returns the amount of total xp that must be earned before the specified prestige."""
     return 0 if prestige == 0 else PRESTIGE_XP[prestige-1]
 
-def total_xp_reqs_for_levels(prestige: int) -> list[int]:
+def total_xp_reqs_for_levels(prestige: int) -> List[int]:
     """Returns a list of size 120, containing the total xp to reach levels 1-120 of the specified prestige."""
     levels_xp_reqs = [total_xp_req_for_pres(prestige)] # this first element will be removed at the end of the function.
     for level in range(1, 121):
@@ -42,7 +43,7 @@ def total_xp_reqs_for_levels(prestige: int) -> list[int]:
     assert len(levels_xp_reqs) == 121
     return levels_xp_reqs[1:]
 
-def xp_percent_levels() -> list[float]:
+def xp_percent_levels() -> List[float]:
     """Returns a list of size 120, containing the percent through a prestige (in terms of xp)
        to reach a certain level."""
     pres = 1 # Any greater prestige works as well.
