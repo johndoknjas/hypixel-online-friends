@@ -220,13 +220,19 @@ class Player:
         """Returns whether the player is already represented in this players list."""
         return any(self.represents_same_person(p) for p in players)
     
+    def get_stats_dict(self) -> dict:
+        """Returns a dict with key-val pairs for uuid, name, fkdr, star, and pit_rank."""
+        return {'uuid': self.uuid(), 'name': self.name(), 'fkdr': self.get_fkdr(), 
+                'star': self.get_bw_star(), 'pit_rank': self.pit_rank_string()}
+    
     @staticmethod
-    def print_dict_report(report: Dict, rank: Optional[hypixel.Rank] = None) -> None:
+    def print_dict_report(report: Dict, rank: Optional[hypixel.Rank] = None,
+                          for_arg_player: bool = False) -> None:
         import Colours
         report = deepcopy(report)
         assert all(isinstance(v, (str,float,int)) for v in report.values())
         possible_keys = ('name', 'fkdr', 'star', 'pit_rank', 'uuid', 'time')
-        assert set(report.keys()) <= set(possible_keys)
+        assert {'uuid'} <= set(report.keys()) <= set(possible_keys)
         name, fkdr, star, pit_rank, uuid, time = [report.get(k) for k in possible_keys]
         assert isinstance(uuid, str) # for mypy
 
@@ -234,8 +240,9 @@ class Player:
             assert isinstance(name, str)
             if old_name := ProcessingResults.uuid_ign_pairs_in_results().get(uuid, ''):
                 old_name = '' if old_name.lower() == name.lower() else f' ({old_name})'
-            print_length = (len(rank.rank(True)) if rank else 0) + len(name) + len(old_name)
-            print(' ' * max(0, 38 - print_length), end='')
+            if not for_arg_player:
+                print_length = (len(rank.rank(True)) if rank else 0) + len(name) + len(old_name)
+                print(' ' * max(0, 38 - print_length), end='')
             if rank and rank.rank(True):
                 rank.print_rank()
                 assert (name_colour := rank.name_and_bracket_colour())
@@ -250,7 +257,8 @@ class Player:
             Colours.print_bw_star(star)
         if pit_rank is not None:
             Colours.print_pit_rank(pit_rank)
-        print(f" uuid {uuid[:(show := 5)]}...{uuid[-show:]}".ljust(10+show*2), end='')
+        if not for_arg_player:
+            print(f" uuid {uuid[:(show := 5)]}...{uuid[-show:]}".ljust(10+show*2), end='')
         if time is not None:
             if Utils.is_date_string(time):
                 date_obj = datetime.strptime(time, '%Y-%m-%d')
@@ -259,7 +267,7 @@ class Player:
         print()
 
     def print_player_info(self) -> None:
-        print(f"This player has {len(self.friends())} unique friends total.\n")
+        print(f"{len(self.friends())} unique friends total\n")
         nw_level = self.get_network_level()
         closest_multiple_50 = Utils.round_up_to_closest_multiple(nw_level, 50)
         percent_to_next_level = round(self.percent_way_to_next_network_level() * 100, 2)
@@ -272,9 +280,9 @@ class Player:
             )
             print(f"{percent_overall_next_50_multiple} of the way overall to level {multiple_50}, ", end="")
         print("\n")
-        print(f"bw fkdr: {self.get_fkdr()}, bw star: {self.get_bw_star()}, bw xp: {self.get_bw_xp()}\n")
+        print(f"bw xp: {self.get_bw_xp()}\n")
         self.pit_stats_object().print_info()
-        print("------------------------\n\n")
+        print(f"{'-'*150}\n\n")
     
     def create_dictionary_report(self, sort_key: str = "fkdr", extra_online_check: bool = False, 
                                  should_terminate: bool = True) -> dict:
@@ -284,14 +292,11 @@ class Player:
         if (self.specs().required_online() and 
             not self.hypixel_object().isOnline(extra_online_check=extra_online_check)):
             return {}
-
-        report = {}
-        if not self.specs().just_uuids():
-            report.update({'name': self.name(), 'fkdr': self.get_fkdr(), 'star': self.get_bw_star(),
-                           'pit_rank': self.pit_rank_string()})
-        report['uuid'] = self.uuid()
-        if time := self.time_friended_parent_player('ms' if Specs.does_program_display_time_as_unix_epoch() 
-                                                    else 'date'):
+        
+        report = self.get_stats_dict() if not self.specs().just_uuids() else {'uuid': self.uuid()}
+        if time := self.time_friended_parent_player(
+            'ms' if Specs.does_program_display_time_as_unix_epoch() else 'date'
+        ):
             report['time'] = time
         if self.specs().print_player_data_exclude_friends():
             self.print_dict_report(

@@ -58,7 +58,7 @@ def combine_players(info_on_players: List[Player]) -> Player:
                     specs=playerSpecs, date_cutoff_for_friends=date_cutoff_friends)
     player.polish_friends_list(exclude_friends)
 
-    print("Now " + str(len(player.friends())) + " friends after adjustments specified in args.")
+    print("Now " + str(len(player.friends())) + " friends after adjustments specified in args.\n\n")
 
     return player
 
@@ -114,8 +114,8 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
         next_arg = args_no_keywords_or_date[i+1] if i+1 < len(args_no_keywords_or_date) else None
         use_specific_textfile = next_arg and next_arg.endswith('.txt')
         use_results_folder = args.from_results_for_all() or next_arg == FROM_RESULTS
+        num_friends_msgs = ['', '']
 
-        player = None
         if use_specific_textfile:
             assert not args.do_file_output()
             player = Player.make_player_from_json_textfile(args_no_keywords_or_date[i+1], arg, specs=specs)
@@ -125,15 +125,11 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             all_friends: List[UUID_Plus_Time] = []
             standard_friends = ProcessingResults.get_best_f_list_for_player_in_results(uuid,
             must_have_times_friended = FRIENDED_WHEN in args_no_keywords_or_date)
-            ign = hypixel_obj.getName()
-            old_ign = ProcessingResults.uuid_ign_pairs_in_results().get(uuid, None)
-            ign_changed = old_ign is not None and ign.lower() != old_ign.lower()
-            print(f'Name: {ign}' + (f' ({old_ign})' if ign_changed else ''))
-            print("total number of friends in biggest single friends list/file for " + arg +
-                  ": " + str(len(standard_friends)))
+            num_friends_msgs[0] = (str(len(standard_friends)) 
+                                   + " friends in biggest single friends list/file\n")
             if args.get_additional_friends():
                 all_friends = ProcessingResults.get_all_additional_friends_for_player(uuid)
-                print("total number of 'additional friends' is " + str(len(all_friends)))
+                num_friends_msgs[1] = (f"{len(all_friends)} unique 'additional friends'\n")
                 for f in standard_friends:
                     ProcessingResults.update_list_if_applicable(all_friends, f)
             else:
@@ -145,6 +141,8 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
 
         if Utils.is_ign(arg):
             print("This player's uuid is " + player.uuid())
+        Player.print_dict_report(player.get_stats_dict(), player.get_network_rank(), True)
+        print(num_friends_msgs[0] + num_friends_msgs[1], end='')
         player.print_player_info()
 
         player.set_will_exclude_friends(in_minus_symbol_section)
