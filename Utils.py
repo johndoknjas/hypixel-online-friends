@@ -133,18 +133,14 @@ def get_all_nested_dicts_in_dict(d: dict, make_deepcopy: bool = False) -> List[d
         dicts.extend(get_all_nested_dicts_in_dict(friend_dict, make_deepcopy=False))
     return dicts
 
-def bool_lowercase_str(b: bool) -> str:
-    return str(b).lower()
-
 def print_info_for_key(dicts: List[dict], k: str, indent: str) -> None:
     k_for_print = k + ('s' if k == 'star' else '')
-    print(indent + str(len(dicts)) + " players with their " + k_for_print + " recorded in results.")
+    print(f"{indent}{len(dicts)} players with their {k_for_print} recorded in results.")
     if k in ('star', 'fkdr', 'friends'):
         highest_dict = max(dicts, key=lambda d: len(d[k]) if k == 'friends' else d[k])
-        print(indent*2 + "Most " + k_for_print + ": " + 
-                str(len(highest_dict[k]) if k == 'friends' else highest_dict[k]) + 
-                " (" + ((highest_dict['name'] + ", ") if 'name' in highest_dict else "") + 
-                'uuid ' + highest_dict['uuid'] + ")")
+        highest_stat = len(highest_dict[k]) if k == 'friends' else highest_dict[k]
+        name = f"{highest_dict['name']}, " if 'name' in highest_dict else ''
+        print(f"{indent*2}Most {k_for_print}: {highest_stat} ({name}uuid {highest_dict['uuid']})")
 
 def does_first_have_more_friends(first: list, second: list) -> Optional[bool]:
     """True returned if more, False returned if less, None returned if equal."""

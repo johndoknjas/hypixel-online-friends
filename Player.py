@@ -407,11 +407,8 @@ class Player:
     def diff_f_lists(self, other: Player, print_results: bool = False) -> List[Player]:
         diff = [f for f in self.friends() if not f.in_player_list(other.friends())]
         if print_results:
-            print(str(len(diff)) + " friends of " + self.name() + " and not of " + other.name() + ":")
+            print(f"{len(diff)} friends of {self.name()} and not of {other.name()}:")
             for player in diff:
-                player.print_uuid_name()
+                print(f"name: {player.name()}, uuid: {player.uuid()}")
             print('\n\n')
         return diff
-    
-    def print_uuid_name(self) -> None:
-        print('name: ' + self.name() + ', uuid: ' + self.uuid())

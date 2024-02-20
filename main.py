@@ -58,7 +58,7 @@ def combine_players(info_on_players: List[Player]) -> Player:
                     specs=playerSpecs, date_cutoff_for_friends=date_cutoff_friends)
     player.polish_friends_list(exclude_friends)
 
-    print("Now " + str(len(player.friends())) + " friends after adjustments specified in args.\n\n")
+    print(f"Now {len(player.friends())} friends after adjustments specified in args.\n\n")
 
     return player
 
@@ -126,8 +126,7 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             standard_friends = ProcessingResults.get_best_f_list_for_player_in_results(
                 uuid, must_have_times_friended=FRIENDED_WHEN in args_no_keywords_or_date
             )
-            num_friends_msgs[0] = (str(len(standard_friends)) 
-                                   + " friends in biggest single friends list/file\n")
+            num_friends_msgs[0] = f"{len(standard_friends)} friends in biggest single friends list/file\n"
             if args.get_additional_friends():
                 all_friends = ProcessingResults.get_all_additional_friends_for_player(uuid)
                 num_friends_msgs[1] = (f"{len(all_friends)} unique 'additional friends'\n")
@@ -246,7 +245,7 @@ def main() -> None:
         if args.minus_results():
             player.polish_friends_list({uuid: Player(uuid) for uuid in 
                                         ProcessingResults.player_uuids_with_f_list_in_results()})
-            print("Now " + str(len(player.friends())) + " unique friends after applying 'minusresults'.")
+            print(f"Now {len(player.friends())} unique friends after applying 'minusresults'.")
 
     if args.update_uuids():
         Files.update_uuids_file(ProcessingResults.ign_uuid_pairs_in_results())

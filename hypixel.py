@@ -124,7 +124,7 @@ def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
     """ This function is used for getting a JSON from Hypixel's Public API. """
     global num_api_calls_made
     num_api_calls_made += 1
-    # print(str(num_api_calls_made) + '\n' + str(time() - TIME_STARTED) + '\n\n')
+    # print(f"{num_api_calls_made}\n{time() - TIME_STARTED}\n\n")
     if typeOfRequest != 'player':
         assert Utils.is_uuid(uuid_or_ign)
     assert _verify_requests is not None
@@ -145,7 +145,7 @@ def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
         if remaining_allowed_requests <= 1:
             sleep_seconds = int(responseHeaders['RateLimit-Reset']) + 1
             wake_up_time = datetime.datetime.now() + datetime.timedelta(seconds=sleep_seconds)
-            print("Sleeping until " + wake_up_time.strftime("%I:%M:%S %p") + " for rate limiting.")
+            print(f"Sleeping until {wake_up_time.strftime('%I:%M:%S %p')} for rate limiting.")
             sleep(sleep_seconds)
 
     if not responseJSON['success']:
@@ -170,7 +170,7 @@ def get_uuid(uuid_or_ign: str, call_api_last_resort: bool = True) -> str:
     possible_uuid = Files.ign_uuid_pairs_in_uuids_txt().get(ign, ign)
     if Utils.is_uuid(possible_uuid):
         if Player(possible_uuid).getName().lower() != ign:
-            raise RuntimeError("NOTE: " + ign + " is no longer the ign of the player with uuid " + possible_uuid)
+            raise RuntimeError(f"NOTE: {ign} is no longer the ign of the player with uuid {possible_uuid}")
         return possible_uuid
     return Player(ign).getUUID() if call_api_last_resort else ign
 

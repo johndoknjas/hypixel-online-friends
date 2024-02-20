@@ -31,7 +31,7 @@ def write_data_as_json_to_file(data: dict, description: str, folder_name: str = 
 
 def create_file(description: str, folder_name: str) -> str:
     """Creates a file using the params and returns the name of the file, which can be used by the caller if desired."""
-    filename = os.path.join(folder_name, Utils.trim_if_needed(description + " - " + str(time.time_ns()) + ".txt"))
+    filename = os.path.join(folder_name, Utils.trim_if_needed(f"{description} - {time.time_ns()}.txt"))
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     return filename
 
@@ -68,9 +68,9 @@ def update_uuids_file(ign_uuid_pairs: Dict[str, str]) -> None:
     pairs.update(ign_uuid_pairs)
     with open("uuids.txt", "w") as file:
         for key, value in pairs.items():
-            file.write(key + " " + value + "\n")
+            file.write(f"{key} {value}\n")
             assert key == key.lower()
-    print("uuids.txt now contains uuid-ign pairs for " + str(len(pairs)) + " players.")
+    print(f"uuids.txt now contains uuid-ign pairs for {len(pairs)} players.")
 
 def add_aliases(keywords: List[str]) -> None:
     aliases: List[Tuple[str, str]] = []
@@ -89,7 +89,7 @@ def add_aliases(keywords: List[str]) -> None:
 
     with open(_ALIASES_FILENAME, 'a+') as file:
         for alias_pair in aliases:
-            file.write('"' + alias_pair[0] + '" = "' + alias_pair[1] + '"\n')
+            file.write(f'"{alias_pair[0]}" = "{alias_pair[1]}"\n')
 
 def get_aliases() -> List[Tuple[str, List[str]]]:
     """ Returns a list representing the aliases stored in aliases.txt. Each element of this list

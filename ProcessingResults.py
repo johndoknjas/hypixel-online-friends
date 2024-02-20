@@ -48,10 +48,9 @@ def check_results(uuid: Optional[str], ign: Optional[str]) -> None:
 
     assert type(uuid) == type(ign)
 
-    print("\n\n")
-    print(str(len(_get_all_unique_uuids_in_results())) + " total unique uuids recorded in the results folder.")
+    print(f"\n\n{len(_get_all_unique_uuids_in_results())} total unique uuids recorded in the results folder.")
     all_dicts: List[dict] = get_all_dicts_unique_uuids_in_results()
-    print(str(len(all_dicts)) + " total players with non-trivial data stored in the results folder (excluding additional friends files).")
+    print(f"{len(all_dicts)} total players with non-trivial data stored in the results folder (excluding additional friends files).")
 
     for k in _NON_TRIVIAL_KEYS:
         dicts_with_key = [d for d in all_dicts if k in d]
@@ -61,9 +60,9 @@ def check_results(uuid: Optional[str], ign: Optional[str]) -> None:
             continue
         _player_uuids_with_f_list_in_results = [d['uuid'] for d in dicts_with_key]
         if uuid and ign:
-            print(indent*2 + "Also, it's " + 
-                  Utils.bool_lowercase_str(uuid in _player_uuids_with_f_list_in_results) +
-                  " that " + ign + "'s friends list is in the results folder.")
+            friends_in_results = uuid in _player_uuids_with_f_list_in_results
+            print(f"{indent*2}Also, it's {str(friends_in_results).lower()} that " +
+                  f"{ign}'s friends list in in the results folder.")
     print('\n\n')
 
 def player_uuids_with_f_list_in_results(get_copy: bool = False) -> List[str]:
@@ -147,7 +146,7 @@ def print_all_matching_uuids_or_igns(uuid_or_ign: str) -> None:
     param_key = 'uuid' if Utils.is_uuid(uuid_or_ign) else 'name'
     search_for = 'name' if param_key == 'uuid' else 'uuid'
 
-    print('\nMatching ' + search_for + 's found in the results folder:')
+    print(f'\nMatching {search_for}s found in the results folder:')
     hits = []
     for d in get_all_dicts_in_results():
         if 'name' in d and d[param_key].lower() == uuid_or_ign.lower() and d[search_for] not in hits:
