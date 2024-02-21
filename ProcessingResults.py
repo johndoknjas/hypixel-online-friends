@@ -113,7 +113,7 @@ def get_best_f_list_for_player_in_results(uuid_or_ign: str,
     for d in get_all_dicts_unique_uuids_in_results(must_have_times_friended=must_have_times_friended):
         if d['uuid'] == uuid:
             # print(d['filename']) For debugging - will show you the filename the dict came from.
-            return [UUID_Plus_Time(f['uuid'], f.get('time', None)) for f in d.get('friends', [])]
+            return [UUID_Plus_Time(f['uuid'], f.get('time')) for f in d.get('friends', [])]
     return []
 
 def update_list_if_applicable(lst: List[UUID_Plus_Time], new_elem: UUID_Plus_Time) -> None:
@@ -134,7 +134,7 @@ def get_all_additional_friends_for_player(uuid_or_ign: str) -> List[UUID_Plus_Ti
         if d['uuid'] != uuid:
             continue
         for f in d.get('friends', []):
-            current_friend = UUID_Plus_Time(f['uuid'], f.get('time', None))
+            current_friend = UUID_Plus_Time(f['uuid'], f.get('time'))
             update_list_if_applicable(additional_friends, current_friend)
     return additional_friends
 

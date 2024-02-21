@@ -27,7 +27,7 @@ class Player:
         assert dict_for_player
         return Player(uuid=dict_for_player['uuid'], 
                       friends=[
-                                  UUID_Plus_Time(d['uuid'], d.get('time', None))
+                                  UUID_Plus_Time(d['uuid'], d.get('time'))
                                   for d in dict_for_player.get('friends', [])
                               ],
                       specs=specs
@@ -126,7 +126,7 @@ class Player:
     def get_network_xp(self) -> int:
         return self.hypixel_object().getNetworkXP()
     
-    def get_network_rank(self) -> hypixel.Rank:
+    def network_rank(self) -> hypixel.Rank:
         return self.hypixel_object().getNetworkRank()
     
     def percent_way_to_next_network_level(self) -> float:
@@ -286,72 +286,57 @@ class Player:
     
     def create_dictionary_report(self, sort_key: str = "fkdr", extra_online_check: bool = False, 
                                  should_terminate: bool = True) -> dict:
-        # CONTINUE HERE - later, could make a Report class and return an object of that, instead of a dict here.
-        if self.root_player():
-            assert not self.time_friended_parent_player('date')
+        assert not (self.root_player() and self.time_friended_parent_player('date'))
         if (self.specs().required_online() and 
             not self.hypixel_object().isOnline(extra_online_check=extra_online_check)):
             return {}
         
         report = self.get_stats_dict() if not self.specs().just_uuids() else {'uuid': self.uuid()}
-        if time := self.time_friended_parent_player(
-            'ms' if Specs.does_program_display_time_as_unix_epoch() else 'date'
-        ):
+        use_epoch_format = Specs.does_program_display_time_as_unix_epoch()
+        if time := self.time_friended_parent_player('ms' if use_epoch_format else 'date'):
             report['time'] = time
         if self.specs().print_player_data_exclude_friends():
-            self.print_dict_report(
-                report, self.get_network_rank() if not self.specs().just_uuids() else None
-            )
-        if not self.specs_for_friends():
-            return report
-        
-        self.iterate_over_friends_for_report(report, self.friends(), not should_terminate, 
-                                             sort_key, False, True)
-
-        return (self.polish_dictionary_report(report, sort_key, self.friends()) 
-                if self.root_player() else report)
+            Player.print_dict_report(report, None if self.specs().just_uuids() else self.network_rank())
+        if self.specs_for_friends():
+            self.iterate_over_friends_for_report(report, self.friends(), not should_terminate, 
+                                                 sort_key, False, True)
+            if self.root_player():
+                report = Player._sort_friends_in_report(report, sort_key)
+                self.print_friends_in_report(report, self.friends())
+        return report
     
-    def iterate_over_friends_for_report(self, report: dict, friends: List[Player],
-                                        do_additional_passes: bool, sort_key: str,
-                                        on_perpetual_pass: bool, on_first_pass: bool,
-                                        end_index: Optional[int] = None) -> None:
+    def iterate_over_friends_for_report(
+        self, report: dict, friends: List[Player], do_additional_passes: bool, sort_key: str,
+        on_perpetual_pass: bool, on_first_pass: bool, end_index: Optional[int] = None
+    ) -> None:
         """Will modify `report`, which is passed by reference."""
 
-        # For friends whose online status is shown, there will be some false negatives over time.
-        # This is because if their json shows them not online at the start of the program, it won't
-        # double check if they're currently online.
-
-        # For friends whose online status isn't shown, there will be some false positives over time.
-        # This is because a player's stats could have been updated, but then later on they logged out.
-
+        report.setdefault('friends', [])
         assert not (on_first_pass and on_perpetual_pass)
         if do_additional_passes:
             assert on_first_pass and self.root_player()
 
-        if 'friends' not in report:
-            report['friends'] = [] # list of dicts
-        points_to_do_second_passes = [200 * 2**i for i in range(0, 10)]
-
         for i in range(len(friends) if end_index is None else end_index+1):
-            if i in points_to_do_second_passes and on_first_pass and do_additional_passes:
+            if do_additional_passes and i in (2**n*200 for n in range(0, 10)):
                 # Do a 'second pass' from 0 until i-1 indexed players, checking if their stats
                 # have been updated (for players who don't have the online status shown):
                 self.iterate_over_friends_for_report(report, friends, False, sort_key,
                                                      False, False, end_index=i-1)
             assert isinstance(report['friends'], list)
             friend: Player = friends[i]
-            if friend.uuid() not in [d['uuid'] for d in report['friends']]:
-                if friend_report := friend.create_dictionary_report(extra_online_check = not on_first_pass):
-                    report['friends'].append(friend_report)
+            if (friend.uuid() not in (d['uuid'] for d in report['friends']) and 
+                (friend_report := friend.create_dictionary_report(extra_online_check = not on_first_pass))):
+                report['friends'].append(friend_report)
             self.processed_msg(i+1, on_perpetual_pass, on_first_pass)
 
         if do_additional_passes and friends:
-            # Do perpetual passes:
-            while True:
-                self.polish_dictionary_report(report, sort_key, friends)
-                report['friends'] = []
-                self.iterate_over_friends_for_report(report, friends, False,
-                                                     sort_key, True, False)
+            self.do_perpetual_passes(report, sort_key, friends)
+
+    def do_perpetual_passes(self, report: dict, sort_key: str, friends: List[Player]) -> None:
+        while True:
+            self.print_friends_in_report(Player._sort_friends_in_report(report, sort_key), friends)
+            report['friends'] = []
+            self.iterate_over_friends_for_report(report, friends, False, sort_key, True, False)
     
     def processed_msg(self, num_processed: int, on_perpetual_pass: bool, on_first_pass: bool) -> None:
         """Prints a message saying how many players have been processed, if the number is a multiple of 50,
@@ -365,26 +350,37 @@ class Player:
         import Colours
         Colours.colour_print(Colours.ColourSpecs(msg, Colours.Hex.DARK_GRAY))
 
-    def polish_dictionary_report(self, report: dict, sort_key: str, friends: List[Player]) -> dict:
-        report = deepcopy(report)
-        if not report.get('friends', None): # if friends list doesn't exist or is empty:
-            return report
-        report['friends'] = sorted(report['friends'], key=lambda d: self._sort_func(d, sort_key),
-                                   reverse=True)
+    def print_friends_in_report(self, report: dict, friends: List[Player]) -> None:
+        if not report.get('friends') or not self.specs().print_only_players_friends():
+            return
         # Assert that there are no duplicate uuids:
         assert report['friends'] == list({f['uuid']:f for f in report['friends']}.values())
-        if self.specs().print_only_players_friends():
-            print()
-            uuid_friend_map = {f.uuid():f for f in friends}
-            for d in report['friends']:
-                friend = uuid_friend_map[d['uuid']]
-                self.print_dict_report(
-                    d, friend.get_network_rank() if not friend.specs().just_uuids() else None
-                )
-            print()
+        print()
+        uuid_friend_map = {f.uuid():f for f in friends}
+        assert len(uuid_friend_map) == len(report['friends'])
+        for d in report['friends']:
+            friend = uuid_friend_map[d['uuid']]
+            Player.print_dict_report(
+                d, friend.network_rank() if not friend.specs().just_uuids() else None
+            )
+        print()
+
+    @staticmethod
+    def _sort_friends_in_report(report: dict, sort_key: str) -> dict:
+        """Returns a version of `report` with the `friends` list sorted (if it exists)."""
+        report = deepcopy(report)
+        if 'friends' in report:
+            report['friends'] = Player._sort_player_dicts(report['friends'], sort_key)
         return report
-    
-    def _sort_func(self, d: dict, sort_key: str) -> int:
+
+    @staticmethod
+    def _sort_player_dicts(lst: list, sort_key: str) -> list:
+        """Returns a sorted version of `lst` in descending order."""
+        assert all(isinstance(d, dict) for d in lst)
+        return sorted(lst, key=lambda d: Player._sort_func(d, sort_key), reverse=True)
+
+    @staticmethod
+    def _sort_func(d: dict, sort_key: str) -> int:
         if sort_key == "pit_rank":
             return Utils.pit_rank_to_num_for_sort(d.get("pit_rank", "0-1"))
         return d.get(sort_key, 0)

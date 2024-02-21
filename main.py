@@ -141,7 +141,7 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
 
         if Utils.is_ign(arg):
             print("This player's uuid is " + player.uuid())
-        Player.print_dict_report(player.get_stats_dict(), player.get_network_rank(), True)
+        Player.print_dict_report(player.get_stats_dict(), player.network_rank(), True)
         print(num_friends_msgs[0] + num_friends_msgs[1], end='')
         player.print_player_info()
 
