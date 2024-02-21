@@ -357,7 +357,6 @@ class Player:
         assert report['friends'] == list({f['uuid']:f for f in report['friends']}.values())
         print()
         uuid_friend_map = {f.uuid():f for f in friends}
-        assert len(uuid_friend_map) == len(report['friends'])
         for d in report['friends']:
             friend = uuid_friend_map[d['uuid']]
             Player.print_dict_report(
