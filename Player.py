@@ -355,14 +355,14 @@ class Player:
             return
         # Assert that there are no duplicate uuids:
         assert report['friends'] == list({f['uuid']:f for f in report['friends']}.values())
-        print()
+        print('\n')
         uuid_friend_map = {f.uuid():f for f in friends}
         for d in report['friends']:
             friend = uuid_friend_map[d['uuid']]
             Player.print_dict_report(
                 d, friend.network_rank() if not friend.specs().just_uuids() else None
             )
-        print()
+        print('\n')
 
     @staticmethod
     def _sort_friends_in_report(report: dict, sort_key: str) -> dict:

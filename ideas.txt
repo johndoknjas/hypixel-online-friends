@@ -18,6 +18,8 @@
     # Consider making a report class instead of report dicts. The class could have a function that makes and
       returns a dict.
 
+    # Have a way to only output the n oldest/newest friends, based on an optional cli arg from the user.
+
     # For pit stats (in the info for arg players), output the amount of time played, K/D ratio,
       and maybe kills/time played ratio.
 
