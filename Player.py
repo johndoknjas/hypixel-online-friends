@@ -298,12 +298,11 @@ class Player:
         if self.specs().print_player_data_exclude_friends():
             Player.print_dict_report(report, None if self.specs().just_uuids() else self.network_rank())
         if self.specs_for_friends():
-            self.iterate_over_friends_for_report(report, self.friends(), not should_terminate, 
-                                                 sort_key, False, True)
+            self.iterate_over_friends_for_report(report, not should_terminate, sort_key, False, True)
         return report
     
     def iterate_over_friends_for_report(
-        self, report: dict, friends: List[Player], do_additional_passes: bool, sort_key: str,
+        self, report: dict, do_additional_passes: bool, sort_key: str,
         on_perpetual_pass: bool, on_first_pass: bool, end_index: Optional[int] = None
     ) -> None:
         """Will modify `report`, which is passed by reference."""
@@ -313,36 +312,35 @@ class Player:
         if do_additional_passes:
             assert on_first_pass and self.root_player()
         assert isinstance(report['friends'], list)
-        if not friends:
+        if not (friends := self.friends()):
             return
 
         for i in range(len(friends) if end_index is None else end_index+1):
             if do_additional_passes and i in (2**n*200 for n in range(0, 10)):
                 # Do a 'second pass' from 0 until i-1 indexed players, checking if their stats
                 # have been updated (for players who don't have the online status shown):
-                self.iterate_over_friends_for_report(report, friends, False, sort_key,
+                self.iterate_over_friends_for_report(report, False, sort_key,
                                                      False, False, end_index=i-1)
             if (friends[i].uuid() not in (d['uuid'] for d in report['friends']) and 
                 (friend_report := friends[i].create_dictionary_report(extra_online_check = not on_first_pass))):
                 report['friends'].append(friend_report)
-            self.processed_msg(i+1, on_perpetual_pass, on_first_pass, len(friends))
+            self.processed_msg(i+1, on_perpetual_pass, on_first_pass)
 
         if self.root_player() and (on_first_pass or on_perpetual_pass):
             Player._sort_friends_in_report(report, sort_key)
-            self.print_friends_in_report(report, friends)
+            self.print_friends_in_report(report)
         if do_additional_passes:
-            self.do_perpetual_passes(report, sort_key, friends)
+            self.do_perpetual_passes(report, sort_key)
 
-    def do_perpetual_passes(self, report: dict, sort_key: str, friends: List[Player]) -> None:
+    def do_perpetual_passes(self, report: dict, sort_key: str) -> None:
         while True:
             report['friends'] = []
-            self.iterate_over_friends_for_report(report, friends, False, sort_key, True, False)
+            self.iterate_over_friends_for_report(report, False, sort_key, True, False)
     
-    def processed_msg(self, num_processed: int, on_perpetual_pass: bool, on_first_pass: bool,
-                      num_total_friends: int) -> None:
+    def processed_msg(self, num_processed: int, on_perpetual_pass: bool, on_first_pass: bool) -> None:
         """Prints a message at regular intervals saying how many friends have been processed, 
            if the player is a root player."""
-        interval = min(50, num_total_friends)
+        interval = min(50, len(self.friends()))
         if not self.root_player() or num_processed % interval != 0:
             return
         msg = f"Processed {num_processed}" + (
@@ -352,13 +350,13 @@ class Player:
         import Colours
         Colours.colour_print(Colours.ColourSpecs(msg, Colours.Hex.DARK_GRAY))
 
-    def print_friends_in_report(self, report: dict, friends: List[Player]) -> None:
+    def print_friends_in_report(self, report: dict) -> None:
         if not report.get('friends') or not self.specs().print_only_players_friends():
             return
         # Assert that there are no duplicate uuids:
         assert report['friends'] == list({f['uuid']:f for f in report['friends']}.values())
         print('\n')
-        uuid_friend_map = {f.uuid():f for f in friends}
+        uuid_friend_map = {f.uuid():f for f in self.friends()}
         for d in report['friends']:
             friend = uuid_friend_map[d['uuid']]
             Player.print_dict_report(
