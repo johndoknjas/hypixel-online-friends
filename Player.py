@@ -225,9 +225,7 @@ class Player:
         return {'uuid': self.uuid(), 'name': self.name(), 'fkdr': self.get_fkdr(), 
                 'star': self.get_bw_star(), 'pit_rank': self.pit_rank_string()}
     
-    @staticmethod
-    def print_dict_report(report: Dict, rank: Optional[hypixel.Rank] = None,
-                          for_arg_player: bool = False) -> None:
+    def print_dict_report(self, report: Dict) -> None:
         import Colours
         report = deepcopy(report)
         assert all(isinstance(v, (str,float,int)) for v in report.values())
@@ -235,12 +233,13 @@ class Player:
         assert {'uuid'} <= set(report.keys()) <= set(possible_keys)
         name, fkdr, star, pit_rank, uuid, time = [report.get(k) for k in possible_keys]
         assert isinstance(uuid, str) # for mypy
+        rank = None if self.specs().just_uuids() else self.network_rank()
 
         if name is not None:
             assert isinstance(name, str)
             if old_name := ProcessingResults.uuid_ign_pairs_in_results().get(uuid, ''):
                 old_name = '' if old_name.lower() == name.lower() else f' ({old_name})'
-            if not for_arg_player:
+            if not self.root_player():
                 print_length = (len(rank.rank(True)) if rank else 0) + len(name) + len(old_name)
                 print(' ' * max(0, 38 - print_length), end='')
             if rank and rank.rank(True):
@@ -257,7 +256,7 @@ class Player:
             Colours.print_bw_star(star)
         if pit_rank is not None:
             Colours.print_pit_rank(pit_rank)
-        if not for_arg_player:
+        if not self.root_player():
             print(f" uuid {uuid[:(show := 5)]}...{uuid[-show:]}".ljust(10+show*2), end='')
         if time is not None:
             if Utils.is_date_string(time):
@@ -296,7 +295,7 @@ class Player:
         if time := self.time_friended_parent_player('ms' if use_epoch_format else 'date'):
             report['time'] = time
         if self.specs().print_player_data_exclude_friends():
-            Player.print_dict_report(report, None if self.specs().just_uuids() else self.network_rank())
+            self.print_dict_report(report)
         if self.specs_for_friends():
             self.iterate_over_friends_for_report(report, not should_terminate, sort_key, False, True)
         return report
@@ -358,10 +357,7 @@ class Player:
         print('\n')
         uuid_friend_map = {f.uuid():f for f in self.friends()}
         for d in report['friends']:
-            friend = uuid_friend_map[d['uuid']]
-            Player.print_dict_report(
-                d, friend.network_rank() if not friend.specs().just_uuids() else None
-            )
+            uuid_friend_map[d['uuid']].print_dict_report(d)
         print('\n')
 
     @staticmethod
