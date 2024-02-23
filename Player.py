@@ -300,9 +300,6 @@ class Player:
         if self.specs_for_friends():
             self.iterate_over_friends_for_report(report, self.friends(), not should_terminate, 
                                                  sort_key, False, True)
-            if self.root_player():
-                report = Player._sort_friends_in_report(report, sort_key)
-                self.print_friends_in_report(report, self.friends())
         return report
     
     def iterate_over_friends_for_report(
@@ -312,9 +309,12 @@ class Player:
         """Will modify `report`, which is passed by reference."""
 
         report.setdefault('friends', [])
-        assert not (on_first_pass and on_perpetual_pass)
+        assert not on_first_pass or not on_perpetual_pass
         if do_additional_passes:
             assert on_first_pass and self.root_player()
+        assert isinstance(report['friends'], list)
+        if not friends:
+            return
 
         for i in range(len(friends) if end_index is None else end_index+1):
             if do_additional_passes and i in (2**n*200 for n in range(0, 10)):
@@ -322,26 +322,28 @@ class Player:
                 # have been updated (for players who don't have the online status shown):
                 self.iterate_over_friends_for_report(report, friends, False, sort_key,
                                                      False, False, end_index=i-1)
-            assert isinstance(report['friends'], list)
-            friend: Player = friends[i]
-            if (friend.uuid() not in (d['uuid'] for d in report['friends']) and 
-                (friend_report := friend.create_dictionary_report(extra_online_check = not on_first_pass))):
+            if (friends[i].uuid() not in (d['uuid'] for d in report['friends']) and 
+                (friend_report := friends[i].create_dictionary_report(extra_online_check = not on_first_pass))):
                 report['friends'].append(friend_report)
-            self.processed_msg(i+1, on_perpetual_pass, on_first_pass)
+            self.processed_msg(i+1, on_perpetual_pass, on_first_pass, len(friends))
 
-        if do_additional_passes and friends:
+        if self.root_player() and (on_first_pass or on_perpetual_pass):
+            Player._sort_friends_in_report(report, sort_key)
+            self.print_friends_in_report(report, friends)
+        if do_additional_passes:
             self.do_perpetual_passes(report, sort_key, friends)
 
     def do_perpetual_passes(self, report: dict, sort_key: str, friends: List[Player]) -> None:
         while True:
-            self.print_friends_in_report(Player._sort_friends_in_report(report, sort_key), friends)
             report['friends'] = []
             self.iterate_over_friends_for_report(report, friends, False, sort_key, True, False)
     
-    def processed_msg(self, num_processed: int, on_perpetual_pass: bool, on_first_pass: bool) -> None:
-        """Prints a message saying how many players have been processed, if the number is a multiple of 50,
-           and if the player is the root player."""
-        if num_processed % 50 != 0 or not self.root_player():
+    def processed_msg(self, num_processed: int, on_perpetual_pass: bool, on_first_pass: bool,
+                      num_total_friends: int) -> None:
+        """Prints a message at regular intervals saying how many friends have been processed, 
+           if the player is a root player."""
+        interval = min(50, num_total_friends)
+        if not self.root_player() or num_processed % interval != 0:
             return
         msg = f"Processed {num_processed}" + (
             " for a perpetual pass\n" if on_perpetual_pass else
@@ -365,12 +367,10 @@ class Player:
         print('\n')
 
     @staticmethod
-    def _sort_friends_in_report(report: dict, sort_key: str) -> dict:
-        """Returns a version of `report` with the `friends` list sorted (if it exists)."""
-        report = deepcopy(report)
+    def _sort_friends_in_report(report: dict, sort_key: str) -> None:
+        """Sorts the 'friends' list (if it exists) of `report`."""
         if 'friends' in report:
             report['friends'] = Player._sort_player_dicts(report['friends'], sort_key)
-        return report
 
     @staticmethod
     def _sort_player_dicts(lst: list, sort_key: str) -> list:
