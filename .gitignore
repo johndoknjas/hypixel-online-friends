@@ -3,6 +3,7 @@
 __pycache__/
 /results/
 /old-uuids/
+/old-aliases/
 /player-lists
 /debugging
 /additional_friends.txt

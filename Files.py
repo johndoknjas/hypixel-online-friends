@@ -5,17 +5,17 @@ import os
 import os.path
 import json
 import time
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict, List
 import copy
 import shutil
 import ntpath
+from string import whitespace
 
 import Utils
 
 _ALIASES_FILENAME = "aliases.txt"
 
 _ign_uuid_pairs: Optional[dict] = None
-_aliases: Optional[List[Tuple[str, List[str]]]] = None
 
 def write_data_as_json_to_file(data: dict, description: str, folder_name: str = "results") -> None:
     warning_msg = """About to output a player's friends list to a file. Note that for any additional
@@ -73,49 +73,60 @@ def update_uuids_file(ign_uuid_pairs: Dict[str, str]) -> None:
     print(f"uuids.txt now contains uuid-ign pairs for {len(pairs)} players.")
 
 def add_aliases(keywords: List[str]) -> None:
-    aliases: List[Tuple[str, str]] = []
-    forbidden_as_aliases = keywords + [pair[0] for pair in get_aliases()]
+    print_aliases('Current aliases:')
+    aliases: Dict[str, str] = {a: ' '.join(m) for a,m in get_aliases().items()}
     while True:
         curr_alias = input("Enter alias (or 'done'/'stop' to quit): ").lower()
         if curr_alias in ('done', 'stop', 'quit'):
             break
-        if curr_alias in forbidden_as_aliases:
-            raise ValueError(f'{curr_alias} is either already an alias, or is a keyword')
+        if curr_alias in keywords:
+            raise ValueError(f'{curr_alias} is a keyword')
         assert not Utils.contains_whitespace(curr_alias)
         curr_meaning = input("Enter the text this alias stands for: ").lower()
         assert '.txt' not in curr_meaning
-        aliases.append((curr_alias, curr_meaning))
+        if curr_meaning in ('del', 'delete', 'remove'):
+            if input(f"Confirm you want to delete the {curr_alias} alias by entering y: ") in ('y', 'Y'):
+                del aliases[curr_alias]
+            continue
+        if curr_alias in aliases:
+            print(f"'{curr_alias}' is already an alias that stands for '{aliases[curr_alias]}'. ", end='')
+            if input(f"To confirm replacing its meaning to be '{curr_meaning}', enter y: ") not in ('y', 'Y'):
+                continue
+        aliases[curr_alias] = curr_meaning
         print()
 
-    with open(_ALIASES_FILENAME, 'a+') as file:
-        for alias_pair in aliases:
-            file.write(f'"{alias_pair[0]}" = "{alias_pair[1]}"\n')
+    shutil.copy('aliases.txt', create_file('aliases copy', 'old-aliases'))
+    with open(_ALIASES_FILENAME, 'w') as file:
+        for a,m in sorted(aliases.items()):
+            file.write(f'"{a}" = "{m}"\n')
+    print_aliases("\nUpdated aliases:")
 
-def get_aliases() -> List[Tuple[str, List[str]]]:
+def get_aliases() -> Dict[str, List[str]]:
     """ Returns a list representing the aliases stored in aliases.txt. Each element of this list
         will be a tuple, where the first element is a string (the alias), and the second element
         is a list of strings (what the alias stands for). """
-    global _aliases
-
-    if _aliases is not None:
-        return _aliases
-    _aliases = []
+    aliases: Dict[str, List[str]] = {}
     if not os.path.isfile(_ALIASES_FILENAME):
-        return _aliases
-
+        return aliases
     lines: List[str]
     with open(_ALIASES_FILENAME, 'r') as file:
         lines = file.read().splitlines()
     for line in lines:
-        split_line = [x.strip('" ') for x in line.split('=')]
+        split_line = [x.strip(whitespace + '"') for x in line.split('=')]
         assert line.count('=') == 1 and len(split_line) == 2 and line == line.lower()
-        _aliases.append((split_line[0], split_line[1].split(' ')))
-    return _aliases
+        aliases[split_line[0]] = split_line[1].split()
+    return aliases
+
+def print_aliases(msg: str = 'Aliases:') -> None:
+    print(f'{msg}\n')
+    for alias in (aliases := get_aliases()):
+        print(f"{alias} = {aliases[alias]}")
+    print()
 
 def apply_aliases(lst: List[str]) -> List[str]:
     """Returns a new list that results from applying the aliases (in aliases.txt) to the strings in lst."""
     old_lst = lst
-    for alias in get_aliases():
-        lst = Utils.replace_in_list(lst, alias[0], alias[1])
+    for alias in (aliases := get_aliases()):
+        lst = Utils.replace_in_list(lst, alias, aliases[alias])
     # If lst got updated, keep recursing (as some aliases may have aliases of their own):
     return apply_aliases(lst) if lst != old_lst else lst

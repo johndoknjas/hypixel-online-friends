@@ -181,7 +181,7 @@ def do_mini_program(args: Args) -> None:
     elif args.add_aliases():
         Files.add_aliases(args.get_keywords())
     elif args.print_aliases():
-        print(*sorted(f"{a} --> {' '.join(l)}" for a,l in Files.get_aliases()), sep='\n')
+        Files.print_aliases()
     elif args.get_player_json():
         output_player_jsons_to_file(get_players_from_args(args)[0])
     elif args.pit_percent():
