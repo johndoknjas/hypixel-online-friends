@@ -1,11 +1,4 @@
-/api-key.txt
-/uuids*.txt
 __pycache__/
-/results/
-/old-uuids/
-/old-aliases/
-/player-lists
-/debugging
-/additional_friends.txt
-/aliases.txt
+*.txt
+!ideas.txt
 *.pem
