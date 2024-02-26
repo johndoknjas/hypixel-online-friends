@@ -59,7 +59,7 @@ def read_json_textfile(filepath: str) -> dict:
             return json.loads(f.read())
 
 def update_uuids_file(ign_uuid_pairs: Dict[str, str]) -> None:
-    """Updates the uuids.txt file with the ign_uuid_pairs param. 
+    """Updates the uuids.txt file with the ign_uuid_pairs param.
     If a uuid is found for an ign in uuids.txt that conflicts with a pair in the passed in param,
     it will be replaced. Also, this function will make a backup of uuids.txt before overwriting it."""
 

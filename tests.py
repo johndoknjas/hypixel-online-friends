@@ -26,13 +26,13 @@ class Tests:
     def example_fixture(self):
         pass
     """
-    
+
     def test_deep_copy_Specs_constructor(self):
         friends_specs = Specs(False, True, None, 1)
         specs = Specs(False, False, friends_specs, 0)
         specs._friends_specs._just_uuids = True
         assert not friends_specs._just_uuids
-    
+
     def test_network_levels(self):
         level_range = range(1, 10001)
         xps = [leveling.getTotalExpToLevelFloor(l) for l in level_range]

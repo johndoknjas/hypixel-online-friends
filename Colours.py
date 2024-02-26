@@ -37,7 +37,7 @@ BW_PRES_HEXES = (Hex.GRAY, Hex.WHITE, Hex.GOLD, Hex.AQUA, Hex.DARK_GREEN, Hex.DA
 assert (13,13,10) == (len(PIT_PRES_HEXES), len(PIT_LVL_HEXES), len(BW_PRES_HEXES))
 
 class ColourSpecs:
-    def __init__(self, text: str, text_colour: Hex, bg_colour: Optional[Hex] = None, 
+    def __init__(self, text: str, text_colour: Hex, bg_colour: Optional[Hex] = None,
                  bold: bool = False, blink: bool = False):
         self.text, self.style = text, rich.style.Style(color=text_colour.value, bold=bold, blink=blink,
                                                        bgcolor = bg_colour.value if bg_colour else None)
@@ -72,10 +72,10 @@ def print_pit_rank(rank: str) -> None:
         colour_print(ColourSpecs(Utils.num_to_roman(pres), Hex.YELLOW, bg_colour=background))
         colour_print(ColourSpecs('-', pres_colour, bg_colour=background))
     lvl = Utils.get_level_from_pit_rank(rank)
-    colour_print(ColourSpecs(str(lvl), pit_lvl_hex_colour(lvl), bg_colour=background, bold=(lvl >= 60)))
+    colour_print(ColourSpecs(str(lvl), pit_lvl_hex_colour(lvl), bg_colour=background, bold=lvl >= 60))
     colour_print(ColourSpecs("]", pres_colour, bg_colour=background))
     print(' ' * (10 - len(rank) + (2 if pres == 0 else 0)), end='')
 
 def print_bw_star(star: int) -> None:
-    colour_print(ColourSpecs(f" [{star}:star:]", bw_star_hex_colour(star), bold = True, blink=(star >= 1000)))
+    colour_print(ColourSpecs(f" [{star}:star:]", bw_star_hex_colour(star), bold=True, blink=star >= 1000))
     print(' ' * (4 - len(str(star))), end='')

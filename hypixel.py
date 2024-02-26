@@ -1,4 +1,4 @@
-""" Simple Hypixel-API in Python, by Snuggle | 2017-09-30 to 2018-06-14 
+""" Simple Hypixel-API in Python, by Snuggle | 2017 to 2021 (https://github.com/Snuggle/hypixel.py/blob/main/hypixel.py)
     Modifications made by John (late 2022 to current) """
 __version__ = '0.8.0'
 # pylint: disable=C0103
@@ -8,9 +8,9 @@ from time import time, sleep
 import datetime
 from typing import List, Optional, Dict, Tuple
 import re
-import requests
 from dataclasses import dataclass
 from copy import deepcopy
+import requests
 
 from MyClasses import UUID_Plus_Time
 import Files
@@ -79,7 +79,7 @@ class Rank:
         if not with_brackets_and_space or self._display_rank == '':
             return self._display_rank
         return f"[{self._display_rank}] "
-    
+
     def rank_colour(self) -> Optional[Hex]:
         if self._colours.rank_colour == Hex.UNKNOWN:
             assert self._display_rank == 'MVP++'
@@ -87,7 +87,7 @@ class Rank:
                 Hex.AQUA if self._json.get('monthlyRankColor') == 'AQUA' else Hex.GOLD
             )
         return self._colours.rank_colour
-    
+
     def plus_colour(self) -> Optional[Hex]:
         if self._colours.plus_colour == Hex.UNKNOWN:
             assert self._display_rank in ('MVP+', 'MVP++')
@@ -95,12 +95,12 @@ class Rank:
             self._colours.plus_colour = (Hex.RED if json_plus_colour is None else
                                          next(c for c in Hex if json_plus_colour == c.name))
         return self._colours.plus_colour
-    
+
     def name_and_bracket_colour(self) -> Optional[Hex]:
         if self._colours.player_name_brackets_colour == Hex.UNKNOWN:
             self._colours.player_name_brackets_colour = self.rank_colour()
         return self._colours.player_name_brackets_colour
-    
+
     def print_rank(self) -> None:
         from Colours import ColourSpecs, colour_print
         rank = self.rank(False)
@@ -129,8 +129,8 @@ def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
         assert Utils.is_uuid(uuid_or_ign)
     assert _verify_requests is not None
 
-    requestEnd = '{}={}'.format('uuid' if Utils.is_uuid(uuid_or_ign) else 'name', uuid_or_ign)
-    requestURL = HYPIXEL_API_URL + '{}?{}'.format(typeOfRequest, requestEnd)
+    requestEnd = f"{'uuid' if Utils.is_uuid(uuid_or_ign) else 'name'}={uuid_or_ign}"
+    requestURL = f"{HYPIXEL_API_URL}{typeOfRequest}?{requestEnd}"
     response = requests.get(requestURL, headers={"API-Key": get_api_key()}, verify=_verify_requests)
     try:
         responseHeaders, responseJSON = response.headers, response.json()
@@ -156,13 +156,13 @@ def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
         return responseJSON[typeOfRequest]
     except KeyError:
         return responseJSON
-    
+
 def get_uuid(uuid_or_ign: str, call_api_last_resort: bool = True) -> str:
     """Param can be an ign or uuid. If it's a uuid, this function will return it immediately. Otherwise,
        it will try to get it from uuids.txt (and if so, then verify the player's current ign is still the same
        by using a temp hypixel object). Finally if this fails, a temp hypixel object is created in order to call
        getUUID() - unless `call_api_last_resort` is False, in which case the ign is just returned."""
-    
+
     uuid_or_ign = uuid_or_ign.lower()
     if Utils.is_uuid(uuid_or_ign):
         return uuid_or_ign
@@ -228,11 +228,11 @@ class Player:
             raise RuntimeError("Potentially unsafe character in ign - sanitized version is " + sanitized_name
             + ". To disable this safety check, call this function with getName(extra_safety_check=False).")
         return sanitized_name
-    
+
     def getUUID(self) -> str:
         """ This function returns a player's UUID. """
         return self.JSON['uuid']
-    
+
     def getFriends(self) -> List[UUID_Plus_Time]:
         """ *Deprecated from Hypixel API*
             This function returns a list of the UUIDs of all the player's friends."""
@@ -241,7 +241,7 @@ class Player:
             friend_uuid = friend["uuidReceiver"] if friend["uuidReceiver"] != self.getUUID() else friend["uuidSender"]
             friends.append(UUID_Plus_Time(friend_uuid, friend['started']))
         return list(reversed(friends))
-    
+
     def isOnline(self, extra_online_check: bool = False) -> bool:
         """ This function returns a bool representing whether the player is online. """
         if 'lastLogin' in self.JSON:
@@ -252,31 +252,31 @@ class Player:
             # a few mins ago have updated:
             return self.JSON != getJSON('player', self.getUUID())
         return False
-    
+
     def getFKDR(self) -> float:
         return Utils.fkdr_division(
             Utils.nested_get(self.JSON, ['stats', 'Bedwars', 'final_kills_bedwars'], 0, int),
             Utils.nested_get(self.JSON, ['stats', 'Bedwars', 'final_deaths_bedwars'], 0, int)
         )
-    
+
     def getBedwarsStar(self) -> int:
         return Utils.nested_get(self.JSON, ['achievements', 'bedwars_level'], 0, int)
-    
+
     def getBedwarsXP(self) -> int:
         xp = Utils.nested_get(self.JSON, ['stats', 'Bedwars', 'Experience'], 0)
         assert int(xp) == xp
         return int(xp)
-    
+
     def getPitXP(self) -> int:
         return Utils.nested_get(self.JSON, ['stats', 'Pit', 'profile', 'xp'], 0, int)
-    
+
     def getNetworkXP(self) -> int:
         xp = self.JSON['networkExp']
         assert int(xp) == xp
         return int(xp)
-    
+
     def getExactNWLevel(self) -> float:
         return leveling.getExactLevel(self.getNetworkXP())
-    
+
     def getNetworkRank(self) -> Rank:
         return self._rank

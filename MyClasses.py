@@ -25,56 +25,56 @@ class UUID_Plus_Time:
                 self._unix_epoch_milliseconds = time_val
             else:
                 self._unix_epoch_milliseconds = time_val * 1000
-    
+
     def uuid(self) -> str:
         return self._uuid
 
     def time_epoch_in_seconds(self) -> Optional[float]:
         return self._unix_epoch_milliseconds / 1000 if self._unix_epoch_milliseconds is not None else None
-    
+
     def time_epoch_in_milliseconds(self) -> Optional[float]:
         """Returns the time as a float representing the unix epoch time in milliseconds"""
         return self._unix_epoch_milliseconds
-    
+
     def date_string(self) -> Optional[str]:
         """Returns the time as a YYYY-MM-DD date string"""
         if self._unix_epoch_milliseconds is None:
             return None
         return Utils.epoch_to_date(self._unix_epoch_milliseconds, False)
-    
+
     def sort_key(self) -> float:
         if self._unix_epoch_milliseconds is None:
             return 0
         return -self._unix_epoch_milliseconds
-    
+
     def refers_to_same_person(self, other: UUID_Plus_Time) -> bool:
         return self._uuid == other.uuid()
-    
+
     def more_recent(self, other: UUID_Plus_Time) -> bool:
         return (self.time_epoch_in_milliseconds() or 0) > (other.time_epoch_in_milliseconds() or 0)
 
 class Specs:
-    """This class represents specifications that a caller has when it calls the 
+    """This class represents specifications that a caller has when it calls the
        create_dictionary_report_for_player function."""
 
     _common_specs: dict = {'print player data': None, 'display time as unix epoch': None, 'set flag': False}
-    
+
     @classmethod
     def set_common_specs(cls, print_player_data: bool, display_time_as_unix_epoch: bool) -> None:
         assert not cls._common_specs['set flag']
         cls._common_specs['print player data'] = print_player_data
         cls._common_specs['display time as unix epoch'] = display_time_as_unix_epoch
         cls._common_specs['set flag'] = True
-    
+
     @classmethod
     def _get_value_for_key(cls, key: str) -> bool:
         assert key in cls._common_specs and cls._common_specs[key] is not None
         return cls._common_specs[key]
-    
+
     @classmethod
     def does_program_display_time_as_unix_epoch(cls) -> bool:
         return cls._get_value_for_key('display time as unix epoch')
-    
+
     @classmethod
     def make_specs_object_and_initialize_common_specs(cls, args: Args.Args) -> Specs:
         Specs.set_common_specs(not args.find_friends_of_friends(), args.epoch())
@@ -90,36 +90,36 @@ class Specs:
         self._player_must_be_online = player_must_be_online
         self._friends_specs = deepcopy(friends_specs)
         self._degrees_from_original_player = degrees_from_original_player
-    
+
     def just_uuids(self) -> bool:
         return self._just_uuids
-    
+
     def required_online(self) -> bool:
         return self._player_must_be_online
-    
+
     def specs_for_friends(self) -> Optional[Specs]:
         return deepcopy(self._friends_specs)
-    
+
     def degrees_from_root_player(self) -> int:
         return self._degrees_from_original_player
-    
+
     def root_player(self) -> bool:
         return self._degrees_from_original_player == 0
-    
+
     def friend_of_root_player(self) -> bool:
         return self._degrees_from_original_player == 1
-    
+
     def print_player_data_exclude_friends(self) -> bool:
         return Specs._common_specs['print player data'] and self.friend_of_root_player()
-    
+
     def print_only_players_friends(self) -> bool:
         return Specs._common_specs['print player data'] and self.root_player()
-    
+
     def print_fields(self) -> None:
         pprint(vars(self))
         if specs_friends := self.specs_for_friends():
             specs_friends.print_fields()
-    
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Specs):
             raise ValueError("'other' is not an instance of Specs")

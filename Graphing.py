@@ -10,7 +10,7 @@ class ScatterplotInfo:
 
     def invert(self) -> ScatterplotInfo:
         return ScatterplotInfo(self.y_vals, self.x_vals, self.title, self.y_label, self.x_label)
-    
+
     def fit_to_polynomial(self, degree: int) -> str:
         import numpy as np
         poly_fit = np.polyfit(self.x_vals, self.y_vals, degree)
@@ -43,7 +43,7 @@ def output_scatterplots(info_for_figs: Iterable[ScatterplotInfo]) -> None:
     input("Enter any key to exit: ")
 
 class QuadraticFunc:
-    def __init__(self, a: float, b: float, c: float, 
+    def __init__(self, a: float, b: float, c: float,
                  req_for_x_vals: Optional[Callable[[float], bool]] = None,
                  req_for_y_vals: Optional[Callable[[float], bool]] = None):
         "Represents some function: y = ax^2 + bx + c"
@@ -54,7 +54,7 @@ class QuadraticFunc:
         if self.req_for_x_vals:
             assert self.req_for_x_vals(x_val)
         return self.a*x_val**2 + self.b*x_val + self.c
-    
+
     def x_vals(self, y_val: float) -> Tuple[float, float]:
         """Returns the roots of the equation when substituting `y_val` for y."""
         # Need to make a quadratic equation. Do this by substituting y_val for y,

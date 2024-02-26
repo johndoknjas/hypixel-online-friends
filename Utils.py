@@ -108,7 +108,7 @@ def is_ign(uuid_or_ign: str) -> bool:
 
 def get_all_ign_uuid_pairs_in_dict(d: dict, make_deepcopy: bool = False,
                                    get_uuid_ign_pairs_instead: bool = False) -> dict:
-    """Traverses the d param and returns a dict, where each key-value pair represents an ign-uuid 
+    """Traverses the d param and returns a dict, where each key-value pair represents an ign-uuid
     pair found in d (unless `get_uuid_ign_pairs_instead` is True, in which case uuid-ign pairs are built)."""
     if make_deepcopy:
         d = deepcopy(d)
@@ -169,7 +169,7 @@ def is_first_dict_more_valuable(first: dict, second: dict, must_have_times_frien
     ]
     if must_have_times_friended:
         comparisons[0], comparisons[1] = comparisons[1], comparisons[0]
-    
+
     return next((b for b in comparisons if b is not None), False)
 
 def remove_dicts_duplicate_uuids(dicts: List[dict], make_deepcopy: bool = False,
@@ -289,7 +289,7 @@ def nested_get(d: dict, nested_keys: list, default_val: Any, expected_type: Opti
         for k in nested_keys:
             d = d[k]
         return_val = d
-    except:
+    except KeyError:
         return_val = default_val
     assert expected_type is None or type(return_val) == expected_type
     return return_val

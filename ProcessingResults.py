@@ -46,7 +46,7 @@ def check_results(uuid: Optional[str], ign: Optional[str]) -> None:
        files are included depends on the cli args."""
     global _player_uuids_with_f_list_in_results
 
-    assert type(uuid) == type(ign)
+    assert type(uuid) is type(ign)
 
     print(f"\n\n{len(_get_all_unique_uuids_in_results())} total unique uuids recorded in the results folder.")
     all_dicts: List[dict] = get_all_dicts_unique_uuids_in_results()
@@ -74,7 +74,7 @@ def player_uuids_with_f_list_in_results(get_copy: bool = False) -> List[str]:
             else _player_uuids_with_f_list_in_results)
 
 def get_all_dicts_in_results(get_deepcopy: bool = False, get_additional_friends: bool = False) -> List[dict]:
-    """Returns a flat list of non-trivial dicts, for all dicts/nested dicts found in the results folder. 
+    """Returns a flat list of non-trivial dicts, for all dicts/nested dicts found in the results folder.
        Note that there can be multiple dicts with the same uuid."""
     global _all_dicts_standard_files
     global _all_dicts_additional_friends_files
@@ -94,8 +94,8 @@ def get_all_dicts_in_results(get_deepcopy: bool = False, get_additional_friends:
 
 def get_all_dicts_unique_uuids_in_results(get_deepcopy: bool = False,
                                           must_have_times_friended: bool = False) -> List[dict]:
-    """Returns a flat list of non-trivial dicts (no more than one per uuid), for all dicts/nested dicts found in the 
-    results folder (excluding additional friends files). If multiple dicts have the same uuid, the one with 
+    """Returns a flat list of non-trivial dicts (no more than one per uuid), for all dicts/nested dicts found in the
+    results folder (excluding additional friends files). If multiple dicts have the same uuid, the one with
     the biggest friends list will be kept."""
     global _all_dicts_unique_uuids
 
@@ -170,7 +170,7 @@ def _get_all_jsons_in_results(get_additional_friends: bool = False) -> List[dict
         json_in_file = Files.read_json_textfile(filename)
         json_in_file['filename'] = filename
         if is_multi_player_file and _args.skip_first_dict_in_multi_player_files():
-            json_in_file['exclude'] = '' # Adding this key as a signal to exclude this 
+            json_in_file['exclude'] = '' # Adding this key as a signal to exclude this
                                          # outermost dict of the file, when unnesting.
         all_jsons.append(json_in_file)
     return all_jsons
@@ -182,7 +182,7 @@ def _does_filename_meet_reqs(f: str, for_additional_friends: bool = False) -> bo
 
 def _get_only_non_trivial_keys_in_dict(dicts: List[dict]) -> List[dict]:
     return [d for d in dicts if any(k in d for k in _NON_TRIVIAL_KEYS)]
-    
+
 def _get_all_unique_uuids_in_results() -> List[str]:
     """Returns all uuids written at some point in the results folder - most will be friends of friends."""
     all_dicts = []
@@ -197,7 +197,7 @@ def _reset_static_fields() -> None:
 
     (_all_dicts_additional_friends_files, _all_dicts_standard_files, _all_dicts_unique_uuids,
      _ign_uuid_pairs_in_results, _player_uuids_with_f_list_in_results, _uuid_ign_pairs_in_results) = (None,) * 6
-    
+
 def set_args(args: Args) -> None:
     global _args
     assert not _args

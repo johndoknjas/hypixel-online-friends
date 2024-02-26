@@ -14,15 +14,15 @@ import Utils
 # Got a lot of guidance from brooke-gill's pit repo.
 
 LVL_GROUP_MULTIPLIER = [15, 30, 50, 75, 125, 300, 600, 800, 900, 1000, 1200, 1500, 0]
-PRESTIGE_MULTIPLIER = [100, 110, 120, 130, 140, 150, 175, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000, 
-             1200, 1400, 1600, 1800, 2000, 2400, 2800, 3200, 3600, 4000, 4500, 5000, 7500, 10000, 10100, 
-             10100, 10100, 10100, 10100, 20000, 30000, 40000, 50000, 75000, 100000, 125000, 150000, 
+PRESTIGE_MULTIPLIER = [100, 110, 120, 130, 140, 150, 175, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000,
+             1200, 1400, 1600, 1800, 2000, 2400, 2800, 3200, 3600, 4000, 4500, 5000, 7500, 10000, 10100,
+             10100, 10100, 10100, 10100, 20000, 30000, 40000, 50000, 75000, 100000, 125000, 150000,
              175000, 200000, 300000, 500000, 1000000, 5000000, 10000000]
-PRESTIGE_XP = [65950, 138510, 217680, 303430, 395760, 494700, 610140, 742040, 906930, 1104780, 1368580, 
-               1698330, 2094030, 2555680, 3083280, 3676830, 4336330, 5127730, 6051030, 7106230, 8293330, 
-               9612330, 11195130, 13041730, 15152130, 17526330, 20164330, 23132080, 26429580, 31375830, 
-               37970830, 44631780, 51292730, 57953680, 64614630, 71275580, 84465580, 104250580, 130630580, 
-               163605580, 213068080, 279018080, 361455580, 460380580,575793080, 707693080, 905543080, 
+PRESTIGE_XP = [65950, 138510, 217680, 303430, 395760, 494700, 610140, 742040, 906930, 1104780, 1368580,
+               1698330, 2094030, 2555680, 3083280, 3676830, 4336330, 5127730, 6051030, 7106230, 8293330,
+               9612330, 11195130, 13041730, 15152130, 17526330, 20164330, 23132080, 26429580, 31375830,
+               37970830, 44631780, 51292730, 57953680, 64614630, 71275580, 84465580, 104250580, 130630580,
+               163605580, 213068080, 279018080, 361455580, 460380580,575793080, 707693080, 905543080,
                1235293080, 1894793080, 5192293080,11787293080]
 # https://github.com/brooke-gill/pit/blob/307c126be78a5615b437205966dba13cbab3b787/xp2level.html#L93
 
@@ -64,10 +64,10 @@ class PitStats:
 
     def xp(self) -> int:
         return self._pit_xp
-    
+
     def prestige(self) -> int:
         return self._prestige
-    
+
     def rank_string(self) -> str:
         return f"{Utils.num_to_roman(self.prestige())}-{self.level()}"
 
@@ -77,17 +77,17 @@ class PitStats:
             if self.xp() >= xp_reqs_levels[i]:
                 return i+1
         assert False
-    
+
     def xp_gained_during_curr_pres(self) -> int:
         return self.xp() - total_xp_req_for_pres(self.prestige())
-    
+
     def percent_through_curr_pres(self) -> float:
         return self.xp_gained_during_curr_pres() / (total_xp_req_for_pres(self.prestige()+1) -
                                                     total_xp_req_for_pres(self.prestige()))
-    
+
     def percent_overall_to_given_pres(self, prestige: int) -> float:
         return self.xp() / total_xp_req_for_pres(prestige)
-    
+
     def print_info(self) -> None:
         print(f"pit rank: {self.rank_string()}, pit xp: {self.xp()}")
         print(f"percent through current prestige: {Utils.percentify(self.percent_through_curr_pres())}")

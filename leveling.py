@@ -1,4 +1,5 @@
-# Based off https://github.com/Plancke/hypixel-php/blob/master/src/util/Leveling.php
+# Based off https://github.com/Plancke/hypixel-php/blob/master/src/util/Leveling.php and
+# https://github.com/Snuggle/hypixel.py/blob/main/leveling.py
 
 from math import floor
 
@@ -7,7 +8,7 @@ from Graphing import QuadraticFunc
 _BASE = 10000
 _GROWTH = 2500
 _QUADRATIC_FUNC = QuadraticFunc(_GROWTH/2, _BASE - 1.5*_GROWTH, _GROWTH - _BASE,
-                                lambda x: type(x) == int and 1 <= x <= 10000, 
+                                lambda x: type(x) == int and 1 <= x <= 10000,
                                 lambda y: type(y) == int and 0 <= y <= 10**12)
 """Represents the total xp as a function of level. Note that for decimal values of level in this
    function, they won't be the 'exact' level hypixel records. So for finding the level, this

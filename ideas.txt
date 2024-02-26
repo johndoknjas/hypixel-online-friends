@@ -12,7 +12,7 @@
     # Make a function in hypixel.py that returns a number of leaderboards, obtained from
       https://api.hypixel.net/#tag/Other/paths/~1v2~1leaderboards/get. Then, the user can enter
       which leaderboard they want to see, and it can be outputted with each player's stats per row.
-      All the igns/uuids of these players can be outputted after as well, in one big chunk (same 
+      All the igns/uuids of these players can be outputted after as well, in one big chunk (same
       kind of format your player-name project does).
 
     # Consider making a report class instead of report dicts. The class could have a function that makes and
@@ -27,7 +27,7 @@
       a level value is given by the user, no player igns required.
 
     # Make some updates to Args related stuff:
-      - Consider getting rid of the 'fromresults'/'notallfromresults' stuff, since the 
+      - Consider getting rid of the 'fromresults'/'notallfromresults' stuff, since the
         friends endpoint of hypixel's api has been removed for about a year now.
       - Add an Arg keyword for just getting additional friends.
       - Consider making the positional arg keywords (in main.py) be encapsulated within Args.py.
@@ -37,11 +37,11 @@
 
     # Have a way to check whether someone is a friend. Similar to 'friendedwhen', but not requiring
       a date.
-        # Note that this is now kind of already done with the friendedwhen feature (if a player is 
+        # Note that this is now kind of already done with the friendedwhen feature (if a player is
           friends but the date isn't recorded in the list, a note is outputted). However, it's still
           best to do an 'isfriend' feature, since the 'friendedwhen' feature makes having
           dates in the friends list it selects a top priority.
-        # Although the best solution more generally might just be not picking the 'best' standard 
+        # Although the best solution more generally might just be not picking the 'best' standard
           friends list in ProcessingResults, and instead combining them like you do with additionals.
 
     # For 'friendedwhen', if a friend appears as an additional friend and in an older standard friends list,
@@ -53,8 +53,8 @@
         # You would also add a way for the user to update this textfile from the command line.
 
     # A bit under 8000 players (who aren't your friend) have their ign recorded in the results folder. So, if any
-      become your friend in the future, their old name will be displayed as the ign from this point 
-      (Dec/22-Jan/23 ish). This isn't a big deal since it'd be interesting to find out if we have a mutual 
+      become your friend in the future, their old name will be displayed as the ign from this point
+      (Dec/22-Jan/23 ish). This isn't a big deal since it'd be interesting to find out if we have a mutual
       friend, and 8000 players is a small fraction of the total player pool. But if there's a way to display
       this oldest ign, as well as the ign for when you've now friended them going forward, that could be good.
 
@@ -88,7 +88,7 @@
     -----------------------------------
 
     # Add a feature to just get friends over a certain fkdr.
-        # When this is implemented you could then run the program and save this list a file, and then 
+        # When this is implemented you could then run the program and save this list a file, and then
         # just go through this file when looking for people to party online.
 
     # Add a feature where if 'avg' is a command line argument, the average size will be calculated for

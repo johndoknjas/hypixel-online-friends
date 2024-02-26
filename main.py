@@ -22,10 +22,10 @@ def intersect_player_lists(l1: List[Player], l2: List[Player]) -> List[Player]:
 
 def combine_players(info_on_players: List[Player]) -> Player:
     """This function runs through the Player list and adds/subtracts/intersects f lists. Whether a Player's f list
-    is used to add/subtract/intersect depends on the bool value of their player.will_exclude_friends() 
+    is used to add/subtract/intersect depends on the bool value of their player.will_exclude_friends()
     and player.will_intersect() functions.
     If a player's f list is used to intersect, it will intersect the entire friends list up to that point,
-    either for playerFriends or exclude_friends. 
+    either for playerFriends or exclude_friends.
     Order of operations:
         union, intersect (left to right for precedence amongst these)
         subtract
@@ -129,7 +129,7 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             num_friends_msgs[0] = f"{len(standard_friends)} friends in biggest single friends list/file\n"
             if args.get_additional_friends():
                 all_friends = ProcessingResults.get_all_additional_friends_for_player(uuid)
-                num_friends_msgs[1] = (f"{len(all_friends)} unique 'additional friends'\n")
+                num_friends_msgs[1] = f"{len(all_friends)} unique 'additional friends'\n"
                 for f in standard_friends:
                     ProcessingResults.update_list_if_applicable(all_friends, f)
             else:
@@ -156,9 +156,9 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
 
 def output_player_jsons_to_file(players: List[Player]) -> None:
     for player in players:
-        Files.write_data_as_json_to_file(player.player_JSON(), "Player json for " + player.name(), 
+        Files.write_data_as_json_to_file(player.player_JSON(), "Player json for " + player.name(),
                                          "results/player-jsons")
-        
+
 def friended_when_feature(players: List[Player], uuids_for_friended_when: List[str]) -> None:
     for player in players:
         for friend in player.friends():
@@ -166,7 +166,7 @@ def friended_when_feature(players: List[Player], uuids_for_friended_when: List[s
                 continue
             time_friended = friend.time_friended_parent_player('date')
             if time_friended is not None:
-                assert type(time_friended) is str
+                assert isinstance(time_friended, str)
                 print(f'{player.name()} became friends with {friend.name()} on {time_friended}')
             else:
                 print(f'{player.name()} is friends with {friend.name()}, but no date recorded.')
@@ -243,7 +243,7 @@ def main() -> None:
     if args.check_results():
         ProcessingResults.check_results(player.uuid(), player.name())
         if args.minus_results():
-            player.polish_friends_list({uuid: Player(uuid) for uuid in 
+            player.polish_friends_list({uuid: Player(uuid) for uuid in
                                         ProcessingResults.player_uuids_with_f_list_in_results()})
             print(f"Now {len(player.friends())} unique friends after applying 'minusresults'.")
 
@@ -255,8 +255,8 @@ def main() -> None:
         should_terminate = args.do_file_output() or not args.just_online_friends()
     )
     if args.do_file_output():
-        filename = ("Friends of " + 
-                    ("friends of " if args.find_friends_of_friends() else "") + 
+        filename = ("Friends of " +
+                    ("friends of " if args.find_friends_of_friends() else "") +
                     player.name_for_file_output())
         Files.write_data_as_json_to_file(report, filename)
 
