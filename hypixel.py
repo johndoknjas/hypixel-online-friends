@@ -255,20 +255,20 @@ class Player:
 
     def getFKDR(self) -> float:
         return Utils.fkdr_division(
-            Utils.nested_get(self.JSON, ['stats', 'Bedwars', 'final_kills_bedwars'], 0, int),
-            Utils.nested_get(self.JSON, ['stats', 'Bedwars', 'final_deaths_bedwars'], 0, int)
+            Utils.nested_get(self.JSON, ('stats', 'Bedwars', 'final_kills_bedwars'), 0, int),
+            Utils.nested_get(self.JSON, ('stats', 'Bedwars', 'final_deaths_bedwars'), 0, int)
         )
 
     def getBedwarsStar(self) -> int:
-        return Utils.nested_get(self.JSON, ['achievements', 'bedwars_level'], 0, int)
+        return Utils.nested_get(self.JSON, ('achievements', 'bedwars_level'), 0, int)
 
     def getBedwarsXP(self) -> int:
-        xp = Utils.nested_get(self.JSON, ['stats', 'Bedwars', 'Experience'], 0)
+        xp = Utils.nested_get(self.JSON, ('stats', 'Bedwars', 'Experience'), 0)
         assert int(xp) == xp
         return int(xp)
 
     def getPitXP(self) -> int:
-        return Utils.nested_get(self.JSON, ['stats', 'Pit', 'profile', 'xp'], 0, int)
+        return Utils.nested_get(self.JSON, ('stats', 'Pit', 'profile', 'xp'), 0, int)
 
     def getNetworkXP(self) -> int:
         xp = self.JSON['networkExp']

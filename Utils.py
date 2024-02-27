@@ -284,7 +284,7 @@ def normalize_against_max_val(l: Iterable[float]) -> List[float]:
     max_val = max(l)
     return [i / max_val for i in l]
 
-def nested_get(d: dict, nested_keys: list, default_val: Any, expected_type: Optional[Type] = None) -> Any:
+def nested_get(d: dict, nested_keys: Iterable, default_val: Any, expected_type: Optional[Type] = None) -> Any:
     try:
         for k in nested_keys:
             d = d[k]
