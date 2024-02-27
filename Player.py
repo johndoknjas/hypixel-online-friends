@@ -225,7 +225,7 @@ class Player:
         return {'uuid': self.uuid(), 'name': self.name(), 'fkdr': self.get_fkdr(),
                 'star': self.get_bw_star(), 'pit_rank': self.pit_rank_string()}
 
-    def print_dict_report(self, report: Dict) -> None:
+    def print_dict_report(self, report: Dict, ending_text: str = '') -> None:
         import Colours
         report = deepcopy(report)
         assert all(isinstance(v, (str,float,int)) for v in report.values())
@@ -263,7 +263,7 @@ class Player:
                 date_obj = datetime.strptime(time, '%Y-%m-%d')
                 time = date_obj.strftime('%b ') + date_obj.strftime('%d/%y').lstrip('0')
             print(f" friended {time}", end='')
-        print()
+        print(ending_text)
 
     def print_player_info(self) -> None:
         print(f"{len(self.friends())} unique friends total\n")
@@ -305,6 +305,10 @@ class Player:
         on_perpetual_pass: bool, on_first_pass: bool, end_index: Optional[int] = None
     ) -> None:
         """Will modify `report`, which is passed by reference."""
+
+        if self.root_player():
+            online_status = 'online' if self.hypixel_object().isOnline(True) else 'offline'
+            self.print_dict_report(self.get_stats_dict(), f"root player is {online_status}")
 
         report.setdefault('friends', [])
         assert not on_first_pass or not on_perpetual_pass
