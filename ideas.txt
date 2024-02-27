@@ -1,7 +1,5 @@
 # CONTINUE HERE - todos:
 
-    # Deal with cases where players have no `lastLogout` key, but have `lastLogin`.
-
     # Consider including network levels when outputting dict reports.
 
     # For bw stars >= 1000, print in the actual colours they should be, rather than yellow and blinking.
