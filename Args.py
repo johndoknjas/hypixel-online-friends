@@ -17,7 +17,7 @@ class Args:
                               'addadditionalfriends', 'addadditionals',
                               'noadditionalfriends', 'noadditionals',
                               'addaliases', 'showaliases', 'printaliases',
-                              'getplayerjson', 'playerjson', 'noverify', 'dontverify',
+                              'getplayerjson', 'playerjson', 'noverify', 'dontverify', 'nover',
                               'pitpercent', 'pit%', 'pitplot', 'nwplot', 'bwplot', 'contains']
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
@@ -108,7 +108,7 @@ class Args:
         return 'getplayerjson' in self._ARGS or 'playerjson' in self._ARGS
 
     def verify_requests(self) -> bool:
-        return 'noverify' not in self._ARGS and 'dontverify' not in self._ARGS
+        return all(x not in self._ARGS for x in ('noverify', 'dontverify', 'nover'))
 
     def pit_percent(self) -> bool:
         return 'pitpercent' in self._ARGS or 'pit%' in self._ARGS
