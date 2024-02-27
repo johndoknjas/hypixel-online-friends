@@ -247,11 +247,9 @@ class Player:
         if 'lastLogin' in self.JSON:
             return (self.JSON['lastLogin'] > self.JSON['lastLogout'] and
                     getJSON('status', self.getUUID())['session']['online'])
-        if extra_online_check:
-            # This player doesn't have the online status shown, but we can check if stats from
-            # a few mins ago have updated:
-            return self.JSON != getJSON('player', self.getUUID())
-        return False
+        # This player doesn't have the online status shown, but we can check if stats from
+        # a few mins ago have updated (if the caller has enabled this feature):
+        return extra_online_check and self.JSON != getJSON('player', self.getUUID())
 
     def getFKDR(self) -> float:
         return Utils.fkdr_division(
