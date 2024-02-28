@@ -20,7 +20,7 @@ import Colours
 from Colours import Hex
 
 def _get_api_keys_from_file() -> List[str]:
-    """ This function gets the api key(s) from `api-key.txt`, and returns them in a tuple. """
+    """ This function gets the api key(s) from `api-key.txt`, and returns them in a list. """
     with open('api-key.txt') as file:
         return [line.rstrip() for line in file]
 
