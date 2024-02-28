@@ -38,7 +38,7 @@ class Player:
                  friends: Union[List[UUID_Plus_Time], List[Player], None] = None, specs: Optional[Specs] = None,
                  name_for_file_output: Optional[str] = None, will_exclude_friends: bool = False,
                  date_cutoff_for_friends: Optional[str] = None, will_intersect: bool = False,
-                 players_used_to_combine: Optional[Tuple[Player]] = None):
+                 players_used_to_combine: Optional[List[Player]] = None):
         self._uuid_plus_time = UUID_Plus_Time(uuid, time_friended_parent_player)
         self._hypixel_object = hypixel_object
         self._name = name

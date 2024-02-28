@@ -19,14 +19,15 @@ import leveling
 import Colours
 from Colours import Hex
 
-HYPIXEL_API_URL = 'https://api.hypixel.net/'
+def _get_api_keys_from_file() -> List[str]:
+    """ This function gets the api key(s) from `api-key.txt`, and returns them in a tuple. """
+    with open('api-key.txt') as file:
+        return [line.rstrip() for line in file]
 
-HYPIXEL_API_KEY_LENGTH = 36
-verified_api_keys: List[str] = []
-
+API_KEYS: List[str] = _get_api_keys_from_file()
+HYPIXEL_API_URL: str = 'https://api.hypixel.net/'
 TIME_STARTED: float = time()
 num_api_calls_made: int = 0
-
 _verify_requests: Optional[bool] = None
 
 class PlayerNotFoundException(Exception):
@@ -131,7 +132,7 @@ def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
 
     requestEnd = f"{'uuid' if Utils.is_uuid(uuid_or_ign) else 'name'}={uuid_or_ign}"
     requestURL = f"{HYPIXEL_API_URL}{typeOfRequest}?{requestEnd}"
-    response = requests.get(requestURL, headers={"API-Key": get_api_key()}, verify=_verify_requests)
+    response = requests.get(requestURL, headers={"API-Key": choice(API_KEYS)}, verify=_verify_requests)
     try:
         responseHeaders, responseJSON = response.headers, response.json()
     except Exception as e:
@@ -173,22 +174,6 @@ def get_uuid(uuid_or_ign: str, call_api_last_resort: bool = True) -> str:
             raise RuntimeError(f"NOTE: {ign} is no longer the ign of the player with uuid {possible_uuid}")
         return possible_uuid
     return Player(ign).getUUID() if call_api_last_resort else ign
-
-def set_api_keys() -> None:
-    """ This function gets the api key(s) from `api-key.txt` and stores them in `verified_api_keys`. The
-        function also checks that the api keys are all of the required length.
-    """
-    global verified_api_keys
-    assert not verified_api_keys
-    with open('api-key.txt') as file:
-        verified_api_keys = [line.rstrip() for line in file]
-    assert all(len(api_key) == HYPIXEL_API_KEY_LENGTH for api_key in verified_api_keys)
-
-def get_api_key() -> str:
-    """This function returns a random api key from the ones stored in api-key.txt"""
-    if not verified_api_keys:
-        set_api_keys()
-    return choice(verified_api_keys)
 
 def set_verify_requests(b: bool) -> None:
     global _verify_requests

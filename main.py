@@ -56,7 +56,7 @@ def combine_players(info_on_players: List[Player], args: Args) -> Player:
 
     player = Player(playerUUID, friends=playerFriends, name_for_file_output=playerNameForFileOutput,
                     specs=playerSpecs, date_cutoff_for_friends=date_cutoff_friends,
-                    players_used_to_combine=tuple(deepcopy(info_on_players))
+                    players_used_to_combine=deepcopy(info_on_players)
                     if args.track_if_arg_players_online() else None)
     player.polish_friends_list(exclude_friends)
     print(f"Now {len(player.friends())} friends after adjustments specified in args.\n\n")

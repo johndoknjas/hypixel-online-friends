@@ -2,8 +2,9 @@
 
     # Consider including network levels when outputting dict reports.
 
-    # Replace uses of lists with tuples, for cases where the collection is never mutated.
-      # Can use the find all function for `= [` to find some cases.
+    # Replace uses of lists with tuples, for cases where the collection is never mutated (and where you know the length
+      at the time of coding?).
+      # E.g., can use the find all function for `= [` to find some cases.
 
     # For bw stars >= 1000, print in the actual colours they should be, rather than yellow and blinking.
 
@@ -25,6 +26,8 @@
       respectively have the status available/unavailable through the api.
 
     # Have a way to only output the n oldest/newest friends, based on an optional cli arg from the user.
+
+    # Replace using a white background for pit ranks with black brackets.
 
     # For pit stats (in the info for arg players), output the amount of time played, K/D ratio,
       and maybe kills/time played ratio.
