@@ -2,10 +2,10 @@
 
     # Consider including network levels when outputting dict reports.
 
-    # For bw stars >= 1000, print in the actual colours they should be, rather than yellow and blinking.
+    # Replace uses of lists with tuples, for cases where the collection is never mutated.
+      # Can use the find all function for `= [` to find some cases.
 
-    # Allow the user to specify (via a cli arg) whether the program should keep outputting whether the
-      root player is online/offline.
+    # For bw stars >= 1000, print in the actual colours they should be, rather than yellow and blinking.
 
     # Consider refactoring to not need the HEX.UNKNOWN hacky stuff used in hypixel.py.
 
@@ -21,13 +21,13 @@
     # Consider making a report class instead of report dicts. The class could have a function that makes and
       returns a dict.
 
+    # Try to find some way to limit false negatives/positives for the online statuses of players who
+      respectively have the status available/unavailable through the api.
+
     # Have a way to only output the n oldest/newest friends, based on an optional cli arg from the user.
 
     # For pit stats (in the info for arg players), output the amount of time played, K/D ratio,
       and maybe kills/time played ratio.
-
-    # When there are multiple arg players, consider finding a way to output the online status for all of them,
-      rather than just the first one.
 
     # Do something similar to the pit percent feature, but for nw levels. I.e., just
       a level value is given by the user, no player igns required.

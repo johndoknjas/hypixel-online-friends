@@ -18,7 +18,8 @@ class Args:
                               'noadditionalfriends', 'noadditionals',
                               'addaliases', 'showaliases', 'printaliases',
                               'getplayerjson', 'playerjson', 'noverify', 'dontverify', 'nover',
-                              'pitpercent', 'pit%', 'pitplot', 'nwplot', 'bwplot', 'contains']
+                              'pitpercent', 'pit%', 'pitplot', 'nwplot', 'bwplot', 'contains',
+                              'trackargs', 'argsonline']
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'friendedwhen', 'intersect').
@@ -93,10 +94,10 @@ class Args:
         return 'notallfromresults' not in self._ARGS
 
     def add_additional_friends(self) -> bool:
-        return any(x in self._ARGS for x in ['addadditionalfriends', 'addadditionals'])
+        return any(x in self._ARGS for x in ('addadditionalfriends', 'addadditionals'))
 
     def get_additional_friends(self) -> bool:
-        return all(x not in self._ARGS for x in ['noadditionalfriends', 'noadditionals'])
+        return all(x not in self._ARGS for x in ('noadditionalfriends', 'noadditionals'))
 
     def add_aliases(self) -> bool:
         return 'addaliases' in self._ARGS
@@ -125,10 +126,13 @@ class Args:
     def contains_substr(self) -> bool:
         return 'contains' in self._ARGS
 
+    def track_if_arg_players_online(self) -> bool:
+        return 'trackargs' in self._ARGS or 'argsonline' in self._ARGS
+
     def do_mini_program(self) -> bool:
-        mini_programs = [self.add_aliases(), self.print_aliases(), self.contains_substr(),
+        mini_programs = (self.add_aliases(), self.print_aliases(), self.contains_substr(),
                          self.add_additional_friends(), self.get_player_json(),
-                         self.pit_percent(), self.pit_plot(), self.network_plot(), self.bedwars_plot()]
+                         self.pit_percent(), self.pit_plot(), self.network_plot(), self.bedwars_plot())
         assert (bool_sum := sum(1 for x in mini_programs if x)) <= 1
         return bool_sum == 1
 

@@ -20,7 +20,7 @@ from Graphing import ScatterplotInfo
 def intersect_player_lists(l1: List[Player], l2: List[Player]) -> List[Player]:
     return [p for p in l1 if p.in_player_list(l2)]
 
-def combine_players(info_on_players: List[Player]) -> Player:
+def combine_players(info_on_players: List[Player], args: Args) -> Player:
     """This function runs through the Player list and adds/subtracts/intersects f lists. Whether a Player's f list
     is used to add/subtract/intersect depends on the bool value of their player.will_exclude_friends()
     and player.will_intersect() functions.
@@ -42,24 +42,24 @@ def combine_players(info_on_players: List[Player]) -> Player:
         if player.will_exclude_friends():
             if player.will_intersect():
                 exclude_friends = intersect_player_lists(exclude_friends, player.friends())
-                playerNameForFileOutput += (' intersect ' + player.name())
+                playerNameForFileOutput += ' intersect ' + player.name()
             else:
                 exclude_friends.extend(player.friends())
-                playerNameForFileOutput += (' minus ' + player.name())
+                playerNameForFileOutput += ' minus ' + player.name()
         else:
             if player.will_intersect():
                 playerFriends = intersect_player_lists(playerFriends, player.friends())
-                playerNameForFileOutput += (' intersect ' + player.name())
+                playerNameForFileOutput += ' intersect ' + player.name()
             else:
                 playerFriends.extend(player.friends())
-                playerNameForFileOutput += (' plus ' + player.name())
+                playerNameForFileOutput += ' plus ' + player.name()
 
     player = Player(playerUUID, friends=playerFriends, name_for_file_output=playerNameForFileOutput,
-                    specs=playerSpecs, date_cutoff_for_friends=date_cutoff_friends)
+                    specs=playerSpecs, date_cutoff_for_friends=date_cutoff_friends,
+                    players_used_to_combine=tuple(deepcopy(info_on_players))
+                    if args.track_if_arg_players_online() else None)
     player.polish_friends_list(exclude_friends)
-
     print(f"Now {len(player.friends())} friends after adjustments specified in args.\n\n")
-
     return player
 
 def diff_f_lists(players: List[Player], args: Args) -> None:
@@ -238,7 +238,7 @@ def main() -> None:
     if uuids_for_friended_when:
         friended_when_feature(players_from_args, uuids_for_friended_when)
 
-    player = combine_players(players_from_args)
+    player = combine_players(players_from_args, args)
 
     if args.check_results():
         ProcessingResults.check_results(player.uuid(), player.name())

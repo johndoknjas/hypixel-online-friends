@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, List, Union, Dict
+from typing import Optional, List, Union, Dict, Tuple
 from copy import deepcopy
 from datetime import datetime
 
@@ -37,7 +37,8 @@ class Player:
                  hypixel_object: Optional[hypixel.Player] = None, name: Optional[str] = None,
                  friends: Union[List[UUID_Plus_Time], List[Player], None] = None, specs: Optional[Specs] = None,
                  name_for_file_output: Optional[str] = None, will_exclude_friends: bool = False,
-                 date_cutoff_for_friends: Optional[str] = None, will_intersect: bool = False):
+                 date_cutoff_for_friends: Optional[str] = None, will_intersect: bool = False,
+                 players_used_to_combine: Optional[Tuple[Player]] = None):
         self._uuid_plus_time = UUID_Plus_Time(uuid, time_friended_parent_player)
         self._hypixel_object = hypixel_object
         self._name = name
@@ -49,6 +50,7 @@ class Player:
         self._friends: Optional[List[Player]] = None
         self._call_api_if_friends_empty_in_friends_getter: bool = True
         self._pit_stats: Optional[PitStats] = None
+        self._players_used_to_combine = players_used_to_combine
         if friends is not None:
             self._set_friends(friends)
 
@@ -305,17 +307,19 @@ class Player:
         on_perpetual_pass: bool, on_first_pass: bool, end_index: Optional[int] = None
     ) -> None:
         """Will modify `report`, which is passed by reference."""
-
-        if self.root_player():
-            online_status = 'online' if self.hypixel_object().isOnline(True) else 'offline'
-            self.print_dict_report(self.get_stats_dict(), f"root player is {online_status}")
+        if self._players_used_to_combine:
+            assert self.root_player()
+            for player in self._players_used_to_combine:
+                online_status = 'online' if player.hypixel_object().isOnline(True) else 'offline'
+                player.print_dict_report(player.get_stats_dict(), f"this arg player is {online_status}")
+            print()
 
         report.setdefault('friends', [])
         assert not on_first_pass or not on_perpetual_pass
         if do_additional_passes:
             assert on_first_pass and self.root_player()
         assert isinstance(report['friends'], list)
-        if not (friends := self.friends()):
+        if not (friends := self.friends()) and not self._players_used_to_combine:
             return
 
         for i in range(len(friends) if end_index is None else end_index+1):
