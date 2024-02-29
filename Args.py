@@ -9,7 +9,7 @@ class Args:
         assert args[0] == 'main.py'
         args = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
         self._ARGS = Files.apply_aliases(args)
-        self._ARG_KEYWORDS = ['all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
+        self._ARG_KEYWORDS = ('all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
                               'diff', 'diffl', 'diffr', 'starsort', 'pitsort',
                               'fileoutput', 'updateuuids', 'minusresults',
                               'matchingignsuuids', 'includemultiplayerfiles',
@@ -19,7 +19,7 @@ class Args:
                               'addaliases', 'showaliases', 'printaliases',
                               'getplayerjson', 'playerjson', 'noverify', 'dontverify', 'nover',
                               'pitpercent', 'pit%', 'pitplot', 'nwplot', 'bwplot', 'contains',
-                              'trackargs', 'argsonline']
+                              'trackargs', 'argsonline')
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'friendedwhen', 'intersect').
@@ -36,7 +36,7 @@ class Args:
         return args
 
     def get_keywords(self) -> List[str]:
-        return copy.copy(self._ARG_KEYWORDS)
+        return list(self._ARG_KEYWORDS)
 
     def find_friends_of_friends(self) -> bool:
         return 'friendsoffriends' in self._ARGS

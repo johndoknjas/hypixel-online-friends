@@ -2,10 +2,6 @@
 
     # Consider including network levels when outputting dict reports.
 
-    # Replace uses of lists with tuples, for cases where the collection is never mutated (and where you know the length
-      at the time of coding?).
-      # E.g., can use the find all function for `= [` to find some cases.
-
     # For bw stars >= 1000, print in the actual colours they should be, rather than yellow and blinking.
 
     # Consider refactoring to not need the HEX.UNKNOWN hacky stuff used in hypixel.py.

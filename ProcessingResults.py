@@ -20,7 +20,7 @@ _ign_uuid_pairs_in_results: Optional[Dict[str, str]] = None
 _uuid_ign_pairs_in_results: Optional[Dict[str, str]] = None
 _player_uuids_with_f_list_in_results: Optional[List[str]] = None
 
-_NON_TRIVIAL_KEYS = ['friends', 'name', 'fkdr', 'star', 'pit_rank']
+_NON_TRIVIAL_KEYS = ('friends', 'name', 'fkdr', 'star', 'pit_rank')
 
 def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
     global _ign_uuid_pairs_in_results

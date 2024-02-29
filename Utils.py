@@ -7,8 +7,8 @@ from collections import OrderedDict
 from copy import deepcopy
 import math
 
-def list_subtract(main_list: List, subtract_list: List) -> List:
-    subtract_set = set(subtract_list)
+def list_subtract(main_list: List, subtract_elems: Iterable) -> List:
+    subtract_set = set(subtract_elems)
     return [x for x in main_list if x not in subtract_set]
 
 def remove_duplicates(lst: List) -> List:
@@ -237,8 +237,8 @@ def num_to_roman(num: int) -> str:
     if num == 0:
         return "0"
     # https://stackoverflow.com/a/40274588/7743427:
-    num_map = [(1000, 'M'), (900, 'CM'), (500, 'D'), (400, 'CD'), (100, 'C'), (90, 'XC'),
-               (50, 'L'), (40, 'XL'), (10, 'X'), (9, 'IX'), (5, 'V'), (4, 'IV'), (1, 'I')]
+    num_map = ((1000, 'M'), (900, 'CM'), (500, 'D'), (400, 'CD'), (100, 'C'), (90, 'XC'),
+               (50, 'L'), (40, 'XL'), (10, 'X'), (9, 'IX'), (5, 'V'), (4, 'IV'), (1, 'I'))
     roman = ''
     while num > 0:
         for i, r in num_map:

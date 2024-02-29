@@ -12,8 +12,8 @@ Specs.set_common_specs(False, False)
 def test_pit_colours() -> None:
     """Tests all the 13 pit ranks shown in the image here: https://pit.wiki/Prestige.
        These contain all prestige and level colours."""
-    ranks = ["0-84", "II-40", "VI-39", "XIV-16", "XV-113", "XXII-1", "XXVIII-98",
-             "XXXI-62", "XXXIX-101", "XLII-56", "XLVI-25", "XLIX-77", "L-120"]
+    ranks = ("0-84", "II-40", "VI-39", "XIV-16", "XV-113", "XXII-1", "XXVIII-98",
+             "XXXI-62", "XXXIX-101", "XLII-56", "XLVI-25", "XLIX-77", "L-120")
     for rank in ranks:
         Colours.print_pit_rank(rank)
 
