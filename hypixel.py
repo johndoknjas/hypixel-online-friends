@@ -227,14 +227,21 @@ class Player:
             friends.append(UUID_Plus_Time(friend_uuid, friend['started']))
         return list(reversed(friends))
 
-    def isOnline(self, extra_online_check: bool = False) -> bool:
-        """ This function returns a bool representing whether the player is online. """
+    def isOnline(self, extra_online_checks: Tuple[bool, bool]) -> bool:
+        """ This function returns a bool representing whether the player is online.
+            For `extra_online_checks`:
+                - The first bool is for players whose online status is shown. It determines whether to check
+                  the current online statuses of players, irrespective of whether they were recorded as
+                  online in the original self.JSON. So, this bool being true limits false negatives, at
+                  the expense of more api calls.
+                - The second bool determines whether to call the api for the most recent json to see if
+                  it's changed, for players whose online status is disabled."""
         if {'lastLogin', 'lastLogout'} <= self.JSON.keys():
-            return (self.JSON['lastLogin'] > self.JSON['lastLogout'] and
-                    getJSON('status', self.getUUID())['session']['online'])
+            return (    (extra_online_checks[0] or self.JSON['lastLogin'] > self.JSON['lastLogout'])
+                    and getJSON('status', self.getUUID())['session']['online'])
         # This player doesn't have the online status shown, but we can check if stats from
-        # a few mins ago have updated (if the caller has enabled this feature):
-        return extra_online_check and self.JSON != getJSON('player', self.getUUID())
+        # the original self.JSON have updated (if the caller has enabled this feature):
+        return extra_online_checks[1] and self.JSON != getJSON('player', self.getUUID())
 
     def getFKDR(self) -> float:
         return Utils.fkdr_division(

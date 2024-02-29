@@ -285,11 +285,11 @@ class Player:
         self.pit_stats_object().print_info()
         print(f"{'-'*150}\n\n")
 
-    def create_dictionary_report(self, sort_key: str = "fkdr", extra_online_check: bool = False,
-                                 should_terminate: bool = True) -> dict:
+    def create_dictionary_report(self, sort_key: str = "fkdr", should_terminate: bool = True,
+                                 on_first_pass: Optional[bool] = None) -> dict:
         assert not (self.root_player() and self.time_friended_parent_player('date'))
         if (self.specs().required_online() and
-            not self.hypixel_object().isOnline(extra_online_check=extra_online_check)):
+            not self.hypixel_object().isOnline((False, on_first_pass is False))):
             return {}
 
         report = self.get_stats_dict() if not self.specs().just_uuids() else {'uuid': self.uuid()}
@@ -299,6 +299,7 @@ class Player:
         if self.specs().print_player_data_exclude_friends():
             self.print_dict_report(report)
         if self.specs_for_friends():
+            assert on_first_pass is not False
             self.iterate_over_friends_for_report(report, not should_terminate, sort_key, False, True)
         return report
 
@@ -310,7 +311,7 @@ class Player:
         if self._players_used_to_combine:
             assert self.root_player()
             for player in self._players_used_to_combine:
-                online_status = 'online' if player.hypixel_object().isOnline(True) else 'offline'
+                online_status = 'online' if player.hypixel_object().isOnline((True, True)) else 'offline'
                 player.print_dict_report(player.get_stats_dict(), f"this arg player is {online_status}")
             print()
 
@@ -329,7 +330,7 @@ class Player:
                 self.iterate_over_friends_for_report(report, False, sort_key,
                                                      False, False, end_index=i-1)
             if (friends[i].uuid() not in (d['uuid'] for d in report['friends']) and
-                (friend_report := friends[i].create_dictionary_report(extra_online_check = not on_first_pass))):
+                (friend_report := friends[i].create_dictionary_report(on_first_pass=on_first_pass))):
                 report['friends'].append(friend_report)
             self.processed_msg(i+1, on_perpetual_pass, on_first_pass)
 
