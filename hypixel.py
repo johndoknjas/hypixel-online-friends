@@ -5,7 +5,7 @@ __version__ = '0.8.0'
 
 from random import choice
 from time import time, sleep
-import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Tuple
 import re
 from dataclasses import dataclass
@@ -121,9 +121,17 @@ class Rank:
                 colour_print(ColourSpecs('+', plus_colour))
         colour_print(ColourSpecs('] ', bracket_colour))
 
+sleep_till: Optional[datetime] = None
 def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
     """ This function is used for getting a JSON from Hypixel's Public API. """
+    global sleep_till
     global num_api_calls_made
+
+    if sleep_till and (sleep_duration := (sleep_till - datetime.now()).total_seconds()) >= 0:
+        print(f"Sleeping until {sleep_till.strftime('%I:%M:%S %p')} for rate limiting.")
+        sleep(sleep_duration)
+    sleep_till = None
+
     num_api_calls_made += 1
     # print(f"{num_api_calls_made}\n{time() - TIME_STARTED}\n\n")
     if typeOfRequest != 'player':
@@ -141,13 +149,8 @@ def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
             f'typeOfRequest: {typeOfRequest}\nthere was a problem with response.json()'
         ) from e
 
-    if 'RateLimit-Remaining' in responseHeaders:
-        remaining_allowed_requests = int(responseHeaders['RateLimit-Remaining'])
-        if remaining_allowed_requests <= 1:
-            sleep_seconds = int(responseHeaders['RateLimit-Reset']) + 1
-            wake_up_time = datetime.datetime.now() + datetime.timedelta(seconds=sleep_seconds)
-            print(f"Sleeping until {wake_up_time.strftime('%I:%M:%S %p')} for rate limiting.")
-            sleep(sleep_seconds)
+    if 'RateLimit-Remaining' in responseHeaders and int(responseHeaders['RateLimit-Remaining']) <= 1:
+        sleep_till = datetime.now() + timedelta(seconds=int(responseHeaders['RateLimit-Reset'])+1)
 
     if not responseJSON['success']:
         raise HypixelAPIError(responseJSON)
