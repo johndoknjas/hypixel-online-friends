@@ -16,7 +16,7 @@ class Args:
                               'keepfirstdictmultifiles', 'notallfromresults',
                               'addadditionalfriends', 'addadditionals',
                               'noadditionalfriends', 'noadditionals',
-                              'addaliases', 'showaliases', 'printaliases',
+                              'addaliases', 'updatealiases', 'showaliases', 'printaliases',
                               'getplayerjson', 'playerjson', 'noverify', 'dontverify', 'nover',
                               'pitpercent', 'pit%', 'pitplot', 'nwplot', 'bwplot', 'contains',
                               'trackargs', 'argsonline')
@@ -99,8 +99,8 @@ class Args:
     def get_additional_friends(self) -> bool:
         return all(x not in self._ARGS for x in ('noadditionalfriends', 'noadditionals'))
 
-    def add_aliases(self) -> bool:
-        return 'addaliases' in self._ARGS
+    def update_aliases(self) -> bool:
+        return 'addaliases' in self._ARGS or 'updatealiases' in self._ARGS
 
     def print_aliases(self) -> bool:
         return 'printaliases' in self._ARGS or 'showaliases' in self._ARGS
@@ -130,7 +130,7 @@ class Args:
         return 'trackargs' in self._ARGS or 'argsonline' in self._ARGS
 
     def do_mini_program(self) -> bool:
-        mini_programs = (self.add_aliases(), self.print_aliases(), self.contains_substr(),
+        mini_programs = (self.update_aliases(), self.print_aliases(), self.contains_substr(),
                          self.add_additional_friends(), self.get_player_json(),
                          self.pit_percent(), self.pit_plot(), self.network_plot(), self.bedwars_plot())
         assert (bool_sum := sum(1 for x in mini_programs if x)) <= 1
@@ -143,7 +143,7 @@ class Args:
         if self.do_file_output():
             assert self.date_cutoff() is None and not self.just_online_friends() and not self.minus_results()
         assert not (self.sort_by_pit_rank() and self.sort_by_star())
-        if any((self.add_aliases(), self.print_aliases(), self.pit_plot(), self.network_plot(), self.bedwars_plot())):
+        if any((self.update_aliases(), self.print_aliases(), self.pit_plot(), self.network_plot(), self.bedwars_plot())):
             assert len(self.get_args(False, False)) == 1
         if self.add_additional_friends():
             assert len(self.get_args(True, True)) == 1

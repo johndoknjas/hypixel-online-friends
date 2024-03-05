@@ -178,8 +178,8 @@ def set_args_in_files(args: Args) -> None:
 def do_mini_program(args: Args) -> None:
     if args.add_additional_friends():
         additional_friends.add_additional_friends_to_file_system(args.get_args(True, True)[0])
-    elif args.add_aliases():
-        Files.add_aliases(args.get_keywords())
+    elif args.update_aliases():
+        Files.update_aliases(args.get_keywords())
     elif args.print_aliases():
         Files.print_aliases()
     elif args.get_player_json():

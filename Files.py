@@ -72,7 +72,7 @@ def update_uuids_file(ign_uuid_pairs: Dict[str, str]) -> None:
             assert key == key.lower()
     print(f"uuids.txt now contains uuid-ign pairs for {len(pairs)} players.")
 
-def add_aliases(keywords: Iterable[str]) -> None:
+def update_aliases(keywords: Iterable[str]) -> None:
     print_aliases('Current aliases:')
     aliases: Dict[str, str] = {a: ' '.join(m) for a,m in get_aliases().items()}
     while True:

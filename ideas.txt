@@ -1,5 +1,9 @@
 # CONTINUE HERE - todos:
 
+    # Add a feature (e.g., `adduuidaliases` or smth) that gets the players from the args, and makes the
+      ign for each an alias of the uuid, adding to aliases.txt.
+        - If a player's ign is already an alias in aliases.txt, don't update that one and print a message.
+
     # Consider including network levels when outputting dict reports.
 
     # For bw stars >= 1000, print in the actual colours they should be, rather than yellow and blinking.
