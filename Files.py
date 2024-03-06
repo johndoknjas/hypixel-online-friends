@@ -5,7 +5,7 @@ import os
 import os.path
 import json
 import time
-from typing import Optional, Dict, List, Iterable
+from typing import Optional, Dict, List, Iterable, Tuple
 import copy
 import shutil
 import ntpath
@@ -72,18 +72,18 @@ def update_uuids_file(ign_uuid_pairs: Dict[str, str]) -> None:
             assert key == key.lower()
     print(f"uuids.txt now contains uuid-ign pairs for {len(pairs)} players.")
 
-def update_aliases(keywords: Iterable[str]) -> None:
-    print_aliases('Current aliases:')
-    aliases: Dict[str, str] = {a: ' '.join(m) for a,m in get_aliases().items()}
+def assertions_for_aliases(alias: str, meaning: str, keywords: Iterable[str]) -> None:
+    assert alias not in keywords and not Utils.contains_whitespace(alias)
+    assert '.txt' not in meaning
+
+def get_new_aliases_from_user(aliases: Dict[str, str], keywords: Iterable[str]) -> None:
+    """Asks the user for new aliases, and updates the `aliases` parameter accordingly."""
     while True:
         curr_alias = input("Enter alias (or 'done'/'stop' to quit): ").lower()
         if curr_alias in ('done', 'stop', 'quit'):
-            break
-        if curr_alias in keywords:
-            raise ValueError(f'{curr_alias} is a keyword')
-        assert not Utils.contains_whitespace(curr_alias)
+            return
         curr_meaning = input("Enter the text this alias stands for: ").lower()
-        assert '.txt' not in curr_meaning
+        assertions_for_aliases(curr_alias, curr_meaning, keywords)
         if curr_meaning in ('del', 'delete', 'remove'):
             if input(f"Confirm you want to delete the {curr_alias} alias by entering y: ") in ('y', 'Y'):
                 del aliases[curr_alias]
@@ -95,6 +95,30 @@ def update_aliases(keywords: Iterable[str]) -> None:
         aliases[curr_alias] = curr_meaning
         print()
 
+def add_new_ign_uuid_aliases(
+        aliases: Dict[str, str], ign_uuid_pairs: Iterable[Tuple[str, str]], keywords: Iterable[str]
+    ) -> None:
+    """Makes each ign an alias for its uuid, and adds it to `aliases` (if the ign is not
+       already an existing alias)."""
+    for ign, uuid in ((a.lower(), b.lower()) for a, b in ign_uuid_pairs):
+        assert Utils.is_ign(ign) and Utils.is_uuid(uuid)
+        assertions_for_aliases(ign, uuid, keywords)
+        if ign in aliases:
+            print(f"The alias {ign} already exists, so not replacing it.")
+        else:
+            aliases[ign] = uuid
+
+def update_aliases(
+        keywords: Iterable[str], ign_uuid_pairs: Optional[Iterable[Tuple[str, str]]] = None
+    ) -> None:
+    """ Updates aliases using user input if `ign_uuid_pairs` is None. Otherwise, goes through each
+        2-tuple in `ign_uuid_pairs` and makes the ign (first elem) an alias for the uuid (second elem). """
+    print_aliases('Current aliases:')
+    aliases: Dict[str, str] = {a: ' '.join(m) for a,m in get_aliases().items()}
+    if ign_uuid_pairs is None:
+        get_new_aliases_from_user(aliases, keywords)
+    else:
+        add_new_ign_uuid_aliases(aliases, ign_uuid_pairs, keywords)
     shutil.copy('aliases.txt', create_file('aliases copy', 'old-aliases'))
     with open(_ALIASES_FILENAME, 'w') as file:
         for a,m in sorted(aliases.items()):

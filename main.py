@@ -180,6 +180,10 @@ def do_mini_program(args: Args) -> None:
         additional_friends.add_additional_friends_to_file_system(args.get_args(True, True)[0])
     elif args.update_aliases():
         Files.update_aliases(args.get_keywords())
+    elif args.add_uuid_aliases():
+        Files.update_aliases(
+            args.get_keywords(), ((p.name(), p.uuid()) for p in get_players_from_args(args)[0])
+        )
     elif args.print_aliases():
         Files.print_aliases()
     elif args.get_player_json():
