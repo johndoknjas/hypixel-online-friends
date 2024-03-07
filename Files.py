@@ -113,7 +113,7 @@ def update_aliases(
     ) -> None:
     """ Updates aliases using user input if `ign_uuid_pairs` is None. Otherwise, goes through each
         2-tuple in `ign_uuid_pairs` and makes the ign (first elem) an alias for the uuid (second elem). """
-    print_aliases('Current aliases:')
+    print_aliases()
     aliases: Dict[str, str] = get_aliases_with_str_meanings()
     aliases_copy = deepcopy(aliases)
     if ign_uuid_pairs is None:
@@ -126,7 +126,7 @@ def update_aliases(
         for a,m in sorted(aliases.items()):
             file.write(f'"{a}" = "{m}"\n')
 
-    print_aliases("\nUpdated aliases:")
+    print_aliases(starting_phrase="\nNow")
     assert aliases == get_aliases_with_str_meanings()
     old_items, new_items = set(aliases_copy.items()), set(aliases.items())
     print(f"\nNew aliases - old aliases: {new_items - old_items}")
@@ -152,9 +152,10 @@ def get_aliases() -> Dict[str, List[str]]:
         aliases[split_line[0]] = split_line[1].split()
     return aliases
 
-def print_aliases(msg: str = 'Aliases:') -> None:
-    print(f'{msg}\n')
-    for alias in (aliases := get_aliases()):
+def print_aliases(starting_phrase: str = 'Currently') -> None:
+    aliases = get_aliases()
+    print(f"{starting_phrase} {len(aliases)} aliases:\n")
+    for alias in aliases:
         print(f"{alias} = {aliases[alias]}")
     print()
 
