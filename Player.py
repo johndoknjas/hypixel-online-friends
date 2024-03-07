@@ -227,7 +227,7 @@ class Player:
         return {'uuid': self.uuid(), 'name': self.name(), 'fkdr': self.get_fkdr(),
                 'star': self.get_bw_star(), 'pit_rank': self.pit_rank_string()}
 
-    def print_dict_report(self, report: Dict, ending_text: str = '') -> None:
+    def print_dict_report(self, report: Dict, extra_text: str = '') -> None:
         import Colours
         report = deepcopy(report)
         assert all(isinstance(v, (str,float,int)) for v in report.values())
@@ -265,7 +265,10 @@ class Player:
                 date_obj = datetime.strptime(time, '%Y-%m-%d')
                 time = date_obj.strftime('%b ') + date_obj.strftime('%d/%y').lstrip('0')
             print(f" friended {time}", end='')
-        print(ending_text)
+        print(extra_text, end='')
+        if (updated_json := self.hypixel_object().updated_json) is not None:
+            print(f" (updated player json obtained {updated_json[1].strftime('%I:%M:%S %p')})", end='')
+        print()
 
     def print_player_info(self) -> None:
         print(f"{len(self.friends())} unique friends total\n")

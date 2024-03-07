@@ -21,19 +21,9 @@
     # Consider sleeping in the while loop for perpetual passes, to ensure only one per min (at most) is done.
       # The point of this would be to avoid doing repetitive output so often.
 
-    # Create a second field for hypixel.py, where the current json from a call is stored. This is used to
-      see if a player is online (if their status isn't in the api). You can also store a timestamp for this json.
-      Then:
-        # If this json is different from the original self._JSON, output the player as online, and include the
-          timestamp (i.e., when their xp last changed, they could be afk/offline now).
-        # When calling getJSON for the extra online check, if the new json is different from the current
-          json field, update it (along with the timestamp). Now the player was at least online at this new
-          timestamp going forward.
-        # If this field for current json remains at None, it means the player's json hasn't changed since the
-          start of the program's run, so they're offline.
-
-    # Try to find some way to limit false negatives/positives for the online statuses of players who
-      respectively have the status available/unavailable through the api.
+    # Try to find some way to limit false negatives for the online statuses of players who have it
+      available through the api. I.e., players who are offline at the start of the program's run,
+      but online later.
 
     # Have a way to only output the n oldest/newest friends, based on an optional cli arg from the user.
 

@@ -205,6 +205,8 @@ class Player:
         # print(uuid_or_ign)
         self.JSON = getJSON('player', get_uuid(uuid_or_ign, call_api_last_resort=False))
         self._rank = Rank(self.JSON)
+        self.updated_json: Optional[Tuple[dict, datetime]] = None
+        """Stores the newest result of `getJSON('player')` that was updated from the previous call."""
 
     def getName(self, extra_safety_check=True) -> str:
         """ Just return player's name. """
@@ -244,7 +246,12 @@ class Player:
                     and getJSON('status', self.getUUID())['session']['online'])
         # This player doesn't have the online status shown, but we can check if stats from
         # the original self.JSON have updated (if the caller has enabled this feature):
-        return extra_online_checks[1] and self.JSON != getJSON('player', self.getUUID())
+        if extra_online_checks[1] and self.JSON != (json := getJSON('player', self.getUUID())):
+            # Before returning True, see if this json qualifies as the newest updated json.
+            if self.updated_json is None or self.updated_json[0] != json:
+                self.updated_json = (json, datetime.now())
+            return True
+        return False
 
     def getFKDR(self) -> float:
         return Utils.fkdr_division(
