@@ -5,8 +5,8 @@ import os
 import os.path
 import json
 import time
-from typing import Optional, Dict, List, Iterable, Tuple
-import copy
+from typing import Optional, Dict, List, Iterable, Tuple, Union
+from copy import deepcopy
 import shutil
 import ntpath
 from string import whitespace
@@ -39,7 +39,7 @@ def ign_uuid_pairs_in_uuids_txt(do_deepcopy: bool = False) -> dict:
     """Retrieves pairs stored in the uuids.txt file as a dict - key ign, value uuid"""
     global _ign_uuid_pairs
     if _ign_uuid_pairs is not None:
-        return copy.deepcopy(_ign_uuid_pairs) if do_deepcopy else _ign_uuid_pairs
+        return deepcopy(_ign_uuid_pairs) if do_deepcopy else _ign_uuid_pairs
     _ign_uuid_pairs = {} # key ign, value uuid
     if not os.path.isfile('uuids.txt'):
         return {}
@@ -47,7 +47,7 @@ def ign_uuid_pairs_in_uuids_txt(do_deepcopy: bool = False) -> dict:
         for line in file:
             words = line.rstrip().split()
             _ign_uuid_pairs[words[0].lower()] = words[1]
-    return copy.deepcopy(_ign_uuid_pairs) if do_deepcopy else _ign_uuid_pairs
+    return deepcopy(_ign_uuid_pairs) if do_deepcopy else _ign_uuid_pairs
 
 def read_json_textfile(filepath: str) -> dict:
     try:
@@ -114,27 +114,38 @@ def update_aliases(
     """ Updates aliases using user input if `ign_uuid_pairs` is None. Otherwise, goes through each
         2-tuple in `ign_uuid_pairs` and makes the ign (first elem) an alias for the uuid (second elem). """
     print_aliases('Current aliases:')
-    aliases: Dict[str, str] = {a: ' '.join(m) for a,m in get_aliases().items()}
+    aliases: Dict[str, str] = get_aliases_with_str_meanings()
+    aliases_copy = deepcopy(aliases)
     if ign_uuid_pairs is None:
         get_new_aliases_from_user(aliases, keywords)
     else:
         add_new_ign_uuid_aliases(aliases, ign_uuid_pairs, keywords)
+
     shutil.copy('aliases.txt', create_file('aliases copy', 'old-aliases'))
     with open(_ALIASES_FILENAME, 'w') as file:
         for a,m in sorted(aliases.items()):
             file.write(f'"{a}" = "{m}"\n')
+
     print_aliases("\nUpdated aliases:")
+    assert aliases == get_aliases_with_str_meanings()
+    old_items, new_items = set(aliases_copy.items()), set(aliases.items())
+    print(f"\nNew aliases - old aliases: {new_items - old_items}")
+    print(f"Old aliases - new aliases: {old_items - new_items}")
+
+def get_aliases_with_str_meanings() -> Dict[str, str]:
+    """Does the same thing as `get_aliases()`, but each of the meanings is a string with words
+       separated by spaces, rather than a list."""
+    return {a: ' '.join(m) for a,m in get_aliases().items()}
 
 def get_aliases() -> Dict[str, List[str]]:
     """ Returns a list representing the aliases stored in aliases.txt. Each element of this list
         will be a tuple, where the first element is a string (the alias), and the second element
         is a list of strings (what the alias stands for). """
-    aliases: Dict[str, List[str]] = {}
     if not os.path.isfile(_ALIASES_FILENAME):
-        return aliases
-    lines: List[str]
+        return {}
     with open(_ALIASES_FILENAME, 'r') as file:
-        lines = file.read().splitlines()
+        lines: List[str] = file.read().splitlines()
+    aliases: Dict[str, List[str]] = {}
     for line in lines:
         split_line = [x.strip(whitespace + '"') for x in line.split('=')]
         assert line.count('=') == 1 and len(split_line) == 2 and line == line.lower()
