@@ -9,7 +9,7 @@ from Player import Player
 def get_friends_from_user(friends_specs: Specs) -> List[Player]:
     friends: List[Player] = []
     INPUT_MSG = "Enter the igns/uuids of additional friends, separated by spaces (or enter 'done' to stop): "
-    for i, user_input in enumerate(inputs := input(INPUT_MSG).split()):
+    for i, user_input in enumerate(inputs := Files.apply_aliases(input(INPUT_MSG).split())):
         if user_input.lower() in ('done', 'stop'):
             assert i == len(inputs)-1
             return friends

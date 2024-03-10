@@ -74,7 +74,7 @@ def update_uuids_file(ign_uuid_pairs: Dict[str, str]) -> None:
 
 def assertions_for_aliases(alias: str, meaning: str, keywords: Iterable[str]) -> None:
     assert alias not in keywords and not Utils.contains_whitespace(alias)
-    assert '.txt' not in meaning
+    assert '.txt' not in meaning and '.txt' not in alias
 
 def get_new_aliases_from_user(aliases: Dict[str, str], keywords: Iterable[str]) -> None:
     """Asks the user for new aliases, and updates the `aliases` parameter accordingly."""

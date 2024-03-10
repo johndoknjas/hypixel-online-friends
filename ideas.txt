@@ -25,9 +25,6 @@
       available through the api. I.e., players who are offline at the start of the program's run,
       but online later.
 
-    # For the `addadditionals` feature, let the user optionally enter the friends to add as cli args,
-      instead of user input afterwards. Point is to be able to apply uuid aliases in aliases.txt.
-
     # Have a way to only output the n oldest/newest friends, based on an optional cli arg from the user.
 
     # Replace using a white background for pit ranks with black brackets.
