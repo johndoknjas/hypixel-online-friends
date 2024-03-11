@@ -171,10 +171,21 @@ class Player:
                          Utils.is_older(f.time_friended_parent_player('s'), self._date_cutoff_for_friends)]
 
     def remove_duplicate_friends(self) -> None:
-        """Precondition: friends list must be sorted in the order you want, since duplicates coming after any
+        """Precondition: the friends list must be sorted in the order you want, since duplicates coming after any
         originals will be removed. By a 'duplicate', this means a Player object with the same uuid."""
         assert self._friends is not None
         self._set_friends([f for i, f in enumerate(self.friends()) if not f.in_player_list(self.friends()[:i])])
+
+    def keep_just_first_or_last_friends(self, first_n: Optional[int] = None,
+                                        last_n: Optional[int] = None) -> None:
+        """Precondition: the friends list should already be sorted in the order you want."""
+        assert self._friends is not None and (first_n is None or last_n is None)
+        if first_n is not None:
+            assert 0 <= first_n <= len(self.friends())
+            self._set_friends(self.friends()[:first_n])
+        elif last_n is not None:
+            assert 0 <= last_n <= len(self.friends())
+            self._set_friends(self.friends()[-last_n:] if last_n > 0 else [])
 
     def _set_friends(self, friends: Union[List[UUID_Plus_Time], List[Player], None]) -> None:
         """Note that after this function has been called, if self.friends() is called later and

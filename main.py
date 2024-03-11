@@ -1,5 +1,5 @@
 import sys
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from itertools import combinations
 from copy import deepcopy
 
@@ -59,7 +59,6 @@ def combine_players(info_on_players: List[Player], args: Args) -> Player:
                     players_used_to_combine=deepcopy(info_on_players)
                     if args.track_if_arg_players_online() else None)
     player.polish_friends_list(exclude_friends)
-    print(f"Now {len(player.friends())} friends after adjustments specified in args.\n\n")
     return player
 
 def diff_f_lists(players: List[Player], args: Args) -> None:
@@ -234,6 +233,12 @@ def main() -> None:
         do_mini_program(args)
         sys.exit(0)
 
+    newest_n_friends, oldest_n_friends = None, None
+    if args.get_newest_friends():
+        newest_n_friends = int(input("Enter the n newest friends you want: "))
+    elif args.get_oldest_friends():
+        oldest_n_friends = int(input("Enter the n oldest friends you want: "))
+
     if args.find_matching_igns_or_uuids_in_results():
         ProcessingResults.print_all_matching_uuids_or_igns(args.get_args(True, True)[0])
     players_from_args, uuids_for_friended_when = get_players_from_args(args)
@@ -243,6 +248,8 @@ def main() -> None:
         friended_when_feature(players_from_args, uuids_for_friended_when)
 
     player = combine_players(players_from_args, args)
+    player.keep_just_first_or_last_friends(newest_n_friends, oldest_n_friends)
+    print(f"Now {len(player.friends())} friends after adjustments specified in args.\n\n")
 
     if args.check_results():
         ProcessingResults.check_results(player.uuid(), player.name())

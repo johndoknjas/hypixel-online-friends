@@ -20,7 +20,7 @@ class Args:
                               'showaliases', 'printaliases',
                               'getplayerjson', 'playerjson', 'noverify', 'dontverify', 'nover',
                               'pitpercent', 'pit%', 'pitplot', 'nwplot', 'bwplot', 'contains',
-                              'trackargs', 'argsonline')
+                              'trackargs', 'argsonline', 'newest', 'oldest')
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'friendedwhen', 'intersect').
@@ -133,6 +133,12 @@ class Args:
     def track_if_arg_players_online(self) -> bool:
         return 'trackargs' in self._ARGS or 'argsonline' in self._ARGS
 
+    def get_newest_friends(self) -> bool:
+        return 'newest' in self._ARGS
+
+    def get_oldest_friends(self) -> bool:
+        return 'oldest' in self._ARGS
+
     def do_mini_program(self) -> bool:
         mini_programs = (self.update_aliases(), self.add_uuid_aliases(), self.print_aliases(),
                          self.contains_substr(), self.add_additional_friends(), self.get_player_json(),
@@ -146,6 +152,7 @@ class Args:
         assert set(self.get_keywords()).isdisjoint(Files.get_aliases().keys())
         if self.do_file_output():
             assert self.date_cutoff() is None and not self.just_online_friends() and not self.minus_results()
+            assert not self.get_newest_friends() and not self.get_oldest_friends()
         assert not (self.sort_by_pit_rank() and self.sort_by_star())
         if any((self.update_aliases(), self.print_aliases(), self.pit_plot(), self.network_plot(), self.bedwars_plot())):
             assert len(self.get_args(False, False)) == 1 and not self.get_args(True, True)
@@ -155,3 +162,4 @@ class Args:
             assert len(self.get_args(True, True)) >= 1
         if self.contains_substr() or self.add_uuid_aliases():
             assert len(self.get_args(False, False)) >= 2
+        assert not (self.get_newest_friends() and self.get_oldest_friends())

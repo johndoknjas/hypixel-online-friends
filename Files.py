@@ -5,7 +5,7 @@ import os
 import os.path
 import json
 import time
-from typing import Optional, Dict, List, Iterable, Tuple, Union
+from typing import Optional, Dict, List, Iterable, Tuple
 from copy import deepcopy
 import shutil
 import ntpath
