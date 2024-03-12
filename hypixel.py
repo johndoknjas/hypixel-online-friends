@@ -270,6 +270,10 @@ class Player:
     def getPitXP(self) -> int:
         return Utils.nested_get(self.JSON, ('stats', 'Pit', 'profile', 'xp'), 0, int)
 
+    def getPitPlaytime(self) -> int:
+        """Returns the total pit playtime in minutes."""
+        return Utils.nested_get(self.JSON, ('stats', 'Pit', 'pit_stats_ptl', 'playtime_minutes'), 0, int)
+
     def getNetworkXP(self) -> int:
         xp = self.JSON['networkExp']
         assert int(xp) == xp

@@ -27,8 +27,7 @@
 
     # Replace using a white background for pit ranks with black brackets.
 
-    # For pit stats (in the info for arg players), output the amount of time played, K/D ratio,
-      and maybe kills/time played ratio.
+    # For pit stats (in the info for arg players), output the K/D ratio, and maybe K/T ratio or #kills.
 
     # Do something similar to the pit percent feature, but for nw levels. I.e., just
       a level value is given by the user, no player igns required.
@@ -76,6 +75,8 @@
       # If a given uuid/ign exists in uuids.txt already, have the user confirm they want to replace it.
 
     # Consider using lazy initialization for self.JSON in hypixel.py.
+      # However, for the getOnline feature it'd be good to have an original player json to compare against,
+        so maybe make lazy init. an option at most.
 
     # In hypixel.get_uuid(), maybe add an optional param that gets the function to skip doing the
       Player(possible_uuid).getName().lower() check.

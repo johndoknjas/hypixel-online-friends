@@ -61,7 +61,7 @@ class Player:
 
     def pit_stats_object(self) -> PitStats:
         if not self._pit_stats:
-            self._pit_stats = PitStats(self.hypixel_object().getPitXP())
+            self._pit_stats = PitStats(self.hypixel_object().getPitXP(), self.hypixel_object().getPitPlaytime())
         return self._pit_stats
 
     def player_JSON(self) -> dict:

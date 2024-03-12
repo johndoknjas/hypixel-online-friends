@@ -1,5 +1,5 @@
 import math
-from typing import List
+from typing import List, Optional
 
 import Utils
 
@@ -57,9 +57,10 @@ def get_xp_req_for_rank(pit_rank: str) -> int:
     return total_xp_reqs_for_levels(pres)[lvl-1]
 
 class PitStats:
-    def __init__(self, pit_xp: int):
+    def __init__(self, pit_xp: int, playtime_mins: Optional[int] = None):
         assert pit_xp >= 0
         self._pit_xp = pit_xp
+        self._playtime_mins = playtime_mins
         self._prestige = next(i for i, xp_req in enumerate(PRESTIGE_XP) if xp_req >= self._pit_xp)
 
     def xp(self) -> int:
@@ -97,4 +98,9 @@ class PitStats:
                 break
             print(f"Overall way through to prestige {future_pres}: ", end="")
             print(Utils.percentify(self.percent_overall_to_given_pres(future_pres)), end=", ")
+        if self._playtime_mins is not None:
+            playtime_hrs = self._playtime_mins / 60
+            print(f"\npit playtime hours: {round(playtime_hrs, 3)}, ", end='')
+            if playtime_hrs > 0:
+                print(f"avg xp per hour: {round(self._pit_xp / playtime_hrs, 3)}")
         print("\n")
