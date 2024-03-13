@@ -81,7 +81,6 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
     in_minus_symbol_section = False
     in_friended_when_section = False
     is_intersect_player = False
-    FROM_RESULTS = 'fromresults'
     FRIENDED_WHEN = 'friendedwhen'
     INTERSECT = 'intersect'
     uuids_for_friended_when: List[str] = []
@@ -90,7 +89,7 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
         if in_minus_symbol_section or in_friended_when_section or is_intersect_player:
             assert not args.do_mini_program()
 
-        if arg.endswith('.txt') or arg == FROM_RESULTS:
+        if arg.endswith('.txt'):
             assert not in_friended_when_section
             continue
         if arg == '-':
@@ -112,13 +111,12 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
 
         next_arg = args_no_keywords_or_date[i+1] if i+1 < len(args_no_keywords_or_date) else None
         use_specific_textfile = next_arg and next_arg.endswith('.txt')
-        use_results_folder = args.from_results_for_all() or next_arg == FROM_RESULTS
         num_friends_msgs = ['', '']
 
         if use_specific_textfile:
             assert not args.do_file_output()
             player = Player.make_player_from_json_textfile(args_no_keywords_or_date[i+1], arg, specs=specs)
-        elif use_results_folder:
+        else:
             hypixel_obj = hypixel.Player(arg)
             uuid = hypixel_obj.getUUID()
             all_friends: List[UUID_Plus_Time] = []
@@ -135,8 +133,6 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
                 all_friends = standard_friends
             all_friends.sort(key=UUID_Plus_Time.sort_key)
             player = Player(uuid, specs=specs, friends=all_friends, hypixel_object=hypixel_obj)
-        else:
-            player = Player(hypixel.get_uuid(arg), specs=specs)
 
         if Utils.is_ign(arg):
             print("This player's uuid is " + player.uuid())

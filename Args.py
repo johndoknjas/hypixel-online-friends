@@ -13,7 +13,7 @@ class Args:
                               'diff', 'diffl', 'diffr', 'starsort', 'pitsort',
                               'fileoutput', 'updateuuids', 'minusresults',
                               'matchingignsuuids', 'includemultiplayerfiles',
-                              'keepfirstdictmultifiles', 'notallfromresults',
+                              'keepfirstdictmultifiles',
                               'addadditionalfriends', 'addadditionals',
                               'noadditionalfriends', 'noadditionals',
                               'addaliases', 'updatealiases', 'adduuidaliases', 'updateuuidaliases',
@@ -23,7 +23,7 @@ class Args:
                               'trackargs', 'argsonline', 'newest', 'oldest')
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
-        # For 'positional' arguments, there are fewer (e.g., '-', 'fromresults', 'friendedwhen', 'intersect').
+        # For 'positional' arguments, there are fewer (e.g., '-', 'friendedwhen', 'intersect').
         # They don't appear in this class, but are instead used directly in the logic for main.py.
         Utils.print_list(self.get_args(False, False), prepended_msg="self._ARGS list after applying aliases: ")
         self._validation_checks()
@@ -87,9 +87,6 @@ class Args:
         assert self.include_multi_player_files()
         # Only makes sense to call this function if the above is true.
         return 'keepfirstdictmultifiles' not in self._ARGS
-
-    def from_results_for_all(self) -> bool:
-        return 'notallfromresults' not in self._ARGS
 
     def add_additional_friends(self) -> bool:
         return any(x in self._ARGS for x in ('addadditionalfriends', 'addadditionals'))

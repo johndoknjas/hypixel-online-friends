@@ -31,8 +31,7 @@
       a level value is given by the user, no player igns required.
 
     # Make some updates to Args related stuff:
-      - Consider getting rid of the 'fromresults'/'notallfromresults' stuff, since the
-        friends endpoint of hypixel's api has been removed for about a year now.
+      - Get rid of any features you don't use.
       - Add an Arg keyword for just getting additional friends.
       - Consider making the positional arg keywords (in main.py) be encapsulated within Args.py.
         - Then, functions like get_arguments could have an additional param for 'remove_positional_keywords'.
