@@ -1,5 +1,5 @@
 import math
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import Utils
 
@@ -57,10 +57,12 @@ def get_xp_req_for_rank(pit_rank: str) -> int:
     return total_xp_reqs_for_levels(pres)[lvl-1]
 
 class PitStats:
-    def __init__(self, pit_xp: int, playtime_mins: Optional[int] = None):
+    def __init__(self, pit_xp: int, playtime_kills_deaths: Optional[Tuple[int,int,int]] = None):
+        """note: playtime measured in mins"""
         assert pit_xp >= 0
         self._pit_xp = pit_xp
-        self._playtime_mins = playtime_mins
+        self._playtime_kills_deaths = playtime_kills_deaths
+        """First elem stores the total pit playtime in mins, second elem is total #kills, third is total #deaths."""
         self._prestige = next(i for i, xp_req in enumerate(PRESTIGE_XP) if xp_req >= self._pit_xp)
 
     def xp(self) -> int:
@@ -98,9 +100,14 @@ class PitStats:
                 break
             print(f"Overall way through to prestige {future_pres}: ", end="")
             print(Utils.percentify(self.percent_overall_to_given_pres(future_pres)), end=", ")
-        if self._playtime_mins is not None:
-            playtime_hrs = self._playtime_mins / 60
-            print(f"\npit playtime hours: {round(playtime_hrs, 3)}, ", end='')
-            if playtime_hrs > 0:
-                print(f"avg xp per hour: {round(self._pit_xp / playtime_hrs, 3)}")
+        if not self._playtime_kills_deaths:
+            print("\n")
+            return
+        playtime_mins, kills, deaths = self._playtime_kills_deaths
+        playtime_hrs = playtime_mins / 60
+        print(f"\npit playtime hours: {round(playtime_hrs, 3)}, ", end='')
+        print(f"total kills: {kills}, KDR: {round(Utils.kdr_division(kills, deaths), 3)}, ", end='')
+        if playtime_hrs > 0:
+            print(f"K/hour: {round(kills / playtime_hrs, 3)}, ", end='')
+            print(f"XP/hour: {round(self._pit_xp / playtime_hrs, 3)}, ", end='')
         print("\n")

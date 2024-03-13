@@ -38,8 +38,8 @@ def get_date_string_if_exists(lst: List[str]) -> Optional[str]:
     """If no date strings found, return None."""
     return next((x for x in lst if is_date_string(x)), None)
 
-def fkdr_division(final_kills: int, final_deaths: int) -> float:
-    return final_kills / final_deaths if final_deaths else float(final_kills)
+def kdr_division(kills: int, deaths: int) -> float:
+    return kills / deaths if deaths else float(kills)
 
 def date_to_epoch(date_string: str, in_seconds: bool) -> float:
     epoch = time.mktime(datetime.strptime(date_string, '%Y-%m-%d').timetuple())

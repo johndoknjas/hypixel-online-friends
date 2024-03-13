@@ -61,7 +61,10 @@ class Player:
 
     def pit_stats_object(self) -> PitStats:
         if not self._pit_stats:
-            self._pit_stats = PitStats(self.hypixel_object().getPitXP(), self.hypixel_object().getPitPlaytime())
+            obj = self.hypixel_object()
+            self._pit_stats = PitStats(
+                obj.getPitXP(), (obj.getPitPlaytime(), obj.getPitKills(), obj.getPitDeaths())
+            )
         return self._pit_stats
 
     def player_JSON(self) -> dict:
@@ -185,7 +188,7 @@ class Player:
             self._set_friends(self.friends()[:first_n])
         elif last_n is not None:
             assert 0 <= last_n <= len(self.friends())
-            self._set_friends(self.friends()[-last_n:] if last_n > 0 else [])
+            self._set_friends(self.friends()[-last_n:] if last_n > 0 else []) # type: ignore
 
     def _set_friends(self, friends: Union[List[UUID_Plus_Time], List[Player], None]) -> None:
         """Note that after this function has been called, if self.friends() is called later and

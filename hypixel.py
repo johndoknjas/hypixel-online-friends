@@ -202,7 +202,6 @@ class Player:
     """
 
     def __init__(self, uuid_or_ign: str) -> None:
-        # print(uuid_or_ign)
         self.JSON = getJSON('player', get_uuid(uuid_or_ign, call_api_last_resort=False))
         self._rank = Rank(self.JSON)
         self.updated_json: Optional[Tuple[dict, datetime]] = None
@@ -254,7 +253,7 @@ class Player:
         return False
 
     def getFKDR(self) -> float:
-        return Utils.fkdr_division(
+        return Utils.kdr_division(
             Utils.nested_get(self.JSON, ('stats', 'Bedwars', 'final_kills_bedwars'), 0, int),
             Utils.nested_get(self.JSON, ('stats', 'Bedwars', 'final_deaths_bedwars'), 0, int)
         )
@@ -273,6 +272,12 @@ class Player:
     def getPitPlaytime(self) -> int:
         """Returns the total pit playtime in minutes."""
         return Utils.nested_get(self.JSON, ('stats', 'Pit', 'pit_stats_ptl', 'playtime_minutes'), 0, int)
+
+    def getPitKills(self) -> int:
+        return Utils.nested_get(self.JSON, ('stats', 'Pit', 'pit_stats_ptl', 'kills'), 0, int)
+
+    def getPitDeaths(self) -> int:
+        return Utils.nested_get(self.JSON, ('stats', 'Pit', 'pit_stats_ptl', 'deaths'), 0, int)
 
     def getNetworkXP(self) -> int:
         xp = self.JSON['networkExp']

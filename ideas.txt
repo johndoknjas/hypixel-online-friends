@@ -27,8 +27,6 @@
 
     # Replace using a white background for pit ranks with black brackets.
 
-    # For pit stats (in the info for arg players), output the K/D ratio, and maybe K/T ratio or #kills.
-
     # Do something similar to the pit percent feature, but for nw levels. I.e., just
       a level value is given by the user, no player igns required.
 
