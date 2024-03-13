@@ -74,17 +74,13 @@ class Player:
         return self._uuid_plus_time.uuid()
 
     def time_friended_parent_player(self, date_format: str) -> Union[str, float, int, None]:
-        """date_format must be 'ms', 's' or 'date'
+        """`date_format` must be 'date' or 's'
         Function will return the time the player friended the parent player.
         If there is no parent player (e.g., if player is the root player), None is returned."""
-        if date_format == 'ms':
-            return self._uuid_plus_time.time_epoch_in_milliseconds()
-        elif date_format == 's':
-            return self._uuid_plus_time.time_epoch_in_seconds()
-        elif date_format == 'date':
+        assert date_format in ('date', 's')
+        if date_format == 'date':
             return self._uuid_plus_time.date_string()
-        else:
-            raise ValueError("Invalid value for 'date_format' parameter.")
+        return self._uuid_plus_time.time_epoch_in_seconds()
 
     def name(self) -> str:
         if not self._name:
@@ -310,8 +306,7 @@ class Player:
             return {}
 
         report = self.get_stats_dict() if not self.specs().just_uuids() else {'uuid': self.uuid()}
-        use_epoch_format = Specs.does_program_display_time_as_unix_epoch()
-        if time := self.time_friended_parent_player('ms' if use_epoch_format else 'date'):
+        if time := self.time_friended_parent_player('date'):
             report['time'] = time
         if self.specs().print_player_data_exclude_friends():
             self.print_dict_report(report)

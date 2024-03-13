@@ -7,7 +7,7 @@ from MyClasses import Specs
 import leveling
 import Colours
 
-Specs.set_common_specs(False, False)
+Specs.set_common_specs(False)
 
 def test_pit_colours() -> None:
     """Tests all the 13 pit ranks shown in the image here: https://pit.wiki/Prestige.

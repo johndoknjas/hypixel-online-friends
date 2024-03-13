@@ -9,7 +9,7 @@ class Args:
         assert args[0] == 'main.py'
         args = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
         self._ARGS = Files.apply_aliases(args)
-        self._ARG_KEYWORDS = ('all', 'friendsoffriends', 'justuuids', 'checkresults', 'epoch',
+        self._ARG_KEYWORDS = ('all', 'friendsoffriends', 'justuuids', 'checkresults',
                               'diff', 'diffl', 'diffr', 'starsort', 'pitsort',
                               'fileoutput', 'updateuuids', 'minusresults',
                               'matchingignsuuids', 'includemultiplayerfiles',
@@ -59,9 +59,6 @@ class Args:
 
     def sort_by_pit_rank(self) -> bool:
         return 'pitsort' in self._ARGS
-
-    def epoch(self) -> bool:
-        return 'epoch' in self._ARGS
 
     def just_uuids(self) -> bool:
         return 'justuuids' in self._ARGS

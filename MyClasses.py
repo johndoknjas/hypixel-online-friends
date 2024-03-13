@@ -57,27 +57,22 @@ class Specs:
     """This class represents specifications that a caller has when it calls the
        create_dictionary_report_for_player function."""
 
-    _common_specs: dict = {'print player data': None, 'display time as unix epoch': None, 'set flag': False}
+    _common_specs: dict = {'print player data': None, 'set flag': False}
 
     @classmethod
-    def set_common_specs(cls, print_player_data: bool, display_time_as_unix_epoch: bool) -> None:
+    def set_common_specs(cls, print_player_data: bool) -> None:
         assert not cls._common_specs['set flag']
         cls._common_specs['print player data'] = print_player_data
-        cls._common_specs['display time as unix epoch'] = display_time_as_unix_epoch
         cls._common_specs['set flag'] = True
 
     @classmethod
     def _get_value_for_key(cls, key: str) -> bool:
-        assert key in cls._common_specs and cls._common_specs[key] is not None
+        assert cls._common_specs[key] is not None and cls._common_specs['set flag']
         return cls._common_specs[key]
 
     @classmethod
-    def does_program_display_time_as_unix_epoch(cls) -> bool:
-        return cls._get_value_for_key('display time as unix epoch')
-
-    @classmethod
     def make_specs_object_and_initialize_common_specs(cls, args: Args.Args) -> Specs:
-        Specs.set_common_specs(not args.find_friends_of_friends(), args.epoch())
+        Specs.set_common_specs(not args.find_friends_of_friends())
         friendsfriendsSpecs = Specs(True, False, None, 2) if args.find_friends_of_friends() else None
         friendsSpecs = Specs(args.just_uuids(), args.just_online_friends(), friendsfriendsSpecs, 1)
         playerSpecs = Specs(False, False, friendsSpecs, 0)
@@ -110,10 +105,10 @@ class Specs:
         return self._degrees_from_original_player == 1
 
     def print_player_data_exclude_friends(self) -> bool:
-        return Specs._common_specs['print player data'] and self.friend_of_root_player()
+        return Specs._get_value_for_key('print player data') and self.friend_of_root_player()
 
     def print_only_players_friends(self) -> bool:
-        return Specs._common_specs['print player data'] and self.root_player()
+        return Specs._get_value_for_key('print player data') and self.root_player()
 
     def print_fields(self) -> None:
         pprint(vars(self))

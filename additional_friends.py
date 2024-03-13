@@ -26,7 +26,7 @@ def make_player_with_friends(player_name: str) -> Player:
     return player
 
 def add_additional_friends_to_file_system(player_name: str) -> None:
-    Specs.set_common_specs(True, False)
+    Specs.set_common_specs(True)
     player = make_player_with_friends(player_name)
     file_description = f"Additional friends of {player.name_for_file_output()}, {Utils.get_current_date()}"
     Files.write_data_as_json_to_file(player.create_dictionary_report(), file_description)
