@@ -11,9 +11,8 @@ class Args:
         self._ARGS = Files.apply_aliases(args)
         self._ARG_KEYWORDS = ('all', 'friendsoffriends', 'justuuids', 'checkresults',
                               'diff', 'diffl', 'diffr', 'starsort', 'pitsort',
-                              'fileoutput', 'updateuuids', 'minusresults',
-                              'matchingignsuuids', 'includemultiplayerfiles',
-                              'keepfirstdictmultifiles',
+                              'fileoutput', 'updateuuids', 'matchingignsuuids',
+                              'includemultiplayerfiles', 'keepfirstdictmultifiles',
                               'addadditionalfriends', 'addadditionals',
                               'noadditionalfriends', 'noadditionals',
                               'addaliases', 'updatealiases', 'adduuidaliases', 'updateuuidaliases',
@@ -46,7 +45,7 @@ class Args:
         return 'all' not in self._ARGS and not self.find_friends_of_friends()
 
     def check_results(self) -> bool:
-        return 'checkresults' in self._ARGS or self.minus_results()
+        return 'checkresults' in self._ARGS
 
     def diff_left_to_right(self) -> bool:
         return 'diff' in self._ARGS or 'diffr' in self._ARGS
@@ -71,11 +70,6 @@ class Args:
 
     def update_uuids(self) -> bool:
         return 'updateuuids' in self._ARGS
-
-    def minus_results(self) -> bool:
-        """Return true if the user doesn't want to get f lists of uuids that already have their f list
-        stored in the results folder."""
-        return 'minusresults' in self._ARGS
 
     def find_matching_igns_or_uuids_in_results(self) -> bool:
         return 'matchingignsuuids' in self._ARGS
@@ -145,7 +139,7 @@ class Args:
                    for arg in self.get_args(False, False))
         assert set(self.get_keywords()).isdisjoint(Files.get_aliases().keys())
         if self.do_file_output():
-            assert self.date_cutoff() is None and not self.just_online_friends() and not self.minus_results()
+            assert self.date_cutoff() is None and not self.just_online_friends()
             assert not self.get_newest_friends() and not self.get_oldest_friends()
         assert not (self.sort_by_pit_rank() and self.sort_by_star())
         if any((self.update_aliases(), self.print_aliases(), self.pit_plot(), self.network_plot(), self.bedwars_plot())):

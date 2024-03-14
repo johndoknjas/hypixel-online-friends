@@ -18,7 +18,6 @@ _all_dicts_additional_friends_files: Optional[List[dict]] = None
 _all_dicts_unique_uuids: Optional[List[dict]] = None
 _ign_uuid_pairs_in_results: Optional[Dict[str, str]] = None
 _uuid_ign_pairs_in_results: Optional[Dict[str, str]] = None
-_player_uuids_with_f_list_in_results: Optional[List[str]] = None
 
 _NON_TRIVIAL_KEYS = ('friends', 'name', 'fkdr', 'star', 'pit_rank')
 
@@ -44,8 +43,6 @@ def check_results(uuid: Optional[str], ign: Optional[str]) -> None:
     """Traverses through the results folder and prints some stats and info. If a uuid and ign are provided,
        then some specific info about that player will be outputted as well. Note that whether multiplayer
        files are included depends on the cli args."""
-    global _player_uuids_with_f_list_in_results
-
     assert type(uuid) is type(ign)
 
     print(f"\n\n{len(_get_all_unique_uuids_in_results())} total unique uuids recorded in the results folder.")
@@ -58,20 +55,11 @@ def check_results(uuid: Optional[str], ign: Optional[str]) -> None:
         Utils.print_info_for_key(dicts_with_key, k, indent)
         if k != 'friends':
             continue
-        _player_uuids_with_f_list_in_results = [d['uuid'] for d in dicts_with_key]
         if uuid and ign:
-            friends_in_results = uuid in _player_uuids_with_f_list_in_results
+            friends_in_results = uuid in (d['uuid'] for d in dicts_with_key)
             print(f"{indent*2}Also, it's {str(friends_in_results).lower()} that " +
                   f"{ign}'s friends list in in the results folder.")
     print('\n\n')
-
-def player_uuids_with_f_list_in_results(get_copy: bool = False) -> List[str]:
-    global _player_uuids_with_f_list_in_results
-
-    if not _player_uuids_with_f_list_in_results:
-        raise ValueError("Probably haven't called the checkresults() function yet.")
-    return (copy.copy(_player_uuids_with_f_list_in_results) if get_copy
-            else _player_uuids_with_f_list_in_results)
 
 def get_all_dicts_in_results(get_deepcopy: bool = False, get_additional_friends: bool = False) -> List[dict]:
     """Returns a flat list of non-trivial dicts, for all dicts/nested dicts found in the results folder.
@@ -193,10 +181,10 @@ def _get_all_unique_uuids_in_results() -> List[str]:
 def _reset_static_fields() -> None:
     """Should just be used for debugging purposes"""
     global _all_dicts_additional_friends_files, _all_dicts_standard_files, _all_dicts_unique_uuids
-    global _ign_uuid_pairs_in_results, _player_uuids_with_f_list_in_results, _uuid_ign_pairs_in_results
+    global _ign_uuid_pairs_in_results, _uuid_ign_pairs_in_results
 
     (_all_dicts_additional_friends_files, _all_dicts_standard_files, _all_dicts_unique_uuids,
-     _ign_uuid_pairs_in_results, _player_uuids_with_f_list_in_results, _uuid_ign_pairs_in_results) = (None,) * 6
+     _ign_uuid_pairs_in_results, _uuid_ign_pairs_in_results) = (None,) * 5
 
 def set_args(args: Args) -> None:
     global _args

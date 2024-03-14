@@ -1,5 +1,5 @@
 import sys
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 from itertools import combinations
 from copy import deepcopy
 
@@ -249,10 +249,6 @@ def main() -> None:
 
     if args.check_results():
         ProcessingResults.check_results(player.uuid(), player.name())
-        if args.minus_results():
-            player.polish_friends_list({uuid: Player(uuid) for uuid in
-                                        ProcessingResults.player_uuids_with_f_list_in_results()})
-            print(f"Now {len(player.friends())} unique friends after applying 'minusresults'.")
 
     if args.update_uuids():
         Files.update_uuids_file(ProcessingResults.ign_uuid_pairs_in_results())

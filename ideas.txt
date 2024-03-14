@@ -30,6 +30,8 @@
     # Do something similar to the pit percent feature, but for nw levels. I.e., just
       a level value is given by the user, no player igns required.
 
+    # Consider outputting info on additional friends files as well for checkresults.
+
     # Make some updates to Args related stuff:
       - Get rid of any features you don't use.
       - Add an Arg keyword for just getting additional friends.
