@@ -32,6 +32,14 @@
 
     # Consider outputting info on additional friends files as well for checkresults.
 
+    # Update `Utils.epoch_to_date` to not use the deprecated `utcfromtimestamp` function.
+
+    # Quiet vulture for the three lines it mentions in hypixel.py.
+      # Could put the lines referencing the global vars in a function, and then comment a call
+        to the function in getJSON. This debugging function will be labeled as unused though.
+      # Another option is conditionally calling the debugging function, if the user entered some
+        cli arg to debug.
+
     # Make some updates to Args related stuff:
       - Get rid of any features you don't use.
       - Add an Arg keyword for just getting additional friends.

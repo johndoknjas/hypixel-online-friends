@@ -4,7 +4,6 @@ import os
 from pathlib import Path
 from typing import Optional, List, Dict
 from copy import deepcopy
-import copy
 
 import Utils
 import Files
@@ -177,14 +176,6 @@ def _get_all_unique_uuids_in_results() -> List[str]:
     for d in (get_all_dicts_in_results(False, True) + get_all_dicts_in_results(False, False)):
         all_dicts.extend(Utils.get_all_nested_dicts_in_dict(d))
     return Utils.remove_duplicates([d['uuid'] for d in all_dicts])
-
-def _reset_static_fields() -> None:
-    """Should just be used for debugging purposes"""
-    global _all_dicts_additional_friends_files, _all_dicts_standard_files, _all_dicts_unique_uuids
-    global _ign_uuid_pairs_in_results, _uuid_ign_pairs_in_results
-
-    (_all_dicts_additional_friends_files, _all_dicts_standard_files, _all_dicts_unique_uuids,
-     _ign_uuid_pairs_in_results, _uuid_ign_pairs_in_results) = (None,) * 5
 
 def set_args(args: Args) -> None:
     global _args

@@ -48,35 +48,6 @@ def date_to_epoch(date_string: str, in_seconds: bool) -> float:
 def epoch_to_date(epoch: float, in_seconds: bool) -> str:
     return datetime.utcfromtimestamp(epoch / 1000 if not in_seconds else epoch).strftime('%Y-%m-%d')
 
-def find_path_to_key_in_nested_dict(data, target_key):
-    """Can use this function to find the path to some key in a nested dict."""
-    def search(obj, path):
-        if isinstance(obj, dict):
-            if target_key in obj:
-                return f"{path}[{target_key}]"
-            for key, value in obj.items():
-                if (inner_path := search(value, f"{path}[{key}]")) is not None:
-                    return inner_path
-        elif isinstance(obj, list):
-            for i, item in enumerate(obj):
-                if (inner_path := search(item, f"{path}[{i}]")) is not None:
-                    return inner_path
-        return None
-    return search(data, "dict")
-
-def find_value_of_nested_key(data, key):
-    if isinstance(data, dict):
-        if key in data:
-            return data[key]
-        for value in data.values():
-            if (result := find_value_of_nested_key(value, key)) is not None:
-                return result
-    elif isinstance(data, list):
-        for element in data:
-            if (result := find_value_of_nested_key(element, key)) is not None:
-                return result
-    return None
-
 def find_dict_for_given_player(d: dict, uuid_or_ign: str, make_deep_copy: bool = True,
                                dict_must_have_friends_list: bool = True) -> Optional[dict]:
     """ d will be a dictionary read from a file in json format - it will have a uuid key, and possibly
