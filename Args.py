@@ -10,7 +10,7 @@ class Args:
         args = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
         self._ARGS = Files.apply_aliases(args)
         self._ARG_KEYWORDS = ('all', 'friendsoffriends', 'justuuids', 'checkresults',
-                              'diff', 'diffl', 'diffr', 'starsort', 'pitsort',
+                              'diff', 'starsort', 'pitsort',
                               'fileoutput', 'updateuuids', 'matchingignsuuids',
                               'includemultiplayerfiles', 'keepfirstdictmultifiles',
                               'addadditionalfriends', 'addadditionals',
@@ -47,11 +47,8 @@ class Args:
     def check_results(self) -> bool:
         return 'checkresults' in self._ARGS
 
-    def diff_left_to_right(self) -> bool:
-        return 'diff' in self._ARGS or 'diffr' in self._ARGS
-
-    def diff_right_to_left(self) -> bool:
-        return 'diff' in self._ARGS or 'diffl' in self._ARGS
+    def diff_f_lists(self) -> bool:
+        return 'diff' in self._ARGS
 
     def sort_by_star(self) -> bool:
         return 'starsort' in self._ARGS

@@ -414,11 +414,10 @@ class Player:
         else:
             raise ValueError("friends_to_exclude must be a list or dict of Players")
 
-    def diff_f_lists(self, other: Player, print_results: bool = False) -> List[Player]:
+    def diff_f_lists(self, other: Player, list_friends: bool) -> None:
         diff = [f for f in self.friends() if not f.in_player_list(other.friends())]
-        if print_results:
-            print(f"{len(diff)} friends of {self.name()} and not of {other.name()}:")
+        print(f"{len(diff)} friends of {self.name()} and not of {other.name()}")
+        if list_friends:
             for player in diff:
                 print(f"name: {player.name()}, uuid: {player.uuid()}")
-            print('\n\n')
-        return diff
+        print('\n\n')

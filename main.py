@@ -1,6 +1,6 @@
 import sys
 from typing import List, Tuple
-from itertools import combinations
+from itertools import permutations
 from copy import deepcopy
 
 import hypixel
@@ -63,11 +63,11 @@ def combine_players(info_on_players: List[Player], args: Args) -> Player:
 
 def diff_f_lists(players: List[Player], args: Args) -> None:
     """Runs through all pairs of players and outputs the diff of their f lists"""
-    for p1, p2 in combinations(players, 2):
-        if args.diff_left_to_right():
-            p1.diff_f_lists(p2, print_results=True)
-        if args.diff_right_to_left():
-            p2.diff_f_lists(p1, print_results=True)
+    assert args.diff_f_lists()
+    list_friends = input("Enter y to list out all the friends in each diff: ") in ('y', 'Y')
+    print('\n\n')
+    for p1, p2 in permutations(players, 2):
+        p1.diff_f_lists(p2, list_friends)
 
 def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
     """The first item in the tuple will be a list of Players.
@@ -238,7 +238,7 @@ def main() -> None:
     if args.find_matching_igns_or_uuids_in_results():
         ProcessingResults.print_all_matching_uuids_or_igns(args.get_args(True, True)[0])
     players_from_args, uuids_for_friended_when = get_players_from_args(args)
-    if args.diff_left_to_right() or args.diff_right_to_left():
+    if args.diff_f_lists():
         diff_f_lists(players_from_args, args)
     if uuids_for_friended_when:
         friended_when_feature(players_from_args, uuids_for_friended_when)
