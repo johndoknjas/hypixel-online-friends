@@ -76,7 +76,7 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
        were friended by a Player in the first list."""
 
     specs = Specs.make_specs_object_and_initialize_common_specs(args)
-    args_no_keywords_or_date = args.get_args(True, True)
+    args_no_keywords_or_date = args.get_args(True)
     players: List[Player] = []
     in_minus_symbol_section = False
     in_friended_when_section = False
@@ -172,7 +172,7 @@ def set_args_in_files(args: Args) -> None:
 
 def do_mini_program(args: Args) -> None:
     if args.add_additional_friends():
-        additional_friends.add_additional_friends_to_file_system(args.get_args(True, True)[0])
+        additional_friends.add_additional_friends_to_file_system(args.get_args(True)[0])
     elif args.update_aliases():
         Files.update_aliases(args.get_keywords())
     elif args.add_uuid_aliases():
@@ -184,7 +184,7 @@ def do_mini_program(args: Args) -> None:
     elif args.get_player_json():
         output_player_jsons_to_file(get_players_from_args(args)[0])
     elif args.pit_percent():
-        for arg in args.get_args(True, True):
+        for arg in args.get_args(True):
             Pit.PitStats(Pit.get_xp_req_for_rank(arg)).print_info()
     elif args.pit_plot():
         fig1 = ScatterplotInfo(Pit.xp_percent_levels(), range(1, 121), 'Levels',
@@ -210,7 +210,7 @@ def do_mini_program(args: Args) -> None:
         print(f"\nlevel vs xp data fit to a linear function: {fig.fit_to_polynomial(1)}\n")
         Graphing.output_scatterplots([fig])
     elif args.contains_substr():
-        for substr in args.get_args(False, False)[1:]:
+        for substr in args.get_args(False)[1:]:
             substr = substr.lower()
             keyword_matches = sorted([keyword for keyword in args.get_keywords()
                                       if substr in keyword.lower()])
@@ -236,7 +236,7 @@ def main() -> None:
         oldest_n_friends = int(input("Enter the n oldest friends you want: "))
 
     if args.find_matching_igns_or_uuids_in_results():
-        ProcessingResults.print_all_matching_uuids_or_igns(args.get_args(True, True)[0])
+        ProcessingResults.print_all_matching_uuids_or_igns(args.get_args(True)[0])
     players_from_args, uuids_for_friended_when = get_players_from_args(args)
     if args.diff_f_lists():
         diff_f_lists(players_from_args, args)

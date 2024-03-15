@@ -32,9 +32,6 @@
 
     # Consider outputting info on additional friends files as well for checkresults.
 
-    # Change get args function to just have one param for keywords and date together,
-      seems like all references have same bool val for both.
-
     # Quiet vulture for the three lines it mentions in hypixel.py.
       # Could put the lines referencing the global vars in a function, and then comment a call
         to the function in getJSON. This debugging function will be labeled as unused though.

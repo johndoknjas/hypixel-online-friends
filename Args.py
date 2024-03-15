@@ -24,15 +24,13 @@ class Args:
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'friendedwhen', 'intersect').
         # They don't appear in this class, but are instead used directly in the logic for main.py.
-        Utils.print_list(self.get_args(False, False), prepended_msg="self._ARGS list after applying aliases: ")
+        Utils.print_list(self.get_args(False), prepended_msg="self._ARGS list after applying aliases: ")
         self._validation_checks()
 
-    def get_args(self, remove_keywords: bool, remove_dates: bool) -> List[str]:
+    def get_args(self, remove_keywords_and_dates: bool) -> List[str]:
         args = copy.copy(self._ARGS)
-        if remove_keywords:
-            args = Utils.list_subtract(args, self._ARG_KEYWORDS)
-        if remove_dates:
-            args = Utils.remove_date_strings(args)
+        if remove_keywords_and_dates:
+            args = Utils.remove_date_strings(Utils.list_subtract(args, self._ARG_KEYWORDS))
         return args
 
     def get_keywords(self) -> List[str]:
@@ -133,18 +131,18 @@ class Args:
 
     def _validation_checks(self) -> None:
         assert all(arg.endswith('.txt') or arg.lower() == arg
-                   for arg in self.get_args(False, False))
+                   for arg in self.get_args(False))
         assert set(self.get_keywords()).isdisjoint(Files.get_aliases().keys())
         if self.do_file_output():
             assert self.date_cutoff() is None and not self.just_online_friends()
             assert not self.get_newest_friends() and not self.get_oldest_friends()
         assert not (self.sort_by_pit_rank() and self.sort_by_star())
         if any((self.update_aliases(), self.print_aliases(), self.pit_plot(), self.network_plot(), self.bedwars_plot())):
-            assert len(self.get_args(False, False)) == 1 and not self.get_args(True, True)
+            assert len(self.get_args(False)) == 1 and not self.get_args(True)
         if self.add_additional_friends():
-            assert len(self.get_args(True, True)) == 1 and len(self.get_args(False, False)) == 2
+            assert len(self.get_args(True)) == 1 and len(self.get_args(False)) == 2
         if self.get_player_json() or self.pit_percent() or self.add_uuid_aliases():
-            assert len(self.get_args(True, True)) >= 1
+            assert len(self.get_args(True)) >= 1
         if self.contains_substr() or self.add_uuid_aliases():
-            assert len(self.get_args(False, False)) >= 2
+            assert len(self.get_args(False)) >= 2
         assert not (self.get_newest_friends() and self.get_oldest_friends())
