@@ -32,7 +32,10 @@
 
     # Consider outputting info on additional friends files as well for checkresults.
 
-    # Update `Utils.epoch_to_date` to not use the deprecated `utcfromtimestamp` function.
+    # Get rid of individual `diffr` and `diffl` features, just do `diff`.
+
+    # Change get args function to just have one param for keywords and date together,
+      seems like all references have same bool val for both.
 
     # Quiet vulture for the three lines it mentions in hypixel.py.
       # Could put the lines referencing the global vars in a function, and then comment a call

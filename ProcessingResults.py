@@ -20,6 +20,11 @@ _uuid_ign_pairs_in_results: Optional[Dict[str, str]] = None
 
 _NON_TRIVIAL_KEYS = ('friends', 'name', 'fkdr', 'star', 'pit_rank')
 
+def set_args(args: Args) -> None:
+    global _args
+    assert not _args
+    _args = deepcopy(args)
+
 def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
     global _ign_uuid_pairs_in_results
 
@@ -176,8 +181,3 @@ def _get_all_unique_uuids_in_results() -> List[str]:
     for d in (get_all_dicts_in_results(False, True) + get_all_dicts_in_results(False, False)):
         all_dicts.extend(Utils.get_all_nested_dicts_in_dict(d))
     return Utils.remove_duplicates([d['uuid'] for d in all_dicts])
-
-def set_args(args: Args) -> None:
-    global _args
-    assert not _args
-    _args = deepcopy(args)
