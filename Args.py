@@ -19,7 +19,8 @@ class Args:
                               'showaliases', 'printaliases',
                               'getplayerjson', 'playerjson', 'noverify', 'dontverify', 'nover',
                               'pitpercent', 'pit%', 'pitplot', 'nwplot', 'bwplot', 'contains',
-                              'trackargs', 'argsonline', 'newest', 'oldest')
+                              'trackargs', 'argsonline', 'newest', 'oldest',
+                              'debugapi')
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'friendedwhen', 'intersect').
@@ -121,6 +122,9 @@ class Args:
 
     def get_oldest_friends(self) -> bool:
         return 'oldest' in self._ARGS
+
+    def debug_api(self) -> bool:
+        return 'debugapi' in self._ARGS
 
     def do_mini_program(self) -> bool:
         mini_programs = (self.update_aliases(), self.add_uuid_aliases(), self.print_aliases(),

@@ -68,8 +68,7 @@ def check_results(uuid: Optional[str], ign: Optional[str]) -> None:
 def get_all_dicts_in_results(get_deepcopy: bool = False, get_additional_friends: bool = False) -> List[dict]:
     """Returns a flat list of non-trivial dicts, for all dicts/nested dicts found in the results folder.
        Note that there can be multiple dicts with the same uuid."""
-    global _all_dicts_standard_files
-    global _all_dicts_additional_friends_files
+    global _all_dicts_standard_files, _all_dicts_additional_friends_files
 
     all_dicts = _all_dicts_additional_friends_files if get_additional_friends else _all_dicts_standard_files
     if not all_dicts:
