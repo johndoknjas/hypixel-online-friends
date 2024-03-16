@@ -15,6 +15,9 @@
       All the igns/uuids of these players can be outputted after as well, in one big chunk (same
       kind of format your player-name project does).
 
+    # Could add a feature where info is outputted for which keys of a json are updated (for players
+      whose online statuses aren't visible).
+
     # Consider making a report class instead of report dicts. The class could have a function that makes and
       returns a dict.
 

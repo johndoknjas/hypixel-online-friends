@@ -168,7 +168,7 @@ def friended_when_feature(players: List[Player], uuids_for_friended_when: List[s
 
 def set_args_in_files(args: Args) -> None:
     ProcessingResults.set_args(args)
-    hypixel.add_user_options(args)
+    hypixel.set_args(args)
 
 def do_mini_program(args: Args) -> None:
     if args.add_additional_friends():

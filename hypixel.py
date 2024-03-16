@@ -29,29 +29,21 @@ API_KEYS: List[str] = _get_api_keys_from_file()
 HYPIXEL_API_URL: str = 'https://api.hypixel.net/'
 TIME_STARTED: float = time()
 num_api_calls_made: int = 0
-_debug_api: Optional[bool] = None
-_verify_requests: Optional[bool] = None
+_args: Optional[Args] = None
 
-def add_user_options(args: Args) -> None:
-    global _verify_requests, _debug_api
-    assert _verify_requests is None and _debug_api is None
-    _verify_requests, _debug_api = args.verify_requests(), args.debug_api()
-    if not _verify_requests:
+def set_args(args: Args) -> None:
+    global _args
+    assert not _args
+    _args = deepcopy(args)
+    if not _args.verify_requests():
         import urllib3
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-def should_verify_requests() -> bool:
-    assert _verify_requests is not None
-    return _verify_requests
-
-def in_debug_api_mode() -> bool:
-    assert _debug_api is not None
-    return _debug_api
 
 sleep_till: Optional[datetime] = None
 def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
     """ This function is used for getting a JSON from Hypixel's Public API. """
     global sleep_till, num_api_calls_made
+    assert _args
 
     if sleep_till and (sleep_duration := (sleep_till - datetime.now()).total_seconds()) >= 0:
         print(f"Sleeping until {sleep_till.strftime('%I:%M:%S %p')} for rate limiting.")
@@ -59,14 +51,14 @@ def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
     sleep_till = None
 
     num_api_calls_made += 1
-    if in_debug_api_mode():
+    if _args.debug_api():
         print(f"{num_api_calls_made}\n{time() - TIME_STARTED}\n\n")
 
     if typeOfRequest != 'player':
         assert Utils.is_uuid(uuid_or_ign)
     requestEnd = f"{'uuid' if Utils.is_uuid(uuid_or_ign) else 'name'}={uuid_or_ign}"
     requestURL = f"{HYPIXEL_API_URL}{typeOfRequest}?{requestEnd}"
-    response = requests.get(requestURL, headers={"API-Key": choice(API_KEYS)}, verify=should_verify_requests())
+    response = requests.get(requestURL, headers={"API-Key": choice(API_KEYS)}, verify=_args.verify_requests())
     try:
         responseHeaders, responseJSON = response.headers, response.json()
     except Exception as e:
