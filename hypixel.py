@@ -30,6 +30,71 @@ TIME_STARTED: float = time()
 num_api_calls_made: int = 0
 _verify_requests: Optional[bool] = None
 
+def set_verify_requests(b: bool) -> None:
+    global _verify_requests
+    assert _verify_requests is None
+    _verify_requests = b
+    if not _verify_requests:
+        import urllib3
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+sleep_till: Optional[datetime] = None
+def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
+    """ This function is used for getting a JSON from Hypixel's Public API. """
+    global sleep_till
+    global num_api_calls_made
+
+    if sleep_till and (sleep_duration := (sleep_till - datetime.now()).total_seconds()) >= 0:
+        print(f"Sleeping until {sleep_till.strftime('%I:%M:%S %p')} for rate limiting.")
+        sleep(sleep_duration)
+    sleep_till = None
+
+    num_api_calls_made += 1
+    # print(f"{num_api_calls_made}\n{time() - TIME_STARTED}\n\n")
+    if typeOfRequest != 'player':
+        assert Utils.is_uuid(uuid_or_ign)
+    assert _verify_requests is not None
+
+    requestEnd = f"{'uuid' if Utils.is_uuid(uuid_or_ign) else 'name'}={uuid_or_ign}"
+    requestURL = f"{HYPIXEL_API_URL}{typeOfRequest}?{requestEnd}"
+    response = requests.get(requestURL, headers={"API-Key": choice(API_KEYS)}, verify=_verify_requests)
+    try:
+        responseHeaders, responseJSON = response.headers, response.json()
+    except Exception as e:
+        raise Exception(
+            f'{response.content.decode()}\nresponse content ^\nuuid_or_ign: {uuid_or_ign}\n'
+            f'typeOfRequest: {typeOfRequest}\nthere was a problem with response.json()'
+        ) from e
+
+    if 'RateLimit-Remaining' in responseHeaders and int(responseHeaders['RateLimit-Remaining']) <= 1:
+        sleep_till = datetime.now() + timedelta(seconds=int(responseHeaders['RateLimit-Reset'])+1)
+
+    if not responseJSON['success']:
+        raise HypixelAPIError(responseJSON)
+    if typeOfRequest == 'player' and responseJSON['player'] is None:
+        raise PlayerNotFoundException(uuid_or_ign)
+    try:
+        return responseJSON[typeOfRequest]
+    except KeyError:
+        return responseJSON
+
+def get_uuid(uuid_or_ign: str, call_api_last_resort: bool = True) -> str:
+    """Param can be an ign or uuid. If it's a uuid, this function will return it immediately. Otherwise,
+       it will try to get it from uuids.txt (and if so, then verify the player's current ign is still the same
+       by using a temp hypixel object). Finally if this fails, a temp hypixel object is created in order to call
+       getUUID() - unless `call_api_last_resort` is False, in which case the ign is just returned."""
+
+    uuid_or_ign = uuid_or_ign.lower()
+    if Utils.is_uuid(uuid_or_ign):
+        return uuid_or_ign
+    ign = uuid_or_ign
+    possible_uuid = Files.ign_uuid_pairs_in_uuids_txt().get(ign, ign)
+    if Utils.is_uuid(possible_uuid):
+        if Player(possible_uuid).getName().lower() != ign:
+            raise RuntimeError(f"NOTE: {ign} is no longer the ign of the player with uuid {possible_uuid}")
+        return possible_uuid
+    return Player(ign).getUUID() if call_api_last_resort else ign
+
 class PlayerNotFoundException(Exception):
     """ Simple exception if a player/UUID is not found. This exception can usually be ignored.
         You can catch this exception with ``except hypixel.PlayerNotFoundException:`` """
@@ -120,71 +185,6 @@ class Rank:
             if rank.count('+') == 2:
                 colour_print(ColourSpecs('+', plus_colour))
         colour_print(ColourSpecs('] ', bracket_colour))
-
-sleep_till: Optional[datetime] = None
-def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
-    """ This function is used for getting a JSON from Hypixel's Public API. """
-    global sleep_till
-    global num_api_calls_made
-
-    if sleep_till and (sleep_duration := (sleep_till - datetime.now()).total_seconds()) >= 0:
-        print(f"Sleeping until {sleep_till.strftime('%I:%M:%S %p')} for rate limiting.")
-        sleep(sleep_duration)
-    sleep_till = None
-
-    num_api_calls_made += 1
-    # print(f"{num_api_calls_made}\n{time() - TIME_STARTED}\n\n")
-    if typeOfRequest != 'player':
-        assert Utils.is_uuid(uuid_or_ign)
-    assert _verify_requests is not None
-
-    requestEnd = f"{'uuid' if Utils.is_uuid(uuid_or_ign) else 'name'}={uuid_or_ign}"
-    requestURL = f"{HYPIXEL_API_URL}{typeOfRequest}?{requestEnd}"
-    response = requests.get(requestURL, headers={"API-Key": choice(API_KEYS)}, verify=_verify_requests)
-    try:
-        responseHeaders, responseJSON = response.headers, response.json()
-    except Exception as e:
-        raise Exception(
-            f'{response.content.decode()}\nresponse content ^\nuuid_or_ign: {uuid_or_ign}\n'
-            f'typeOfRequest: {typeOfRequest}\nthere was a problem with response.json()'
-        ) from e
-
-    if 'RateLimit-Remaining' in responseHeaders and int(responseHeaders['RateLimit-Remaining']) <= 1:
-        sleep_till = datetime.now() + timedelta(seconds=int(responseHeaders['RateLimit-Reset'])+1)
-
-    if not responseJSON['success']:
-        raise HypixelAPIError(responseJSON)
-    if typeOfRequest == 'player' and responseJSON['player'] is None:
-        raise PlayerNotFoundException(uuid_or_ign)
-    try:
-        return responseJSON[typeOfRequest]
-    except KeyError:
-        return responseJSON
-
-def get_uuid(uuid_or_ign: str, call_api_last_resort: bool = True) -> str:
-    """Param can be an ign or uuid. If it's a uuid, this function will return it immediately. Otherwise,
-       it will try to get it from uuids.txt (and if so, then verify the player's current ign is still the same
-       by using a temp hypixel object). Finally if this fails, a temp hypixel object is created in order to call
-       getUUID() - unless `call_api_last_resort` is False, in which case the ign is just returned."""
-
-    uuid_or_ign = uuid_or_ign.lower()
-    if Utils.is_uuid(uuid_or_ign):
-        return uuid_or_ign
-    ign = uuid_or_ign
-    possible_uuid = Files.ign_uuid_pairs_in_uuids_txt().get(ign, ign)
-    if Utils.is_uuid(possible_uuid):
-        if Player(possible_uuid).getName().lower() != ign:
-            raise RuntimeError(f"NOTE: {ign} is no longer the ign of the player with uuid {possible_uuid}")
-        return possible_uuid
-    return Player(ign).getUUID() if call_api_last_resort else ign
-
-def set_verify_requests(b: bool) -> None:
-    global _verify_requests
-    assert _verify_requests is None
-    _verify_requests = b
-    if not _verify_requests:
-        import urllib3
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class Player:
     """ This class represents a player on Hypixel as a single object.
