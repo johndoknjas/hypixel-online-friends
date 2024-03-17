@@ -20,7 +20,7 @@ class Args:
                               'getplayerjson', 'playerjson', 'noverify', 'dontverify', 'nover',
                               'pitpercent', 'pit%', 'pitplot', 'nwplot', 'bwplot', 'contains',
                               'trackargs', 'argsonline', 'newest', 'oldest',
-                              'debugapi')
+                              'debugapi', 'showjsondiff', 'showjsonupdates')
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'friendedwhen', 'intersect').
@@ -125,6 +125,11 @@ class Args:
 
     def debug_api(self) -> bool:
         return 'debugapi' in self._ARGS
+
+    def show_json_updates(self) -> bool:
+        """Returns whether to show what parts of the player json have updated, for players whose online
+           status isn't shown."""
+        return 'showjsondiff' in self._ARGS or 'showjsonupdates' in self._ARGS
 
     def do_mini_program(self) -> bool:
         mini_programs = (self.update_aliases(), self.add_uuid_aliases(), self.print_aliases(),

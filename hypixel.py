@@ -247,11 +247,17 @@ class Player:
         # This player doesn't have the online status shown, but we can check if stats from
         # the original self.JSON have updated (if the caller has enabled this feature):
         if extra_online_checks[1] and self.JSON != (json := getJSON('player', self.getUUID())):
-            # Before returning True, see if this json qualifies as the newest updated json.
-            if self.updated_json is None or self.updated_json[0] != json:
-                self.updated_json = (json, datetime.now())
+            self.set_updated_json_if_applicable(json)
             return True
         return False
+
+    def set_updated_json_if_applicable(self, new_json: dict) -> None:
+        assert _args
+        if new_json == (curr_latest_json := self.updated_json[0] if self.updated_json else self.JSON):
+            return
+        if _args.show_json_updates():
+            Utils.print_diff_dicts(curr_latest_json, new_json, f"\nUpdates to json for {self.getName()}: ")
+        self.updated_json = (new_json, datetime.now())
 
     def getFKDR(self) -> float:
         return Utils.kdr_division(

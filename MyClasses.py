@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from copy import deepcopy
 from typing import Optional, Union
-from pprint import pprint
 
 import Utils
 import Args
@@ -109,11 +108,6 @@ class Specs:
 
     def print_only_players_friends(self) -> bool:
         return Specs._get_value_for_key('print player data') and self.root_player()
-
-    def print_fields(self) -> None:
-        pprint(vars(self))
-        if specs_friends := self.specs_for_friends():
-            specs_friends.print_fields()
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Specs):

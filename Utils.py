@@ -6,6 +6,7 @@ from typing import List, Optional, Union, Iterable, Any, Type
 from collections import OrderedDict
 from copy import deepcopy
 import math
+from pprint import pprint
 
 def list_subtract(main_list: List, subtract_elems: Iterable) -> List:
     subtract_set = set(subtract_elems)
@@ -264,3 +265,8 @@ def nested_get(d: dict, nested_keys: Iterable, default_val: Any, expected_type: 
         return_val = default_val
     assert expected_type is None or type(return_val) == expected_type
     return return_val
+
+def print_diff_dicts(old_dict: dict, new_dict: dict, prepended_msg: str = '') -> None:
+    from deepdiff import DeepDiff
+    print(prepended_msg, end='')
+    pprint(DeepDiff(old_dict, new_dict), indent=2)
