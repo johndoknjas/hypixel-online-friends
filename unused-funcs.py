@@ -1,23 +1,27 @@
 import os
-from typing import List
+from typing import List, Tuple
+from dataclasses import dataclass
 
-def find_funcs(lines: List[str]) -> List[str]:
+@dataclass
+class Func:
+    name: str
+    line_index: int
+
+def find_funcs(lines: List[str]) -> List[Func]:
     """`lines` are all the lines of code. The function will go through it and find all function definitions,
-       putting each function name into the list that's returned."""
+       putting each function name and line index into the list that's returned."""
     funcs: List[str] = []
-    for code_line in lines:
+    for i, code_line in enumerate(lines):
         words = code_line.split()
         if not words or words[0] != 'def':
             continue
         assert '(' in words[1]
-        funcs.append(words[1].split('(')[0])
+        funcs.append(Func(words[1].split('(')[0], i))
     return funcs
 
-def num_times_func_referenced(lines: List[str], func: str) -> int:
+def find_func_references(lines: List[str], func: Func) -> List[int]:
     """Note that this doesn't include the function's definition."""
-    num_ref = sum(1 for line in lines if func in line) - 1
-    assert num_ref >= 0
-    return num_ref
+    return [i for (i, line) in enumerate(lines) if func.name in line and i != func.line_index]
 
 def main():
     lines: List[str] = []
@@ -26,12 +30,20 @@ def main():
             continue
         with open(filename) as file:
             lines.extend(file.read().splitlines())
-    print("Unused functions:")
+    funcs_used_once: List[Tuple[Func, int]] = []
+    print("\n\nUnused functions:\n")
     for func in find_funcs(lines):
-        if (num_ref := num_times_func_referenced(lines, func)) == 0:
-            print(f"{func} is unused")
-        elif num_ref == 1:
-            print(f"{func} is only used once.")
+        references = find_func_references(lines, func)
+        if len(references) == 0:
+            print(f"******{func} is unused******")
+        elif len(references) == 1:
+            funcs_used_once.append((func, references[0]))
+    funcs_used_once.sort(key=lambda f:
+                         ((defined_vs_used := f[0].line_index-f[1]) < 0, -abs(defined_vs_used)),
+                         reverse=True)
+    print("\n\nFunctions used only once:\n")
+    for f in funcs_used_once:
+        print(f"{f[0]} is only referenced at line index {f[1]}")
 
 if __name__ == '__main__':
     main()
