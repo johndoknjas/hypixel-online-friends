@@ -23,16 +23,24 @@ def find_func_references(lines: List[str], func: Func) -> List[int]:
     """Note that this doesn't include the function's definition."""
     return [i for (i, line) in enumerate(lines) if func.name in line and i != func.line_index]
 
-def main():
+def output_funcs_with_no_arrow(lines: List[str], funcs: List[Func]) -> None:
+    print("Functions without a '->':\n")
+    for func in funcs:
+        if all('->' not in line for line in lines[func.line_index:func.line_index+3]):
+            print(f"{func} possibly does not have a '->'")
+
+def main() -> None:
     lines: List[str] = []
     for filename in os.listdir():
         if not filename.endswith(".py") or filename == "tests.py":
             continue
         with open(filename) as file:
             lines.extend(file.read().splitlines())
+    funcs: List[Func] = find_funcs(lines)
+    output_funcs_with_no_arrow(lines, funcs)
     funcs_used_once: List[Tuple[Func, int]] = []
     print("\n\nUnused functions:\n")
-    for func in find_funcs(lines):
+    for func in funcs:
         references = find_func_references(lines, func)
         if len(references) == 0:
             print(f"******{func} is unused******")
