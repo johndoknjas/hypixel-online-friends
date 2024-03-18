@@ -15,6 +15,9 @@
       All the igns/uuids of these players can be outputted after as well, in one big chunk (same
       kind of format your player-name project does).
 
+    # For the `unused-funcs.py` script, consider adding a way to only count a function call if it's
+      non-recursive.
+
     # Consider making a report class instead of report dicts. The class could have a function that makes and
       returns a dict.
 

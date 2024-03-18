@@ -267,6 +267,6 @@ def nested_get(d: dict, nested_keys: Iterable, default_val: Any, expected_type: 
     return return_val
 
 def print_diff_dicts(old_dict: dict, new_dict: dict, prepended_msg: str = '') -> None:
-    from deepdiff import DeepDiff
+    from deepdiff import DeepDiff # type: ignore
     print(prepended_msg, end='')
     pprint(DeepDiff(old_dict, new_dict), indent=2)

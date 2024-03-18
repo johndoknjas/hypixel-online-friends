@@ -10,7 +10,7 @@ class Func:
 def find_funcs(lines: List[str]) -> List[Func]:
     """`lines` are all the lines of code. The function will go through it and find all function definitions,
        putting each function name and line index into the list that's returned."""
-    funcs: List[str] = []
+    funcs: List[Func] = []
     for i, code_line in enumerate(lines):
         words = code_line.split()
         if not words or words[0] != 'def':
