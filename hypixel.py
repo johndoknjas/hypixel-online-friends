@@ -17,7 +17,6 @@ import Files
 import Utils
 from Args import Args
 import leveling
-import Colours
 from Colours import Hex
 
 def _get_api_keys_from_file() -> List[str]:
@@ -105,11 +104,11 @@ class HypixelAPIError(Exception):
 
 @dataclass
 class RankColours:
-    plus_colour: Optional[Colours.Hex]
+    plus_colour: Optional[Hex]
     """Represents the colour of any '+' chars that may be present in the rank."""
-    player_name_brackets_colour: Optional[Colours.Hex]
+    player_name_brackets_colour: Optional[Hex]
     """Represents the colour of the rank brackets and the player's name."""
-    rank_colour: Optional[Colours.Hex]
+    rank_colour: Optional[Hex]
     """Represents the colour of the rank, excluding any potential '+' chars."""
 
 class RankMap:
