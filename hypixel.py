@@ -95,27 +95,12 @@ def get_uuid(uuid_or_ign: str, call_api_last_resort: bool = True) -> str:
     return Player(ign).getUUID() if call_api_last_resort else ign
 
 class PlayerNotFoundException(Exception):
-    """ Simple exception if a player/UUID is not found. This exception can usually be ignored.
-        You can catch this exception with ``except hypixel.PlayerNotFoundException:`` """
+    pass
 
 class HypixelAPIError(Exception):
-    """ Simple exception if something's gone very wrong and the program can't continue. """
+    pass
 
 class Player:
-    """ This class represents a player on Hypixel as a single object.
-        A player has a UUID, a username, statistics etc.
-
-        Parameters
-        -----------
-        Username/UUID : string
-            Either the UUID or the username for a player.
-
-        Attributes
-        -----------
-        JSON : string
-            The raw JSON receieved from the Hypixel API.
-    """
-
     def __init__(self, uuid_or_ign: str) -> None:
         self.JSON = getJSON('player', get_uuid(uuid_or_ign, call_api_last_resort=False))
         self._rank = Rank(self.JSON)
