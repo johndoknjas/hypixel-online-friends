@@ -11,6 +11,7 @@ import Files
 from Pit import PitStats
 import ProcessingResults
 import leveling
+import Colours
 
 class Player:
 
@@ -238,7 +239,6 @@ class Player:
                 'star': self.get_bw_star(), 'pit_rank': self.pit_rank_string()}
 
     def print_dict_report(self, report: Dict, extra_text: str = '') -> None:
-        import Colours
         report = deepcopy(report)
         assert all(isinstance(v, (str,float,int)) for v in report.values())
         possible_keys = ('name', 'fkdr', 'star', 'pit_rank', 'uuid', 'time')
@@ -367,7 +367,6 @@ class Player:
             " for a perpetual pass\n" if on_perpetual_pass else
             " for a 'second pass'\n" if not on_first_pass else "\n"
         )
-        import Colours
         Colours.colour_print(Colours.ColourSpecs(msg, Colours.Hex.DARK_GRAY))
 
     def print_friends_in_report(self, report: dict) -> None:

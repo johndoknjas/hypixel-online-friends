@@ -2,7 +2,7 @@ from typing import Optional, Dict, Tuple
 from dataclasses import dataclass
 from copy import deepcopy
 
-from Colours import Hex
+from Colours import Hex, ColourSpecs, colour_print
 
 @dataclass
 class RankColours:
@@ -70,7 +70,6 @@ class Rank:
         return self._colours.player_name_brackets_colour
 
     def print_rank(self) -> None:
-        from Colours import ColourSpecs, colour_print
         rank = self.rank(False)
         bracket_colour = self.name_and_bracket_colour()
         rank_colour = self.rank_colour()

@@ -10,6 +10,7 @@ from typing import List, Optional, Tuple
 import re
 from copy import deepcopy
 import requests
+import urllib3
 
 from MyClasses import UUID_Plus_Time
 import Files
@@ -34,7 +35,6 @@ def set_args(args: Args) -> None:
     assert not _args
     _args = deepcopy(args)
     if not _args.verify_requests():
-        import urllib3
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 sleep_till: Optional[datetime] = None
