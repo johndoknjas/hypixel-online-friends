@@ -1,0 +1,11 @@
+[pydeps]
+max_bacon = 3
+reverse = True
+cluster = True
+exclude =
+    charset_normalizer
+    typing_extensions
+    certifi
+    packaging
+    cycler
+    PIL
