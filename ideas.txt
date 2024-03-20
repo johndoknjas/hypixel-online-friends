@@ -28,6 +28,8 @@
       available through the api. I.e., players who are offline at the start of the program's run,
       but online later.
 
+    # Update the readme with instructions on using the other features.
+
     # Replace using a white background for pit ranks with black brackets.
 
     # Do something similar to the pit percent feature, but for nw levels. I.e., just
