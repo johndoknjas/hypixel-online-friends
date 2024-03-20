@@ -1,9 +1,31 @@
 # Based off https://github.com/Plancke/hypixel-php/blob/master/src/util/Leveling.php and
 # https://github.com/Snuggle/hypixel.py/blob/main/leveling.py
 
-from math import floor
+import math
+from typing import Optional, Callable, Tuple
 
-from Graphing import QuadraticFunc
+class QuadraticFunc:
+    def __init__(self, a: float, b: float, c: float,
+                 req_for_x_vals: Optional[Callable[[float], bool]] = None,
+                 req_for_y_vals: Optional[Callable[[float], bool]] = None):
+        "Represents some function: y = ax^2 + bx + c"
+        self.a, self.b, self.c = a, b, c
+        self.req_for_x_vals, self.req_for_y_vals = req_for_x_vals, req_for_y_vals
+
+    def y_val(self, x_val: float) -> float:
+        if self.req_for_x_vals:
+            assert self.req_for_x_vals(x_val)
+        return self.a*x_val**2 + self.b*x_val + self.c
+
+    def x_vals(self, y_val: float) -> Tuple[float, float]:
+        """Returns the roots of the equation when substituting `y_val` for y."""
+        # Need to make a quadratic equation. Do this by substituting y_val for y,
+        # then subtracting it from both sides. This just makes c become self.c - y.
+        if self.req_for_y_vals:
+            assert self.req_for_y_vals(y_val)
+        a, b, c = self.a, self.b, self.c - y_val
+        sqrt_exp = math.sqrt(b**2 - 4*a*c)
+        return ((-b+sqrt_exp)/(2*a), (-b-sqrt_exp)/(2*a))
 
 _BASE = 10000
 _GROWTH = 2500
@@ -24,7 +46,7 @@ def getExpFromLevelToNext(level: int) -> int:
     return getTotalExpToLevelFloor(level+1) - getTotalExpToLevelFloor(level)
 
 def getLevelFloor(exp: int) -> int:
-    return floor(next(l for l in _QUADRATIC_FUNC.x_vals(exp) if l >= 1))
+    return math.floor(next(l for l in _QUADRATIC_FUNC.x_vals(exp) if l >= 1))
 
 def getExactLevel(exp: int) -> float:
     return getLevelFloor(exp) + getPercentageToNextLevel(exp)
