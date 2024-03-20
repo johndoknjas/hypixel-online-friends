@@ -8,6 +8,7 @@ Note that hypixel.py and leveling.py are originally from https://github.com/Snug
 
 Instructions for running:
 - Install the python libraries `requests` and `rich`. To use any of the plot features, install `mplcursors` as well.
+  To see differences in player jsons over time, install `deepdiff`.
 - Make a textfile called 'api-key.txt', and paste your hypixel api key as the first line.
   - To get this api key, make a developer account with hypixel: https://developer.hypixel.net/
 - Basic usage is to run with `python3 main.py *username/uuid*`
@@ -30,3 +31,5 @@ Open the root directory of the project in the terminal, and then:
   - `pylint *.py` will review the code for style.
   - `pydeps main.py` will output a dependency graph of the project's modules.
   - `python unused-funcs.py` is a basic script I wrote that attempts to find functions which are never/rarely used.
+  - `pytest tests.py` runs a few basic automated tests. Requires installing `pytest`. To run manual tests (output to
+    the screen needs to be judged by the tester), run `python tests.py`.

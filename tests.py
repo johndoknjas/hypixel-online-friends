@@ -1,6 +1,3 @@
-if __name__ != '__main__':
-    raise ImportError("This module is not meant to be imported.") # https://stackoverflow.com/questions/51298123/
-
 import pytest
 
 from MyClasses import Specs
@@ -9,7 +6,7 @@ import Colours
 
 Specs.set_common_specs(False)
 
-def test_pit_colours() -> None:
+def print_pit_colours() -> None:
     """Tests all the 13 pit ranks shown in the image here: https://pit.wiki/Prestige.
        These contain all prestige and level colours."""
     ranks = ("0-84", "II-40", "VI-39", "XIV-16", "XV-113", "XXII-1", "XXVIII-98",
@@ -18,7 +15,7 @@ def test_pit_colours() -> None:
         Colours.print_pit_rank(rank)
 
 def non_automated_tests() -> None:
-    test_pit_colours()
+    print_pit_colours()
 
 class Tests:
     """

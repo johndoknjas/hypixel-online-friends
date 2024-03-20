@@ -17,6 +17,8 @@
 
     # For the `unused-funcs.py` script, consider adding a way to only count a function call if it's
       non-recursive.
+        # E.g., could track the lines of all the functions in the project, and then if the latest function
+          a call is after is the same function as the one being called, it's likely recursive (or a global call).
 
     # Consider making a report class instead of report dicts. The class could have a function that makes and
       returns a dict.

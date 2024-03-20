@@ -1,5 +1,5 @@
 [pydeps]
-max_bacon = 3
+max_bacon = 4
 reverse = True
 cluster = True
 exclude =
@@ -9,3 +9,8 @@ exclude =
     packaging
     cycler
     PIL
+    idna
+    dateutil
+    contourpy
+    mpl_toolkits
+    ordered_set

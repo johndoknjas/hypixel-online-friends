@@ -56,4 +56,4 @@ def main() -> None:
 if __name__ == '__main__':
     main()
 else:
-    raise ImportError("This module is not meant to be imported.")
+    raise ImportError("This module shouldn't be imported.")
