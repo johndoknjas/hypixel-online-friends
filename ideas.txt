@@ -14,6 +14,8 @@
       which leaderboard they want to see, and it can be outputted with each player's stats per row.
       All the igns/uuids of these players can be outputted after as well, in one big chunk (same
       kind of format your player-name project does).
+        - Can also output whether any friends (on a normal program run) appear on any leaderboards,
+          and if so which.
 
     # For the `unused-funcs.py` script, consider adding a way to only count a function call if it's
       non-recursive.
