@@ -2,7 +2,7 @@
 
 name: hypickle 🐍 distribution 📦 to PyPI
 
-on: release
+on: push
 
 jobs:
   build:
@@ -32,6 +32,7 @@ jobs:
   publish-to-pypi:
     name: >-
       Publish Python 🐍 distribution 📦 to PyPI
+    if: startsWith(github.ref, 'refs/tags/')  # only publish to PyPI on tag pushes
     needs:
     - build
     runs-on: ubuntu-latest
