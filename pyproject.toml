@@ -16,7 +16,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 
 [project.scripts]
-hypickle = "main:main"
+hypickle = "main"
 
 [tool.setuptools]
 py-modules = []
