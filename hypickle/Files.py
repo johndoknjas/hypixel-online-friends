@@ -11,7 +11,7 @@ import shutil
 import ntpath
 from string import whitespace
 
-import Utils
+from . import Utils
 
 _ALIASES_FILENAME = "aliases.txt"
 

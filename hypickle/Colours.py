@@ -3,7 +3,7 @@ from enum import Enum
 import rich.console
 import rich.style
 
-import Utils
+from . import Utils
 
 console = rich.console.Console()
 

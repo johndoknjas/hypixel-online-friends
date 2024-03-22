@@ -1,7 +1,7 @@
 import math
 from typing import List, Optional, Tuple
 
-import Utils
+from . import Utils
 
 """Some notes on how the pit leveling system works:
     - The PRESTIGE_XP values are the amount of total xp needed before each prestige.

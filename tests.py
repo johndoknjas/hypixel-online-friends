@@ -1,8 +1,7 @@
 import pytest
 
-from MyClasses import Specs
-import leveling
-import Colours
+from hypickle.MyClasses import Specs
+from hypickle import leveling, Colours
 
 Specs.set_common_specs(False)
 

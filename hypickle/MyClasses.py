@@ -5,8 +5,8 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Optional, Union
 
-import Utils
-import Args
+from . import Utils
+from . import Args
 
 class UUID_Plus_Time:
     """This class encapsulates a UUID and a time (unix epoch), likely representing when

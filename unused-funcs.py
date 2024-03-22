@@ -1,4 +1,4 @@
-import os
+import glob
 from typing import List, Tuple
 from dataclasses import dataclass
 
@@ -31,7 +31,7 @@ def output_funcs_with_no_arrow(lines: List[str], funcs: List[Func]) -> None:
 
 def main() -> None:
     lines: List[str] = []
-    for filename in os.listdir():
+    for filename in glob.iglob('**/*.py', recursive=True):
         if not filename.endswith(".py") or filename == "tests.py":
             continue
         with open(filename) as file:

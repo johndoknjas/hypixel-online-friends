@@ -5,11 +5,11 @@ from pathlib import Path
 from typing import Optional, List, Dict
 from copy import deepcopy
 
-import Utils
-import Files
-from MyClasses import UUID_Plus_Time
-import hypixel
-from Args import Args
+from . import Utils
+from . import Files
+from .MyClasses import UUID_Plus_Time
+from . import hypixel
+from .Args import Args
 
 _args: Optional[Args] = None
 _all_dicts_standard_files: Optional[List[dict]] = None
