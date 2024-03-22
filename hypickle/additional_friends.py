@@ -1,10 +1,10 @@
 from typing import List
 
-import Utils
-import hypixel
-from MyClasses import Specs
-import Files
-from Player import Player
+from . import Utils
+from . import hypixel
+from .MyClasses import Specs
+from . import Files
+from .Player import Player
 
 def get_friends_from_user(friends_specs: Specs) -> List[Player]:
     friends: List[Player] = []

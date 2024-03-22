@@ -2,7 +2,7 @@ from typing import Optional, Dict, Tuple
 from dataclasses import dataclass
 from copy import deepcopy
 
-from Colours import Hex, ColourSpecs, colour_print
+from .Colours import Hex, ColourSpecs, colour_print
 
 @dataclass
 class RankColours:

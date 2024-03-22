@@ -4,18 +4,18 @@ from itertools import permutations
 from copy import deepcopy
 
 from . import hypixel
-from MyClasses import Specs, UUID_Plus_Time
-import Files
-from Player import Player
-from Args import Args
-import ProcessingResults
-import additional_friends
-import Utils
-import Pit
-import leveling
-import bedwars
-import Graphing
-from Graphing import ScatterplotInfo
+from .MyClasses import Specs, UUID_Plus_Time
+from . import Files
+from .Player import Player
+from .Args import Args
+from . import ProcessingResults
+from . import additional_friends
+from . import Utils
+from . import Pit
+from . import leveling
+from . import bedwars
+from . import Graphing
+from .Graphing import ScatterplotInfo
 
 def intersect_player_lists(l1: List[Player], l2: List[Player]) -> List[Player]:
     return [p for p in l1 if p.in_player_list(l2)]

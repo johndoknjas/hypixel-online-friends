@@ -12,12 +12,12 @@ from copy import deepcopy
 import requests
 import urllib3
 
-from MyClasses import UUID_Plus_Time
-import Files
-import Utils
-from Args import Args
-import leveling
-from Rank import Rank
+from .MyClasses import UUID_Plus_Time
+from . import Files
+from . import Utils
+from .Args import Args
+from . import leveling
+from .Rank import Rank
 
 def _get_api_keys_from_file() -> List[str]:
     """ This function gets the api key(s) from `api-key.txt`, and returns them in a list. """

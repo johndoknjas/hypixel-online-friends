@@ -1,8 +1,8 @@
 from typing import List, Optional
 import copy
 
-import Utils
-import Files
+from . import Utils
+from . import Files
 
 class Args:
     def __init__(self, args: List[str]):

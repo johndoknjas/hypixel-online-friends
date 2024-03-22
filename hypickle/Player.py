@@ -4,14 +4,14 @@ from typing import Optional, List, Union, Dict
 from copy import deepcopy
 from datetime import datetime
 
-import Utils
-import hypixel
-from MyClasses import UUID_Plus_Time, Specs
-import Files
-from Pit import PitStats
-import ProcessingResults
-import leveling
-import Colours
+from . import Utils
+from . import hypixel
+from .MyClasses import UUID_Plus_Time, Specs
+from . import Files
+from .Pit import PitStats
+from . import ProcessingResults
+from . import leveling
+from . import Colours
 
 class Player:
 
