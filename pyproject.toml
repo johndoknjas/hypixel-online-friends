@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 requires-python = ">= 3.0"
 name = "hypickle"
-version = "1.0.36"
+version = "1.0.37"
 dependencies = [
   "requests",
   "rich",
@@ -16,7 +16,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 
 [project.scripts]
-hypickle = "hypickle:main"
+hypickle = "hypickle:main.main"
 
 [tool.setuptools]
 packages = ["hypickle"]
