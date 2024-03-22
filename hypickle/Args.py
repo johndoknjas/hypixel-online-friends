@@ -1,12 +1,13 @@
 from typing import List, Optional
 import copy
+import re
 
 from . import Utils
 from . import Files
 
 class Args:
     def __init__(self, args: List[str]):
-        assert args[0] == 'hypickle/main.py'
+        assert re.split(r'/|\\', args[0])[-1] in ('main.py', 'hypickle')
         args = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
         self._ARGS = Files.apply_aliases(args)
         self._ARG_KEYWORDS = ('all', 'friendsoffriends', 'justuuids', 'checkresults',
