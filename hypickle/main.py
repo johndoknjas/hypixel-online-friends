@@ -3,7 +3,7 @@ from typing import List, Tuple
 from itertools import permutations
 from copy import deepcopy
 
-import hypixel
+from . import hypixel
 from MyClasses import Specs, UUID_Plus_Time
 import Files
 from Player import Player
