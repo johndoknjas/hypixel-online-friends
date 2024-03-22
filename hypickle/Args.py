@@ -6,6 +6,7 @@ from . import Files
 
 class Args:
     def __init__(self, args: List[str]):
+        print(args[0])
         assert args[0] == 'hypickle/main.py'
         args = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
         self._ARGS = Files.apply_aliases(args)
