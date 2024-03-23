@@ -1,5 +1,5 @@
 import sys
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from itertools import permutations
 from copy import deepcopy
 
@@ -221,8 +221,9 @@ def do_mini_program(args: Args) -> None:
     else:
         assert False
 
-def main(argv: List[str]) -> None:
-    args = Args(argv)
+def main(argv: Optional[List[str]] = None) -> None:
+    """argv is used when calling this function as a dev in the parent dir."""
+    args = Args(argv if argv is not None else sys.argv)
     set_args_in_files(args)
 
     if args.do_mini_program():
@@ -264,4 +265,4 @@ def main(argv: List[str]) -> None:
         Files.write_data_as_json_to_file(report, filename)
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()

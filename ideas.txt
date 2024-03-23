@@ -9,6 +9,8 @@
     # Test the program when there are no `aliases.txt` or `uuids.txt` files. Program should handle it,
       not raise an error.
 
+    # Update readme with updated instructions on how to run as a dev, how to install, etc.
+
     # https://hypixel.fandom.com/wiki/Ranks
       Consider handling the other 'Special' ranks (only handle 'YOUTUBE' right now).
 
