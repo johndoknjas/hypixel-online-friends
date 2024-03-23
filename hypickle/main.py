@@ -221,8 +221,8 @@ def do_mini_program(args: Args) -> None:
     else:
         assert False
 
-def main() -> None:
-    args = Args(sys.argv)
+def main(argv: List[str]) -> None:
+    args = Args(argv)
     set_args_in_files(args)
 
     if args.do_mini_program():
@@ -264,4 +264,4 @@ def main() -> None:
         Files.write_data_as_json_to_file(report, filename)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

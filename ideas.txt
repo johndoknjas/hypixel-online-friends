@@ -6,6 +6,9 @@
 
     # Consider refactoring to not need the HEX.UNKNOWN hacky stuff used in hypixel.py.
 
+    # Test the program when there are no `aliases.txt` or `uuids.txt` files. Program should handle it,
+      not raise an error.
+
     # https://hypixel.fandom.com/wiki/Ranks
       Consider handling the other 'Special' ranks (only handle 'YOUTUBE' right now).
 
