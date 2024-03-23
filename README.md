@@ -1,8 +1,13 @@
 # hypickle
 
+A script that outputs realtime stats for custom lists of friends you create.
+
 ### Installation:
 
-`pip install hypickle`\
+To install, run the following command:
+
+`pip install hypickle`
+
 Besides installing the script, this will also automatically install its dependencies (the libraries `requests`,
 `rich`, `mplcursors`, `deepdiff`, and any of their own dependencies).
 
