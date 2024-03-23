@@ -5,7 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 requires-python = ">= 3.0"
 name = "hypickle"
-version = "1.0.41"
+version = "1.1.0"
+authors = [
+  { name="John Doknjas", email="jdoknjas@sfu.ca" },
+]
+description = "A script that outputs realtime stats for custom lists of friends you create."
+keywords = ["hypickle", "hypixel", "pit", "bedwars", "friends", "stats", "api"]
 dependencies = [
   "requests",
   "rich",
@@ -13,10 +18,19 @@ dependencies = [
   "mplcursors",
 ]
 readme = "README.md"
-license = {file = "LICENSE"}
+
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Operating System :: OS Independent",
+]
 
 [project.scripts]
 hypickle = "hypickle:main.main"
+
+[project.urls]
+Homepage = "https://github.com/johndoknjas/hypixel-online-friends"
 
 [tool.setuptools]
 packages = ["hypickle"]
