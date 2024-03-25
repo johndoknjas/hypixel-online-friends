@@ -6,6 +6,8 @@
 
     # Consider refactoring to not need the HEX.UNKNOWN hacky stuff used in hypixel.py.
 
+    # Check whether the api key is valid, when the user enters it if it doesn't exist yet in `hypixel.py`.
+
     # Test the program when there are no `aliases.txt` or `uuids.txt` files. Program should handle it,
       not raise an error.
 

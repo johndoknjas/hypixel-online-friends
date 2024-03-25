@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
 import re
 from copy import deepcopy
+import os.path
 import requests
 import urllib3
 
@@ -20,8 +21,15 @@ from . import leveling
 from .Rank import Rank
 
 def _get_api_keys_from_file() -> List[str]:
-    """ This function gets the api key(s) from `api-key.txt`, and returns them in a list. """
-    with open('api-key.txt') as file:
+    """ This function gets the api key(s) from `api-key.txt`, and returns them in a list. If the file doesn't
+        exist, it will ask the user for an api key and write it to the new file."""
+    FILENAME = 'api-key.txt'
+    if not os.path.isfile(FILENAME):
+        print("The script needs a hypixel api key. To get one, you can follow the first part of this guide: https://gist.github.com/camnwalter/c0156c68b1e2a21ec0b084c6f04b63f0#how-to-get-a-new-api-key-after-the-hypixel-api-changes")
+        api_key = input("Please enter your api key: ")
+        with open(FILENAME, 'w') as file:
+            file.write(api_key)
+    with open(FILENAME) as file:
         return [line.rstrip() for line in file]
 
 API_KEYS: List[str] = _get_api_keys_from_file()

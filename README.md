@@ -13,7 +13,9 @@ Besides installing the script, this will also automatically install its dependen
 
 Then, create a new folder that will be used to store persistent information (such as friends lists you create).
 In this folder, make a textfile called 'api-key.txt', and paste your hypixel api key as the first line.
-  - To get this api key, make a developer account with hypixel: https://developer.hypixel.net/
+  - To get this api key, make a [hypixel developer account](https://developer.hypixel.net/).
+    The first part of [this](https://gist.github.com/camnwalter/c0156c68b1e2a21ec0b084c6f04b63f0#how-to-get-a-new-api-key-after-the-hypixel-api-changes)
+    guide is helpful to do this.
 
 After setting this up, you will be able to open a terminal window in this directory and run various commands
 with the `hypickle` script (explained below).
@@ -46,4 +48,4 @@ Open the root directory of the project in the terminal, and then:
 
 ### Acknowledgements:
 
-The `hypixel.py` and `leveling.py` files were originally from https://github.com/Snuggle/hypixel.py/. Since then I have made a number of modifications to them.
+The `hypixel.py` and `leveling.py` files were originally from [Snuggle's repo](https://github.com/Snuggle/hypixel.py/). Since then I have made a number of modifications to them.
