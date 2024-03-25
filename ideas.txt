@@ -10,6 +10,10 @@
 
     # Update from calling the feature `addadditionals` to maybe something like `addfriends`.
 
+    # Update the readme with instructions on using the other features.
+
+    # Allow the user to adjust an alias' meaning by adding/removing word(s) from it.
+
     # https://hypixel.fandom.com/wiki/Ranks
       Consider handling the other 'Special' ranks (only handle 'YOUTUBE' right now).
 
@@ -35,8 +39,6 @@
     # Try to find some way to limit false negatives for the online statuses of players who have it
       available through the api. I.e., players who are offline at the start of the program's run,
       but online later.
-
-    # Update the readme with instructions on using the other features.
 
     # Replace using a white background for pit ranks with black brackets.
 
