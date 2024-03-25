@@ -14,6 +14,7 @@ from string import whitespace
 from . import Utils
 
 _ALIASES_FILENAME = "aliases.txt"
+_UUIDS_FILENAME = "uuids.txt"
 
 _ign_uuid_pairs: Optional[dict] = None
 
@@ -41,9 +42,9 @@ def ign_uuid_pairs_in_uuids_txt(do_deepcopy: bool = False) -> dict:
     if _ign_uuid_pairs is not None:
         return deepcopy(_ign_uuid_pairs) if do_deepcopy else _ign_uuid_pairs
     _ign_uuid_pairs = {} # key ign, value uuid
-    if not os.path.isfile('uuids.txt'):
+    if not os.path.isfile(_UUIDS_FILENAME):
         return {}
-    with open('uuids.txt') as file:
+    with open(_UUIDS_FILENAME) as file:
         for line in file:
             words = line.rstrip().split()
             _ign_uuid_pairs[words[0].lower()] = words[1]
@@ -63,14 +64,15 @@ def update_uuids_file(ign_uuid_pairs: Dict[str, str]) -> None:
     If a uuid is found for an ign in uuids.txt that conflicts with a pair in the passed in param,
     it will be replaced. Also, this function will make a backup of uuids.txt before overwriting it."""
 
-    shutil.copy('uuids.txt', create_file('uuids copy', 'old-uuids'))
+    if os.path.isfile(_UUIDS_FILENAME):
+        shutil.copy(_UUIDS_FILENAME, create_file('uuids copy', 'old-uuids'))
     pairs = ign_uuid_pairs_in_uuids_txt(do_deepcopy=True)
     pairs.update(ign_uuid_pairs)
-    with open("uuids.txt", "w") as file:
+    with open(_UUIDS_FILENAME, "w") as file:
         for key, value in pairs.items():
             file.write(f"{key} {value}\n")
             assert key == key.lower()
-    print(f"uuids.txt now contains uuid-ign pairs for {len(pairs)} players.")
+    print(f"{_UUIDS_FILENAME} now contains uuid-ign pairs for {len(pairs)} players.")
 
 def assertions_for_aliases(alias: str, meaning: str, keywords: Iterable[str]) -> None:
     assert alias not in keywords and not Utils.contains_whitespace(alias)
@@ -121,7 +123,8 @@ def update_aliases(
     else:
         add_new_ign_uuid_aliases(aliases, ign_uuid_pairs, keywords)
 
-    shutil.copy('aliases.txt', create_file('aliases copy', 'old-aliases'))
+    if os.path.isfile(_ALIASES_FILENAME):
+        shutil.copy(_ALIASES_FILENAME, create_file('aliases copy', 'old-aliases'))
     with open(_ALIASES_FILENAME, 'w') as file:
         for a,m in sorted(aliases.items()):
             file.write(f'"{a}" = "{m}"\n')
