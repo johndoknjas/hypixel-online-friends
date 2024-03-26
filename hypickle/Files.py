@@ -81,20 +81,26 @@ def assertions_for_aliases(alias: str, meaning: str, keywords: Iterable[str]) ->
 def get_new_aliases_from_user(aliases: Dict[str, str], keywords: Iterable[str]) -> None:
     """Asks the user for new aliases, and updates the `aliases` parameter accordingly."""
     while True:
-        curr_alias = input("Enter alias (or 'done'/'stop' to quit): ").lower()
-        if curr_alias in ('done', 'stop', 'quit'):
+        alias = input("Enter alias (or 'done'/'stop' to quit): ").lower()
+        if alias in ('done', 'stop', 'quit'):
             return
-        curr_meaning = input("Enter the text this alias stands for: ").lower()
-        assertions_for_aliases(curr_alias, curr_meaning, keywords)
-        if curr_meaning in ('del', 'delete', 'remove'):
-            if input(f"Confirm you want to delete the {curr_alias} alias by entering y: ") in ('y', 'Y'):
-                del aliases[curr_alias]
+        meaning = input("Enter the text this alias stands for: ").lower()
+        if meaning in ('del', 'delete', 'remove'):
+            if input(f"Confirm you want to delete the {alias} alias by entering y: ") in ('y', 'Y'):
+                del aliases[alias]
             continue
-        if curr_alias in aliases:
-            print(f"'{curr_alias}' is already an alias that stands for '{aliases[curr_alias]}'. ", end='')
-            if input(f"To confirm replacing its meaning to be '{curr_meaning}', enter y: ") not in ('y', 'Y'):
+        elif meaning == 'append':
+            new_words = input(f"Enter the new word(s) to append to this alias' meaning: ").lower().split()
+            meaning = ' '.join(aliases[alias].split() + new_words)
+        elif meaning in ('shorten', 'trim'):
+            remove_words = input(f"Enter the word(s) to remove from this alias' meaning: ").lower().split()
+            meaning = ' '.join(x for x in aliases[alias].split() if x not in remove_words)
+        if alias in aliases:
+            print(f"'{alias}' is already an alias that stands for '{aliases[alias]}'. ", end='')
+            if input(f"To confirm replacing its meaning to be '{meaning}', enter y: ") not in ('y', 'Y'):
                 continue
-        aliases[curr_alias] = curr_meaning
+        assertions_for_aliases(alias, meaning, keywords)
+        aliases[alias] = meaning
         print()
 
 def add_new_ign_uuid_aliases(

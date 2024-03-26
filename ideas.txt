@@ -12,8 +12,6 @@
 
     # Update the readme with instructions on using the other features.
 
-    # Allow the user to adjust an alias' meaning by adding/removing word(s) from it.
-
     # https://hypixel.fandom.com/wiki/Ranks
       Consider handling the other 'Special' ranks (only handle 'YOUTUBE' right now).
 
