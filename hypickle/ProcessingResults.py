@@ -167,9 +167,8 @@ def _get_all_jsons_in_results(get_additional_friends: bool = False) -> List[dict
     return all_jsons
 
 def _does_filename_meet_reqs(f: str, for_additional_friends: bool = False) -> bool:
-    if for_additional_friends:
-        return f.startswith('Additional friends of') and f.endswith('.txt')
-    return f.startswith('Friends of') and f.endswith('.txt')
+    required_start = 'Additional friends of' if for_additional_friends else 'Friends of'
+    return f.startswith(required_start) and f.endswith('.txt')
 
 def _get_only_non_trivial_keys_in_dict(dicts: List[dict]) -> List[dict]:
     return [d for d in dicts if any(k in d for k in _NON_TRIVIAL_KEYS)]

@@ -14,7 +14,7 @@ class Args:
                               'diff', 'starsort', 'pitsort',
                               'fileoutput', 'updateuuids', 'matchingignsuuids',
                               'includemultiplayerfiles', 'keepfirstdictmultifiles',
-                              'addadditionalfriends', 'addadditionals',
+                              'addadditionalfriends', 'addadditionals', 'addfriends',
                               'noadditionalfriends', 'noadditionals',
                               'addaliases', 'updatealiases', 'adduuidaliases', 'updateuuidaliases',
                               'showaliases', 'printaliases',
@@ -80,7 +80,7 @@ class Args:
         return 'keepfirstdictmultifiles' not in self._ARGS
 
     def add_additional_friends(self) -> bool:
-        return any(x in self._ARGS for x in ('addadditionalfriends', 'addadditionals'))
+        return any(x in self._ARGS for x in ('addadditionalfriends', 'addadditionals', 'addfriends'))
 
     def get_additional_friends(self) -> bool:
         return all(x not in self._ARGS for x in ('noadditionalfriends', 'noadditionals'))

@@ -126,7 +126,7 @@ def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
             num_friends_msgs[0] = f"{len(standard_friends)} friends in biggest single friends list/file\n"
             if args.get_additional_friends():
                 all_friends = ProcessingResults.get_all_additional_friends_for_player(uuid)
-                num_friends_msgs[1] = f"{len(all_friends)} unique 'additional friends'\n"
+                num_friends_msgs[1] = f"{len(all_friends)} unique manually added friends\n"
                 for f in standard_friends:
                     ProcessingResults.update_list_if_applicable(all_friends, f)
             else:

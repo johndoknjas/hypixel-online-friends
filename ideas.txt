@@ -8,12 +8,14 @@
 
     # Check whether the api key is valid, when the user enters it if it doesn't exist yet in `hypixel.py`.
 
-    # Update from calling the feature `addadditionals` to maybe something like `addfriends`.
-
     # Update the readme with instructions on using the other features.
 
     # https://hypixel.fandom.com/wiki/Ranks
       Consider handling the other 'Special' ranks (only handle 'YOUTUBE' right now).
+
+    # Could use the `"prestiges"` key in a player's json to output the total time it takes to get
+      1 XP (on average, and not just playtime), in the previous prestige. Can help give more useful
+      predictions for how many weeks/months the next few prestiges will take.
 
     # Make a function in hypixel.py that returns a number of leaderboards, obtained from
       https://api.hypixel.net/#tag/Other/paths/~1v2~1leaderboards/get. Then, the user can enter
@@ -82,6 +84,12 @@
     # Periodically run pylint on the project (`pylint *.py`).
 
     # Have a way to just output additional friends.
+
+    # Have some way for users to set persistent defaults for their Args settings, if they want.
+
+    # For info on each arg player, maybe don't output the number of friends in the 'single friends list/file'
+      thing. For any users of the PyPI library, it will be 0. But find a way to still show it for you.
+      E.g., some persistent arg thing like above.
 
     # Add a command that lets you enter a uuid-ign pair from the terminal, to update uuids.txt.
       # If a given uuid/ign exists in uuids.txt already, have the user confirm they want to replace it.

@@ -25,7 +25,7 @@ with the `hypickle` script (explained below).
 - Basic usage is to run with `hypickle *username/uuid*`
   - This will output stats for the specified player, and then output any friends for them.
   - Since the `friends` endpoint of hypixel's API was deprecated, you must manually add any friends for them you want.
-    To do this, run `hypickle addadditionalfriends *username/uuid*`
+    To do this, run `hypickle addfriends *username/uuid*`
 - If there's a player you run the program on often, consider making an alias for their uuid:
   - Run `hypickle updateuuidaliases *username*`
   - Then when running `hypickle *username*`, the program will automatically substitute the username for the uuid.
