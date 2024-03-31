@@ -83,6 +83,13 @@
 
     # Periodically run pylint on the project (`pylint *.py`).
 
+    # For the pit percent feature:
+      # Output info on percentages where 0 to 50 progress (from fast pass) is excluded.
+      # Maybe have a way for the user to enter an xp value, as an alternative to a rank string.
+      # Consider showing the percent distance (xp wise) each pair of levels are from each other,
+        assuming the user enters multiple. The prestiges should be the same when comparing, but could just
+        consider levels on their own. Can also show the xp distance between the two levels.
+
     # Have a way to just output additional friends.
 
     # Have some way for users to set persistent defaults for their Args settings, if they want.

@@ -84,9 +84,12 @@ class PitStats:
     def xp_gained_during_curr_pres(self) -> int:
         return self.xp() - total_xp_req_for_pres(self.prestige())
 
+    def xp_delta_req_for_curr_pres(self) -> int:
+        """Returns the xp requirements for the curr prestige (not including past prestiges)."""
+        return total_xp_req_for_pres(self.prestige()+1) - total_xp_req_for_pres(self.prestige())
+
     def percent_through_curr_pres(self) -> float:
-        return self.xp_gained_during_curr_pres() / (total_xp_req_for_pres(self.prestige()+1) -
-                                                    total_xp_req_for_pres(self.prestige()))
+        return self.xp_gained_during_curr_pres() / self.xp_delta_req_for_curr_pres()
 
     def percent_overall_to_given_pres(self, prestige: int) -> float:
         return self.xp() / total_xp_req_for_pres(prestige)
@@ -100,6 +103,13 @@ class PitStats:
                 break
             print(f"Overall way through to prestige {future_pres}: ", end="")
             print(Utils.percentify(self.percent_overall_to_given_pres(future_pres)), end=", ")
+        total_xp_for_120 = total_xp_reqs_for_levels(self.prestige())[-1]
+        xp_after_kings = min(total_xp_for_120, self.xp() + 0.3 * self.xp_delta_req_for_curr_pres())
+        print(f"King's quest would bring the rank to {PitStats(xp_after_kings).rank_string()}")
+        xp_after_overdrive = min(total_xp_for_120, self.xp() + 4000)
+        print(f"Overdrive would cover {round(4000 / self.xp_delta_req_for_curr_pres() * 100, 2)}% " +
+              f"of the current prestige's xp requirements. It would bring the rank to " +
+              f"{PitStats(xp_after_overdrive).rank_string()}")
         if not self._playtime_kills_deaths:
             print("\n")
             return
