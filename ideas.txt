@@ -10,6 +10,11 @@
 
     # Update the readme with instructions on using the other features.
 
+    # The hypixel api has an endpoint for player counts for various games. Add a feature that displays this.
+
+    # Use the `recentgames` endpoint for just friends who are online, in order to display the recent games
+      they've played.
+
     # https://hypixel.fandom.com/wiki/Ranks
       Consider handling the other 'Special' ranks (only handle 'YOUTUBE' right now).
 
