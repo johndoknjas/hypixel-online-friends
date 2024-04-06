@@ -12,8 +12,7 @@
 
     # The hypixel api has an endpoint for player counts for various games. Add a feature that displays this.
 
-    # Use the `recentgames` endpoint for just friends who are online, in order to display the recent games
-      they've played.
+    # For arg players, you could display the date of their last login (if available through the api).
 
     # https://hypixel.fandom.com/wiki/Ranks
       Consider handling the other 'Special' ranks (only handle 'YOUTUBE' right now).

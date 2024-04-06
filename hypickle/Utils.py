@@ -46,8 +46,8 @@ def date_to_epoch(date_string: str, in_seconds: bool) -> float:
     epoch = time.mktime(datetime.strptime(date_string, '%Y-%m-%d').timetuple())
     return epoch * 1000 if not in_seconds else epoch
 
-def epoch_to_date(epoch: float, in_seconds: bool) -> str:
-    return datetime.fromtimestamp(epoch / 1000 if not in_seconds else epoch).strftime('%Y-%m-%d')
+def epoch_to_date(epoch: float, epoch_in_seconds: bool) -> str:
+    return datetime.fromtimestamp(epoch / 1000 if not epoch_in_seconds else epoch).strftime('%Y-%m-%d')
 
 def find_dict_for_given_player(d: dict, uuid_or_ign: str, make_deep_copy: bool = True,
                                dict_must_have_friends_list: bool = True) -> Optional[dict]:

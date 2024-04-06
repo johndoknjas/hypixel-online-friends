@@ -71,7 +71,7 @@ def diff_f_lists(players: List[Player], args: Args) -> None:
 
 def get_players_from_args(args: Args) -> Tuple[List[Player], List[str]]:
     """The first item in the tuple will be a list of Players.
-       The second item will likely be empty for most use cases. However, if the user wants this feature,
+       The second item will likely be empty for most use cases. However, if the caller wants this feature,
        it will be a list if uuid strings, where it's intended for each uuid to be checked for when they
        were friended by a Player in the first list."""
 

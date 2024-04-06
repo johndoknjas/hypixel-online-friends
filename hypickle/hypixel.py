@@ -6,7 +6,7 @@ __version__ = '0.8.0'
 from random import choice
 from time import time, sleep
 from datetime import datetime, timedelta
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 import re
 from copy import deepcopy
 import os.path
@@ -113,6 +113,7 @@ class Player:
         self.JSON = getJSON('player', get_uuid(uuid_or_ign, call_api_last_resort=False))
         self._rank = Rank(self.JSON)
         self.updated_json: Optional[Tuple[dict, datetime]] = None
+        self.recent_games_visible: Optional[bool] = None
         """Stores the newest result of `getJSON('player')` that was updated from the previous call."""
 
     def getName(self, extra_safety_check=True) -> str:
@@ -203,3 +204,9 @@ class Player:
 
     def getNetworkRank(self) -> Rank:
         return self._rank
+
+    def getRecentGames(self) -> List[Dict]:
+        if self.recent_games_visible is False:
+            return []
+        self.recent_games_visible = bool(recent_games := getJSON('recentgames', self.getUUID())['games'])
+        return recent_games

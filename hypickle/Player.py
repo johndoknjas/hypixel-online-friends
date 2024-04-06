@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional, List, Union, Dict
 from copy import deepcopy
 from datetime import datetime
+import time
 
 from . import Utils
 from . import hypixel
@@ -137,6 +138,9 @@ class Player:
     def percent_way_overall_to_given_network_level(self, target_level: int) -> float:
         return self.get_network_xp() / leveling.getTotalExpToLevelFloor(target_level)
 
+    def recent_games(self) -> List[Dict]:
+        return self.hypixel_object().getRecentGames()
+
     def specs_for_friends(self) -> Optional[Specs]:
         return self.specs().specs_for_friends()
 
@@ -238,12 +242,12 @@ class Player:
         return {'uuid': self.uuid(), 'name': self.name(), 'fkdr': self.get_fkdr(),
                 'star': self.get_bw_star(), 'pit_rank': self.pit_rank_string()}
 
-    def print_dict_report(self, report: Dict, extra_text: str = '') -> None:
+    def print_dict_report(self, report: Dict, extra_text: str = '', print_recent_game: bool = True) -> None:
         report = deepcopy(report)
         assert all(isinstance(v, (str,float,int)) for v in report.values())
         possible_keys = ('name', 'fkdr', 'star', 'pit_rank', 'uuid', 'time')
         assert {'uuid'} <= set(report.keys()) <= set(possible_keys)
-        name, fkdr, star, pit_rank, uuid, time = [report.get(k) for k in possible_keys]
+        name, fkdr, star, pit_rank, uuid, time_friended = [report.get(k) for k in possible_keys]
         assert isinstance(uuid, str) # for mypy
         rank = None if self.specs().just_uuids() else self.network_rank()
 
@@ -270,11 +274,20 @@ class Player:
             Colours.print_pit_rank(pit_rank)
         if not self.root_player():
             print(f" uuid {uuid[:(show := 5)]}...{uuid[-show:]}".ljust(10+show*2), end='')
-        if time is not None:
-            if Utils.is_date_string(time):
-                date_obj = datetime.strptime(time, '%Y-%m-%d')
-                time = date_obj.strftime('%b ') + date_obj.strftime('%d/%y').lstrip('0')
-            print(f" friended {time}", end='')
+        if time_friended is not None:
+            if Utils.is_date_string(time_friended):
+                date_obj = datetime.strptime(time_friended, '%Y-%m-%d')
+                time_friended = date_obj.strftime('%b ') + date_obj.strftime('%d/%y').lstrip('0')
+            print(f" friended {time_friended}".ljust(20), end='')
+        if print_recent_game:
+            if not (recent_games := self.recent_games()):
+                print(f"recent games not visible")
+            else:
+                recent_game = recent_games[0]
+                game_type = recent_game['gameType']
+                finished = 'ended' in recent_game
+                secs_passed = time.time() - (recent_game['ended'] if finished else recent_game['date']) / 1000
+                print(f"{'Exited' if finished else 'Entered'} {game_type} {round(secs_passed/60, 2)} mins ago.")
         print(extra_text, end='')
         if (updated_json := self.hypixel_object().updated_json) is not None:
             print(f" (updated player json obtained {updated_json[1].strftime('%I:%M:%S %p')})", end='')

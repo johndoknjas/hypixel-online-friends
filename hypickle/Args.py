@@ -147,7 +147,8 @@ class Args:
             assert self.date_cutoff() is None and not self.just_online_friends()
             assert not self.get_newest_friends() and not self.get_oldest_friends()
         assert not (self.sort_by_pit_rank() and self.sort_by_star())
-        if any((self.update_aliases(), self.print_aliases(), self.pit_plot(), self.network_plot(), self.bedwars_plot())):
+        if any((self.update_aliases(), self.print_aliases(), self.pit_plot(), self.network_plot(),
+                self.bedwars_plot())):
             assert len(self.get_args(False)) == 1 and not self.get_args(True)
         if self.add_additional_friends():
             assert len(self.get_args(True)) == 1 and len(self.get_args(False)) == 2
