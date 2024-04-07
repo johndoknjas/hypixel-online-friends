@@ -251,6 +251,12 @@ class Player:
         assert isinstance(uuid, str) # for mypy
         rank = None if self.specs().just_uuids() else self.network_rank()
 
+        recent_game_msg = ''
+        if print_recent_game and (recent_games := self.recent_games()):
+            recent_game = recent_games[0]
+            game_type, finished = recent_game['gameType'], 'ended' in recent_game
+            secs_passed = time.time() - (recent_game['ended'] if finished else recent_game['date']) / 1000
+            recent_game_msg = f"{'Exited' if finished else 'Entered'} {game_type} {round(secs_passed/60, 2)} mins ago.\n"
         if name is not None:
             assert isinstance(name, str)
             if old_name := ProcessingResults.uuid_ign_pairs_in_results().get(uuid, ''):
@@ -279,11 +285,7 @@ class Player:
                 date_obj = datetime.strptime(time_friended, '%Y-%m-%d')
                 time_friended = date_obj.strftime('%b ') + date_obj.strftime('%d/%y').lstrip('0')
             print(f" friended {time_friended}".ljust(20), end='')
-        if print_recent_game and (recent_games := self.recent_games()):
-            recent_game = recent_games[0]
-            game_type, finished = recent_game['gameType'], 'ended' in recent_game
-            secs_passed = time.time() - (recent_game['ended'] if finished else recent_game['date']) / 1000
-            print(f"{'Exited' if finished else 'Entered'} {game_type} {round(secs_passed/60, 2)} mins ago.")
+        print(recent_game_msg, end='')
         print(extra_text, end='')
         if (updated_json := self.hypixel_object().updated_json) is not None:
             print(f" (updated player json obtained {updated_json[1].strftime('%I:%M:%S %p')})", end='')

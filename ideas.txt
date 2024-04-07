@@ -15,10 +15,6 @@
     # For arg players, you could display the date of their last login (if available through the api).
       # And for friends too, at least when doing the 'all' feature (since only makes sense for offline ones).
 
-    # Don't write the 'sleep for rate limiting' message on the same line, if the sleep is done
-      when getting the last game a friend played. So do the api call for the last game too before displaying
-      info for a friend.
-
     # https://hypixel.fandom.com/wiki/Ranks
       Consider handling the other 'Special' ranks (only handle 'YOUTUBE' right now).
 
