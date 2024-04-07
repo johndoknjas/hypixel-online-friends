@@ -279,15 +279,11 @@ class Player:
                 date_obj = datetime.strptime(time_friended, '%Y-%m-%d')
                 time_friended = date_obj.strftime('%b ') + date_obj.strftime('%d/%y').lstrip('0')
             print(f" friended {time_friended}".ljust(20), end='')
-        if print_recent_game:
-            if not (recent_games := self.recent_games()):
-                print(f"recent games not visible")
-            else:
-                recent_game = recent_games[0]
-                game_type = recent_game['gameType']
-                finished = 'ended' in recent_game
-                secs_passed = time.time() - (recent_game['ended'] if finished else recent_game['date']) / 1000
-                print(f"{'Exited' if finished else 'Entered'} {game_type} {round(secs_passed/60, 2)} mins ago.")
+        if print_recent_game and (recent_games := self.recent_games()):
+            recent_game = recent_games[0]
+            game_type, finished = recent_game['gameType'], 'ended' in recent_game
+            secs_passed = time.time() - (recent_game['ended'] if finished else recent_game['date']) / 1000
+            print(f"{'Exited' if finished else 'Entered'} {game_type} {round(secs_passed/60, 2)} mins ago.")
         print(extra_text, end='')
         if (updated_json := self.hypixel_object().updated_json) is not None:
             print(f" (updated player json obtained {updated_json[1].strftime('%I:%M:%S %p')})", end='')

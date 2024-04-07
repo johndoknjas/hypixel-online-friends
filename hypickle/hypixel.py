@@ -113,8 +113,10 @@ class Player:
         self.JSON = getJSON('player', get_uuid(uuid_or_ign, call_api_last_resort=False))
         self._rank = Rank(self.JSON)
         self.updated_json: Optional[Tuple[dict, datetime]] = None
-        self.recent_games_visible: Optional[bool] = None
         """Stores the newest result of `getJSON('player')` that was updated from the previous call."""
+        self.recent_games_visible: Optional[bool] = None
+        """Recent games may not be visible if the player has turned off the api setting, or if they haven't
+           played a game in roughly 3 days it seems."""
 
     def getName(self, extra_safety_check=True) -> str:
         """ Just return player's name. """
