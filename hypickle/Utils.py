@@ -270,3 +270,8 @@ def print_diff_dicts(old_dict: dict, new_dict: dict, prepended_msg: str = '') ->
     from deepdiff import DeepDiff # type: ignore
     print(prepended_msg, end='')
     pprint(DeepDiff(old_dict, new_dict), indent=2)
+
+def content_in_file(filename: str) -> bool:
+    """Returns True if there is at least one non-whitespace character in the file."""
+    with open(filename, 'r') as f:
+        return f.read().strip() != ''

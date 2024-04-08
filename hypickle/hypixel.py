@@ -20,20 +20,6 @@ from .Args import Args
 from . import leveling
 from .Rank import Rank
 
-def _get_api_keys_from_file() -> List[str]:
-    """ This function gets the api key(s) from `api-key.txt`, and returns them in a list. If the file doesn't
-        exist, it will ask the user for an api key and write it to the new file."""
-    FILENAME = 'api-key.txt'
-    if not os.path.isfile(FILENAME):
-        print("The script needs a hypixel api key. To get one, you can follow the first part of this guide: https://gist.github.com/camnwalter/c0156c68b1e2a21ec0b084c6f04b63f0#how-to-get-a-new-api-key-after-the-hypixel-api-changes")
-        api_key = input("Please enter your api key: ")
-        with open(FILENAME, 'w') as file:
-            file.write(api_key)
-    with open(FILENAME) as file:
-        return [line.rstrip() for line in file]
-
-API_KEYS: List[str] = _get_api_keys_from_file()
-HYPIXEL_API_URL: str = 'https://api.hypixel.net/'
 TIME_STARTED: float = time()
 num_api_calls_made: int = 0
 _args: Optional[Args] = None
@@ -47,7 +33,7 @@ def set_args(args: Args) -> None:
 
 def make_request_url(typeOfRequest: str, uuid_or_ign: Optional[str]) -> str:
     assert (typeOfRequest == 'leaderboards') == (uuid_or_ign is None)
-    requestURL = f"{HYPIXEL_API_URL}{typeOfRequest}"
+    requestURL = 'https://api.hypixel.net/' + typeOfRequest
     if uuid_or_ign is not None:
         if (query_param_name := 'uuid' if Utils.is_uuid(uuid_or_ign) else 'name') == 'name':
             assert typeOfRequest == 'player'
@@ -71,7 +57,7 @@ def getJSON(typeOfRequest: str, uuid_or_ign: Optional[str], specific_api_key: Op
 
     response = requests.get(
         make_request_url(typeOfRequest, uuid_or_ign), verify=_args.verify_requests(),
-        headers={"API-Key": choice(API_KEYS) if specific_api_key is None else specific_api_key}
+        headers={"API-Key": _get_api_key() if specific_api_key is None else specific_api_key}
     )
     try:
         responseHeaders, responseJSON = response.headers, response.json()
@@ -92,6 +78,28 @@ def getJSON(typeOfRequest: str, uuid_or_ign: Optional[str], specific_api_key: Op
         return responseJSON[typeOfRequest]
     except KeyError:
         return responseJSON
+
+def _get_api_key() -> str:
+    """ This function returns one of the key(s) in `api-key.txt`. If the file doesn't exist, it will ask the
+        user for an api key and write it to the new file. """
+    FILENAME = 'api-key.txt'
+    if not os.path.isfile(FILENAME) or not Utils.content_in_file(FILENAME):
+        print("The script needs a hypixel api key. To get one, you can follow the first part of this guide: https://gist.github.com/camnwalter/c0156c68b1e2a21ec0b084c6f04b63f0#how-to-get-a-new-api-key-after-the-hypixel-api-changes")
+        while not _validate_api_key(api_key := input("Please enter your api key: ").strip()):
+            print('Sorry, that api key is invalid.')
+        with open(FILENAME, 'w') as file:
+            file.write(api_key)
+    with open(FILENAME) as file:
+        return choice([x for line in file if (x := line.strip())])
+
+def _validate_api_key(key: str) -> bool:
+    try:
+        getJSON('leaderboards', None, specific_api_key=key)
+    except HypixelAPIError as e:
+        if "'cause': 'Invalid API key'" in repr(e):
+            return False
+        raise RuntimeError('Unexpected error') from e
+    return True
 
 def get_uuid(uuid_or_ign: str, call_api_last_resort: bool = True) -> str:
     """Param can be an ign or uuid. If it's a uuid, this function will return it immediately. Otherwise,

@@ -6,8 +6,6 @@
 
     # Consider refactoring to not need the HEX.UNKNOWN hacky stuff used in hypixel.py.
 
-    # Check whether the api key is valid, when the user enters it if it doesn't exist yet in `hypixel.py`.
-
     # Update the readme with instructions on using the other features.
 
     # The hypixel api has an endpoint for player counts for various games. Add a feature that displays this.
