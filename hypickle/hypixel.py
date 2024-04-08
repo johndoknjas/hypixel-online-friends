@@ -45,8 +45,17 @@ def set_args(args: Args) -> None:
     if not _args.verify_requests():
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+def make_request_url(typeOfRequest: str, uuid_or_ign: Optional[str]) -> str:
+    assert (typeOfRequest == 'leaderboards') == (uuid_or_ign is None)
+    requestURL = f"{HYPIXEL_API_URL}{typeOfRequest}"
+    if uuid_or_ign is not None:
+        if (query_param_name := 'uuid' if Utils.is_uuid(uuid_or_ign) else 'name') == 'name':
+            assert typeOfRequest == 'player'
+        requestURL += f"?{query_param_name}={uuid_or_ign}"
+    return requestURL
+
 sleep_till: Optional[datetime] = None
-def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
+def getJSON(typeOfRequest: str, uuid_or_ign: Optional[str], specific_api_key: Optional[str] = None) -> dict:
     """ This function is used for getting a JSON from Hypixel's Public API. """
     global sleep_till, num_api_calls_made
     assert _args
@@ -60,11 +69,10 @@ def getJSON(typeOfRequest: str, uuid_or_ign: str) -> dict:
     if _args.debug_api():
         print(f"{num_api_calls_made}\n{time() - TIME_STARTED}\n\n")
 
-    if typeOfRequest != 'player':
-        assert Utils.is_uuid(uuid_or_ign)
-    requestEnd = f"{'uuid' if Utils.is_uuid(uuid_or_ign) else 'name'}={uuid_or_ign}"
-    requestURL = f"{HYPIXEL_API_URL}{typeOfRequest}?{requestEnd}"
-    response = requests.get(requestURL, headers={"API-Key": choice(API_KEYS)}, verify=_args.verify_requests())
+    response = requests.get(
+        make_request_url(typeOfRequest, uuid_or_ign), verify=_args.verify_requests(),
+        headers={"API-Key": choice(API_KEYS) if specific_api_key is None else specific_api_key}
+    )
     try:
         responseHeaders, responseJSON = response.headers, response.json()
     except Exception as e:
