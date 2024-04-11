@@ -242,17 +242,17 @@ class Player:
         return {'uuid': self.uuid(), 'name': self.name(), 'fkdr': self.get_fkdr(),
                 'star': self.get_bw_star(), 'pit_rank': self.pit_rank_string()}
 
-    def print_dict_report(self, report: Dict, extra_text: str = '', print_recent_game: bool = True) -> None:
+    def print_dict_report(self, report: Dict, extra_text: str = '') -> None:
         report = deepcopy(report)
         assert all(isinstance(v, (str,float,int)) for v in report.values())
         possible_keys = ('name', 'fkdr', 'star', 'pit_rank', 'uuid', 'time')
         assert {'uuid'} <= set(report.keys()) <= set(possible_keys)
         name, fkdr, star, pit_rank, uuid, time_friended = [report.get(k) for k in possible_keys]
         assert isinstance(uuid, str) # for mypy
-        rank = None if self.specs().just_uuids() else self.network_rank()
+        rank = None if (just_uuids := self.specs().just_uuids()) else self.network_rank()
 
         recent_game_msg = ''
-        if print_recent_game and (recent_games := self.recent_games()):
+        if not just_uuids and (recent_games := self.recent_games()):
             recent_game = recent_games[0]
             game_type, finished = recent_game['gameType'], 'ended' in recent_game
             secs_passed = time.time() - (recent_game['ended'] if finished else recent_game['date']) / 1000
@@ -279,7 +279,9 @@ class Player:
         if pit_rank is not None:
             Colours.print_pit_rank(pit_rank)
         if not self.root_player():
-            print(f" uuid {uuid[:(show := 5)]}...{uuid[-show:]}".ljust(10+show*2), end='')
+            uuid_display = (f"{uuid[:(show := 5)]}...{uuid[-show:]}".ljust(10+show*2)
+                            if not just_uuids else f"{uuid} ")
+            print(f" uuid {uuid_display}", end='')
         if time_friended is not None:
             if Utils.is_date_string(time_friended):
                 date_obj = datetime.strptime(time_friended, '%Y-%m-%d')
@@ -287,7 +289,7 @@ class Player:
             print(f" friended {time_friended}".ljust(20), end='')
         print(recent_game_msg, end='')
         print(extra_text, end='')
-        if (updated_json := self.hypixel_object().updated_json) is not None:
+        if not just_uuids and (updated_json := self.hypixel_object().updated_json) is not None:
             print(f" (updated player json obtained {updated_json[1].strftime('%I:%M:%S %p')})", end='')
         print()
 

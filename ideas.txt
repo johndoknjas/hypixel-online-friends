@@ -13,6 +13,15 @@
     # For arg players, you could display the date of their last login (if available through the api).
       # And for friends too, at least when doing the 'all' feature (since only makes sense for offline ones).
 
+    # Add a feature that prints out all friends as a comma separated uuid list, and also a comma separated
+      ign list after that. Makes it easy to copy.
+
+    # Add an option to not call the api to display the most recent game each friend has played.
+      # Currently this is now done for `justuuids`, but there could be cases where the user wants more
+        details about a player without spending an api call on the recent game.
+      # The recentgame feature isn't expensive when just printing friends who are online, but with the
+        `all` feature it is, since the `recentgames` endpoint is called for every single friend.
+
     # https://hypixel.fandom.com/wiki/Ranks
       Consider handling the other 'Special' ranks (only handle 'YOUTUBE' right now).
 
