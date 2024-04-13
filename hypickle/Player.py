@@ -315,7 +315,7 @@ class Player:
                                  on_first_pass: Optional[bool] = None) -> dict:
         assert not (self.root_player() and self.time_friended_parent_player('date'))
         if (self.specs().required_online() and
-            not self.hypixel_object().isOnline((False, on_first_pass is False))):
+            not self.hypixel_object().isOnline((False, on_first_pass is False, False))):
             return {}
 
         report = self.get_stats_dict() if not self.specs().just_uuids() else {'uuid': self.uuid()}
@@ -336,7 +336,7 @@ class Player:
         if self._players_used_to_combine:
             assert self.root_player()
             for player in self._players_used_to_combine:
-                online_status = 'online' if player.hypixel_object().isOnline((True, True)) else 'offline'
+                online_status = 'online' if player.hypixel_object().isOnline((True,)*3) else 'offline'
                 player.print_dict_report(player.get_stats_dict(), f"this arg player is {online_status}")
             print()
 

@@ -158,7 +158,7 @@ class Player:
             friends.append(UUID_Plus_Time(friend_uuid, friend['started']))
         return list(reversed(friends))
 
-    def isOnline(self, extra_online_checks: Tuple[bool, bool]) -> bool:
+    def isOnline(self, extra_online_checks: Tuple[bool, bool, bool]) -> bool:
         """ This function returns a bool representing whether the player is online.
             For `extra_online_checks`:
                 - The first bool is for players whose online status is shown. It determines whether to check
@@ -166,7 +166,10 @@ class Player:
                   online in the original self.JSON. So, this bool being true limits false negatives, at
                   the expense of more api calls.
                 - The second bool determines whether to call the api for the most recent json to see if
-                  it's changed, for players whose online status is disabled."""
+                  it's changed, for players whose online status is disabled.
+                - The third bool determines whether, as a last resort, to call the `recentgames` endpoint,
+                  in order to see if the most recent game is visible, and if it doesn't have an
+                  'ended' key; if so, the player is online."""
         if {'lastLogin', 'lastLogout'} <= self.JSON.keys():
             return (    (extra_online_checks[0] or self.JSON['lastLogin'] > self.JSON['lastLogout'])
                     and getJSON('status', self.getUUID())['session']['online'])
@@ -175,7 +178,7 @@ class Player:
         if extra_online_checks[1] and self.JSON != (json := getJSON('player', self.getUUID())):
             self.set_updated_json_if_applicable(json)
             return True
-        return False
+        return extra_online_checks[2] and bool(games := self.getRecentGames()) and 'ended' not in games[0]
 
     def set_updated_json_if_applicable(self, new_json: dict) -> None:
         assert _args
