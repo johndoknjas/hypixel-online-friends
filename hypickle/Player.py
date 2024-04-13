@@ -279,7 +279,7 @@ class Player:
         if pit_rank is not None:
             Colours.print_pit_rank(pit_rank)
         if not self.root_player():
-            uuid_display = (f"{uuid[:(show := 5)]}...{uuid[-show:]}".ljust(10+show*2)
+            uuid_display = (f"{uuid[:(show := 5)]}...{uuid[-show:]}".ljust(4+show*2)
                             if not just_uuids else f"{uuid} ")
             print(f" uuid {uuid_display}", end='')
         if time_friended is not None:
