@@ -2,6 +2,7 @@
 max_bacon = 4
 reverse = True
 cluster = True
+rmprefix = hypickle.
 exclude =
     charset_normalizer
     typing_extensions
