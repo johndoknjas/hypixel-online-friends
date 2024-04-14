@@ -25,6 +25,10 @@ def set_args(args: Args) -> None:
     assert not _args
     _args = deepcopy(args)
 
+def args() -> Args:
+    assert _args
+    return _args
+
 def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
     global _ign_uuid_pairs_in_results
 
@@ -152,15 +156,14 @@ def _get_all_jsons_in_results(get_additional_friends: bool = False) -> List[dict
     all_jsons: List[dict] = []
     all_paths = sorted(Path('results').iterdir(), key=os.path.getmtime, reverse=True)
     all_files = [f.name for f in all_paths if _does_filename_meet_reqs(f.name, get_additional_friends)]
-    assert _args
     for f in all_files:
         filename = os.path.join('results', f)
         is_multi_player_file = any(x in f for x in [' plus ', ' minus ', ' intersect '])
-        if is_multi_player_file and not _args.include_multi_player_files():
+        if is_multi_player_file and not args().include_multi_player_files():
             continue
         json_in_file = Files.read_json_textfile(filename)
         json_in_file['filename'] = filename
-        if is_multi_player_file and _args.skip_first_dict_in_multi_player_files():
+        if is_multi_player_file and args().skip_first_dict_in_multi_player_files():
             json_in_file['exclude'] = '' # Adding this key as a signal to exclude this
                                          # outermost dict of the file, when unnesting.
         all_jsons.append(json_in_file)

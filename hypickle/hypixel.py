@@ -31,6 +31,10 @@ def set_args(args: Args) -> None:
     if not _args.verify_requests():
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+def args() -> Args:
+    assert _args
+    return _args
+
 def make_request_url(typeOfRequest: str, uuid_or_ign: Optional[str]) -> str:
     assert (typeOfRequest == 'leaderboards') == (uuid_or_ign is None)
     requestURL = 'https://api.hypixel.net/' + typeOfRequest
@@ -44,7 +48,6 @@ sleep_till: Optional[datetime] = None
 def getJSON(typeOfRequest: str, uuid_or_ign: Optional[str], specific_api_key: Optional[str] = None) -> dict:
     """ This function is used for getting a JSON from Hypixel's Public API. """
     global sleep_till, num_api_calls_made
-    assert _args
 
     if sleep_till and (sleep_duration := (sleep_till - datetime.now()).total_seconds()) >= 0:
         print(f"Sleeping until {sleep_till.strftime('%I:%M:%S %p')} for rate limiting.")
@@ -52,11 +55,11 @@ def getJSON(typeOfRequest: str, uuid_or_ign: Optional[str], specific_api_key: Op
     sleep_till = None
 
     num_api_calls_made += 1
-    if _args.debug_api():
+    if args().debug_api():
         print(f"{num_api_calls_made}\n{time() - TIME_STARTED}\n\n")
 
     response = requests.get(
-        make_request_url(typeOfRequest, uuid_or_ign), verify=_args.verify_requests(),
+        make_request_url(typeOfRequest, uuid_or_ign), verify=args().verify_requests(),
         headers={"API-Key": _get_api_key() if specific_api_key is None else specific_api_key}
     )
     try:
@@ -181,10 +184,9 @@ class Player:
         return extra_online_checks[2] and bool(games := self.getRecentGames()) and 'ended' not in games[0]
 
     def set_updated_json_if_applicable(self, new_json: dict) -> None:
-        assert _args
         if new_json == (curr_latest_json := self.updated_json[0] if self.updated_json else self.JSON):
             return
-        if _args.show_json_updates():
+        if args().show_json_updates():
             Utils.print_diff_dicts(curr_latest_json, new_json, f"\nUpdates to json for {self.getName()}: ")
         self.updated_json = (new_json, datetime.now())
 
