@@ -252,11 +252,10 @@ class Player:
         rank = None if (just_uuids := self.specs().just_uuids()) else self.network_rank()
 
         recent_game_msg = ''
-        if not just_uuids and (recent_games := self.recent_games()):
-            recent_game = recent_games[0]
-            game_type, finished = recent_game['gameType'], 'ended' in recent_game
-            secs_passed = time.time() - (recent_game['ended'] if finished else recent_game['date']) / 1000
-            recent_game_msg = f"{'Exited' if finished else 'Entered'} {game_type} {round(secs_passed/60, 2)} mins ago.\n"
+        if not just_uuids and (recent_game := next(iter(self.recent_games()), None)):
+            ms_passed = time.time_ns() // 1_000_000 - (recent_game.get('ended') or recent_game['date'])
+            recent_game_msg = (('Exited' if 'ended' in recent_game else 'Entered') +
+                               f" {recent_game['gameType']} {round(ms_passed/60000, 2)} mins ago.\n")
         if name is not None:
             assert isinstance(name, str)
             if old_name := ProcessingResults.uuid_ign_pairs_in_results().get(uuid, ''):
