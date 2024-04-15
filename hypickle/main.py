@@ -1,5 +1,5 @@
 import sys
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from itertools import permutations
 from copy import deepcopy
 
@@ -217,10 +217,11 @@ def do_mini_program() -> None:
     else:
         assert False
 
-def main(argv: List[str]) -> None:
-    """When called as a script, `argv` is passed `sys.argv` from the if statement at the end of this file.
-       If called as a module (e.g., as a dev from the parent dir), argv is whatever the caller passes."""
-    MyClasses.set_args(argv)
+def main(argv: Optional[List[str]] = None) -> None:
+    """When called as a script, `argv` is left as None and `sys.argv` is used.
+       If calling main() programatically from another python file though, pass the args
+       you want via `argv`."""
+    MyClasses.set_args(argv if argv is not None else sys.argv)
 
     if args().do_mini_program():
         do_mini_program()
@@ -261,4 +262,4 @@ def main(argv: List[str]) -> None:
         Files.write_data_as_json_to_file(report, filename)
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
