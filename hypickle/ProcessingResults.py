@@ -9,9 +9,8 @@ from . import Utils
 from . import Files
 from .MyClasses import UUID_Plus_Time
 from . import hypixel
-from .Args import Args
+from .MyClasses import args
 
-_args: Optional[Args] = None
 _all_dicts_standard_files: Optional[List[dict]] = None
 _all_dicts_additional_friends_files: Optional[List[dict]] = None
 _all_dicts_unique_uuids: Optional[List[dict]] = None
@@ -19,15 +18,6 @@ _ign_uuid_pairs_in_results: Optional[Dict[str, str]] = None
 _uuid_ign_pairs_in_results: Optional[Dict[str, str]] = None
 
 _NON_TRIVIAL_KEYS = ('friends', 'name', 'fkdr', 'star', 'pit_rank')
-
-def set_args(args: Args) -> None:
-    global _args
-    assert not _args
-    _args = deepcopy(args)
-
-def args() -> Args:
-    assert _args
-    return _args
 
 def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
     global _ign_uuid_pairs_in_results

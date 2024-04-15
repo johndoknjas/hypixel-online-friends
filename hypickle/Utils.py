@@ -165,7 +165,7 @@ def remove_dicts_duplicate_uuids(dicts: List[dict], make_deepcopy: bool = False,
 
 def is_in_milliseconds(epoch_val: Union[float, int]) -> bool:
     """epoch_val is assumed to be in either seconds or milliseconds"""
-    return epoch_val > 10000000000
+    return epoch_val > 10_000_000_000
 
 def convert_to_seconds(time_val: Union[float, int, str, None]) -> float:
     """ Converts a datestring or epoch to epoch in seconds. If time_val is already an epoch, it must be

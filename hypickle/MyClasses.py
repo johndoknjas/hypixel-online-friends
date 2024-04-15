@@ -1,12 +1,24 @@
-"""This file should only depend on Utils.py."""
-
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Optional, Union
+from typing import Optional, Union, List
+import urllib3
 
 from . import Utils
-from . import Args
+from .Args import Args
+
+_args: Optional[Args] = None
+
+def set_args(args: List[str]) -> None:
+    global _args
+    assert not _args
+    _args = Args(args)
+    if not _args.verify_requests():
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+def args() -> Args:
+    assert _args
+    return _args
 
 class UUID_Plus_Time:
     """This class encapsulates a UUID and a time (unix epoch), likely representing when
@@ -70,10 +82,10 @@ class Specs:
         return cls._common_specs[key]
 
     @classmethod
-    def make_specs_object_and_initialize_common_specs(cls, args: Args.Args) -> Specs:
-        Specs.set_common_specs(not args.find_friends_of_friends())
-        friendsfriendsSpecs = Specs(True, False, None, 2) if args.find_friends_of_friends() else None
-        friendsSpecs = Specs(args.just_uuids(), args.just_online_friends(), friendsfriendsSpecs, 1)
+    def make_specs_object_and_initialize_common_specs(cls) -> Specs:
+        Specs.set_common_specs(not args().find_friends_of_friends())
+        friendsfriendsSpecs = Specs(True, False, None, 2) if args().find_friends_of_friends() else None
+        friendsSpecs = Specs(args().just_uuids(), args().just_online_friends(), friendsfriendsSpecs, 1)
         playerSpecs = Specs(False, False, friendsSpecs, 0)
         return playerSpecs
 

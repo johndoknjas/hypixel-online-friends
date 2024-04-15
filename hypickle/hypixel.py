@@ -8,32 +8,17 @@ from time import time, sleep
 from datetime import datetime, timedelta
 from typing import List, Optional, Tuple, Dict
 import re
-from copy import deepcopy
 import os.path
 import requests
-import urllib3
 
-from .MyClasses import UUID_Plus_Time
+from .MyClasses import UUID_Plus_Time, args
 from . import Files
 from . import Utils
-from .Args import Args
 from . import leveling
 from .Rank import Rank
 
 TIME_STARTED: float = time()
 num_api_calls_made: int = 0
-_args: Optional[Args] = None
-
-def set_args(args: Args) -> None:
-    global _args
-    assert not _args
-    _args = deepcopy(args)
-    if not _args.verify_requests():
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-def args() -> Args:
-    assert _args
-    return _args
 
 def make_request_url(typeOfRequest: str, uuid_or_ign: Optional[str]) -> str:
     assert (typeOfRequest == 'leaderboards') == (uuid_or_ign is None)

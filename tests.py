@@ -53,9 +53,9 @@ class Tests:
             leveling.getTotalExpToLevelFloor(0)
         with pytest.raises(AssertionError):
             leveling.getLevelFloor(-1)
-        leveling.getLevelFloor(1000000000000)
+        leveling.getLevelFloor(1_000_000_000_000)
         with pytest.raises(AssertionError):
-            leveling.getLevelFloor(1000000000001)
+            leveling.getLevelFloor(1_000_000_000_001)
         with pytest.raises(AssertionError):
             leveling.getTotalExpToLevelFloor(10001)
         with pytest.raises(AssertionError):
