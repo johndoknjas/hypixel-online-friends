@@ -45,6 +45,8 @@
     # Consider making a report class instead of report dicts. The class could have a function that makes and
       returns a dict.
 
+    # Add a way to have `my-linter.py` run `vermin hypickle`, and then assert the minimum version is 3.8.
+
     # Consider sleeping in the while loop for perpetual passes, to ensure only one per min (at most) is done.
       # The point of this would be to avoid doing repetitive output so often.
 
