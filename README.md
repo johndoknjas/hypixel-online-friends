@@ -42,7 +42,7 @@ Open the root directory of the project in the terminal, and then:
   - `mypy .` will typecheck.
   - `pylint *.py` will review the code for style.
   - `pydeps hypickle` will output a dependency graph of the project's modules.
-  - `python unused-funcs.py` is a basic script I wrote that attempts to find functions which are never/rarely used.
+  - `python my-linter.py` is a basic script I wrote that mainly attempts to find functions which are never/rarely used.
   - `pytest tests.py` runs a few basic automated tests. Requires installing `pytest`. To run manual tests (output to
     the screen needs to be judged by the tester), run `python tests.py`.
 
