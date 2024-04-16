@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Optional, Union, List
+from typing import Optional
 import urllib3
 
 from . import Utils
@@ -9,7 +9,7 @@ from .Args import Args
 
 _args: Optional[Args] = None
 
-def set_args(args: List[str]) -> None:
+def set_args(args: list[str]) -> None:
     global _args
     assert not _args
     _args = Args(args)
@@ -24,8 +24,9 @@ class UUID_Plus_Time:
     """This class encapsulates a UUID and a time (unix epoch), likely representing when
     the player was friended to the parent player."""
 
-    def __init__(self, uuid: str, time_val: Union[str, float, int, None]):
-        """time_val must be either a date string, or the unix epoch time in either seconds or milliseconds"""
+    def __init__(self, uuid: str, time_val: str | float | int | None):
+        """If `time_val` isn't None, it must be either a date string, or the
+           unix epoch time in seconds or milliseconds."""
         self._uuid: str = uuid
         self._unix_epoch_milliseconds: Optional[float] = None
         if isinstance(time_val, str):
@@ -40,14 +41,14 @@ class UUID_Plus_Time:
     def uuid(self) -> str:
         return self._uuid
 
-    def time_epoch_in_seconds(self) -> Optional[float]:
+    def time_epoch_in_seconds(self) -> float | None:
         return self._unix_epoch_milliseconds / 1000 if self._unix_epoch_milliseconds is not None else None
 
-    def time_epoch_in_milliseconds(self) -> Optional[float]:
+    def time_epoch_in_milliseconds(self) -> float | None:
         """Returns the time as a float representing the unix epoch time in milliseconds"""
         return self._unix_epoch_milliseconds
 
-    def date_string(self) -> Optional[str]:
+    def date_string(self) -> str | None:
         """Returns the time as a YYYY-MM-DD date string"""
         if self._unix_epoch_milliseconds is None:
             return None
@@ -90,7 +91,7 @@ class Specs:
         return playerSpecs
 
     def __init__(self, just_uuids: bool, player_must_be_online: bool,
-                 friends_specs: Optional[Specs], degrees_from_original_player: int):
+                 friends_specs: Specs | None, degrees_from_original_player: int):
         assert Specs._common_specs['set flag']
         self._just_uuids = just_uuids
         self._player_must_be_online = player_must_be_online
@@ -103,7 +104,7 @@ class Specs:
     def required_online(self) -> bool:
         return self._player_must_be_online
 
-    def specs_for_friends(self) -> Optional[Specs]:
+    def specs_for_friends(self) -> Specs | None:
         return deepcopy(self._friends_specs)
 
     def degrees_from_root_player(self) -> int:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """ Simple Hypixel-API in Python, by Snuggle | 2017 to 2021 (https://github.com/Snuggle/hypixel.py/blob/main/hypixel.py)
     Modifications made by John (late 2022 to current) """
 __version__ = '0.8.0'
@@ -6,7 +8,7 @@ __version__ = '0.8.0'
 from random import choice
 from time import time, sleep
 from datetime import datetime, timedelta
-from typing import List, Optional, Tuple, Dict
+from typing import Optional
 import re
 import os.path
 import requests
@@ -20,7 +22,7 @@ from .Rank import Rank
 TIME_STARTED: float = time()
 num_api_calls_made: int = 0
 
-def make_request_url(typeOfRequest: str, uuid_or_ign: Optional[str]) -> str:
+def make_request_url(typeOfRequest: str, uuid_or_ign: str | None) -> str:
     assert (typeOfRequest == 'leaderboards') == (uuid_or_ign is None)
     requestURL = 'https://api.hypixel.net/' + typeOfRequest
     if uuid_or_ign is not None:
@@ -116,7 +118,7 @@ class Player:
     def __init__(self, uuid_or_ign: str) -> None:
         self.JSON = getJSON('player', get_uuid(uuid_or_ign, call_api_last_resort=False))
         self._rank = Rank(self.JSON)
-        self.updated_json: Optional[Tuple[dict, datetime]] = None
+        self.updated_json: Optional[tuple[dict, datetime]] = None
         """Stores the newest result of `getJSON('player')` that was updated from the previous call."""
         self.recent_games_visible: Optional[bool] = None
         """Recent games may not be visible if the player has turned off the api setting, or if they haven't
@@ -137,7 +139,7 @@ class Player:
         """ This function returns a player's UUID. """
         return self.JSON['uuid']
 
-    def getFriends(self) -> List[UUID_Plus_Time]:
+    def getFriends(self) -> list[UUID_Plus_Time]:
         """ *Deprecated from Hypixel API*
             This function returns a list of the UUIDs of all the player's friends."""
         friends = []
@@ -146,7 +148,7 @@ class Player:
             friends.append(UUID_Plus_Time(friend_uuid, friend['started']))
         return list(reversed(friends))
 
-    def isOnline(self, extra_online_checks: Tuple[bool, bool, bool]) -> bool:
+    def isOnline(self, extra_online_checks: tuple[bool, bool, bool]) -> bool:
         """ This function returns a bool representing whether the player is online.
             For `extra_online_checks`:
                 - The first bool is for players whose online status is shown. It determines whether to check
@@ -213,7 +215,7 @@ class Player:
     def getNetworkRank(self) -> Rank:
         return self._rank
 
-    def getRecentGames(self) -> List[Dict]:
+    def getRecentGames(self) -> list[dict]:
         if self.recent_games_visible is False:
             return []
         self.recent_games_visible = bool(recent_games := getJSON('recentgames', self.getUUID())['games'])

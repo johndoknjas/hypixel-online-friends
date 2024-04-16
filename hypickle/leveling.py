@@ -1,8 +1,9 @@
 # Based off https://github.com/Plancke/hypixel-php/blob/master/src/util/Leveling.php and
 # https://github.com/Snuggle/hypixel.py/blob/main/leveling.py
 
+from __future__ import annotations
 import math
-from typing import Optional, Callable, Tuple
+from typing import Optional, Callable
 
 class QuadraticFunc:
     def __init__(self, a: float, b: float, c: float,
@@ -17,7 +18,7 @@ class QuadraticFunc:
             assert self.req_for_x_vals(x_val)
         return self.a*x_val**2 + self.b*x_val + self.c
 
-    def x_vals(self, y_val: float) -> Tuple[float, float]:
+    def x_vals(self, y_val: float) -> tuple[float, float]:
         """Returns the roots of the equation when substituting `y_val` for y."""
         # Need to make a quadratic equation. Do this by substituting y_val for y,
         # then subtracting it from both sides. This just makes c become self.c - y.

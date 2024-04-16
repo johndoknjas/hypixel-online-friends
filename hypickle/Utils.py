@@ -1,18 +1,19 @@
 """Functions in this file are the most general, and don't have dependencies on other files in the project."""
 
+from __future__ import annotations
 from datetime import datetime
 import time
-from typing import List, Optional, Union, Iterable, Any, Type
+from typing import Optional, Iterable, Any, Type
 from collections import OrderedDict
 from copy import deepcopy
 import math
 from pprint import pprint
 
-def list_subtract(main_list: List, subtract_elems: Iterable) -> List:
+def list_subtract(main_list: list, subtract_elems: Iterable) -> list:
     subtract_set = set(subtract_elems)
     return [x for x in main_list if x not in subtract_set]
 
-def remove_duplicates(lst: List) -> List:
+def remove_duplicates(lst: list) -> list:
     return list(OrderedDict.fromkeys(deepcopy(lst))) # regular dict works to maintain order for python >= 3.7
 
 def is_date_string(text: str) -> bool:
@@ -22,7 +23,7 @@ def is_date_string(text: str) -> bool:
         return False
     return True
 
-def print_list(lst: List, prepended_msg: str = "", separator: str = " ", appended_msg: str = "\n\n") -> None:
+def print_list(lst: list, prepended_msg: str = "", separator: str = " ", appended_msg: str = "\n\n") -> None:
     print(prepended_msg, end="")
     print(separator.join([str(x) for x in lst]), end=appended_msg)
 
@@ -32,10 +33,10 @@ def trim_if_needed(text: str, limit: int = 200) -> str:
     side_lengths = int((limit - 5) / 2)
     return text[:side_lengths].strip() + ' ..... ' + text[-side_lengths:].strip()
 
-def remove_date_strings(lst: List[str]) -> List[str]:
+def remove_date_strings(lst: list[str]) -> list[str]:
     return [x for x in lst if not is_date_string(x)]
 
-def get_date_string_if_exists(lst: List[str]) -> Optional[str]:
+def get_date_string_if_exists(lst: list[str]) -> str | None:
     """If no date strings found, return None."""
     return next((x for x in lst if is_date_string(x)), None)
 
@@ -50,7 +51,7 @@ def epoch_to_date(epoch: float, epoch_in_seconds: bool) -> str:
     return datetime.fromtimestamp(epoch / 1000 if not epoch_in_seconds else epoch).strftime('%Y-%m-%d')
 
 def find_dict_for_given_player(d: dict, uuid_or_ign: str, make_deep_copy: bool = True,
-                               dict_must_have_friends_list: bool = True) -> Optional[dict]:
+                               dict_must_have_friends_list: bool = True) -> dict | None:
     """ d will be a dictionary read from a file in json format - it will have a uuid key, and possibly
     a name, fkdr, and friends key. The friends key would have a value that is a list of dictionaries,
     recursively following the same dictionary requirements."""
@@ -95,7 +96,7 @@ def get_all_ign_uuid_pairs_in_dict(d: dict, make_deepcopy: bool = False,
         ign_uuid_pairs.update(get_all_ign_uuid_pairs_in_dict(friend_dict, False, get_uuid_ign_pairs_instead))
     return ign_uuid_pairs
 
-def get_all_nested_dicts_in_dict(d: dict, make_deepcopy: bool = False) -> List[dict]:
+def get_all_nested_dicts_in_dict(d: dict, make_deepcopy: bool = False) -> list[dict]:
     """Traverses through d and returns a list of d and all its nested friend dicts."""
     if make_deepcopy:
         d = deepcopy(d)
@@ -105,7 +106,7 @@ def get_all_nested_dicts_in_dict(d: dict, make_deepcopy: bool = False) -> List[d
         dicts.extend(get_all_nested_dicts_in_dict(friend_dict, make_deepcopy=False))
     return dicts
 
-def print_info_for_key(dicts: List[dict], k: str, indent: str) -> None:
+def print_info_for_key(dicts: list[dict], k: str, indent: str) -> None:
     k_for_print = k + ('s' if k == 'star' else '')
     print(f"{indent}{len(dicts)} players with their {k_for_print} recorded in results.")
     if k in ('star', 'fkdr', 'friends'):
@@ -114,17 +115,17 @@ def print_info_for_key(dicts: List[dict], k: str, indent: str) -> None:
         name = f"{highest_dict['name']}, " if 'name' in highest_dict else ''
         print(f"{indent*2}Most {k_for_print}: {highest_stat} ({name}uuid {highest_dict['uuid']})")
 
-def does_first_have_more_friends(first: list, second: list) -> Optional[bool]:
+def does_first_have_more_friends(first: list, second: list) -> bool | None:
     """True returned if more, False returned if less, None returned if equal."""
     return True if len(first) > len(second) else (False if len(second) > len(first) else None)
 
-def does_first_record_times_better(first: list, second: list) -> Optional[bool]:
+def does_first_record_times_better(first: list, second: list) -> bool | None:
     """True returned if better, False returned if worse, None returned if equal."""
     first_has_times = len(first) > 0 and 'time' in first[0]
     second_has_times = len(second) > 0 and 'time' in second[0]
     return None if (first_has_times == second_has_times) else first_has_times
 
-def does_first_have_more_keys(first: dict, second: dict) -> Optional[bool]:
+def does_first_have_more_keys(first: dict, second: dict) -> bool | None:
     """True returned if more, False returned if less, None returned if equal."""
     return None if len(first.keys()) == len(second.keys()) else len(first.keys()) > len(second.keys())
 
@@ -134,7 +135,7 @@ def is_first_dict_more_valuable(first: dict, second: dict, must_have_times_frien
     assert first['uuid'] == second['uuid']
     first_friends, second_friends = first.get('friends', []), second.get('friends', [])
 
-    comparisons: List[Optional[bool]] = [
+    comparisons: list[bool | None] = [
         does_first_have_more_friends(first_friends, second_friends),
         does_first_record_times_better(first_friends, second_friends),
         does_first_have_more_keys(first, second)
@@ -144,8 +145,8 @@ def is_first_dict_more_valuable(first: dict, second: dict, must_have_times_frien
 
     return next((b for b in comparisons if b is not None), False)
 
-def remove_dicts_duplicate_uuids(dicts: List[dict], make_deepcopy: bool = False,
-                                 must_have_times_friended: bool = False) -> List[dict]:
+def remove_dicts_duplicate_uuids(dicts: list[dict], make_deepcopy: bool = False,
+                                 must_have_times_friended: bool = False) -> list[dict]:
     """ For dicts with the same uuid, only one dict will be kept in the new list. The criteria
         for choosing which one are as follows (in order):
         - bigger friends list
@@ -163,11 +164,11 @@ def remove_dicts_duplicate_uuids(dicts: List[dict], make_deepcopy: bool = False,
             dicts_unique_uuids[uuid] = d
     return list(dicts_unique_uuids.values())
 
-def is_in_milliseconds(epoch_val: Union[float, int]) -> bool:
+def is_in_milliseconds(epoch_val: float | int) -> bool:
     """epoch_val is assumed to be in either seconds or milliseconds"""
     return epoch_val > 10_000_000_000
 
-def convert_to_seconds(time_val: Union[float, int, str, None]) -> float:
+def convert_to_seconds(time_val: float | int | str | None) -> float:
     """ Converts a datestring or epoch to epoch in seconds. If time_val is already an epoch, it must be
         in seconds or milliseconds form. """
     if time_val is None:
@@ -180,7 +181,7 @@ def convert_to_seconds(time_val: Union[float, int, str, None]) -> float:
     else:
         return time_val
 
-def is_older(time_one: Union[str, float, int, None], time_two: Union[str, float, int, None]) -> bool:
+def is_older(time_one: str | float | int | None, time_two: str | float | int | None) -> bool:
     """Returns true if time_one is more recent than time_two. time_one and time_two must each be either
        a datestring or epoch (in seconds/milliseconds)."""
     return convert_to_seconds(time_one) < convert_to_seconds(time_two)
@@ -188,10 +189,10 @@ def is_older(time_one: Union[str, float, int, None], time_two: Union[str, float,
 def get_current_date() -> str:
     return datetime.now().strftime('%Y-%m-%d')
 
-def replace_in_list(lst: List[str], elem_to_remove: str, list_to_insert: List[str]) -> List[str]:
+def replace_in_list(lst: list[str], elem_to_remove: str, list_to_insert: list[str]) -> list[str]:
     """Returns a new list, where any occurrences of `elem_to_remove` (case-insensitive) in `lst` are
        replaced with the elements in `list_to_insert`. `lst` will not be modified."""
-    replacement: List[str] = []
+    replacement: list[str] = []
     for s in lst:
         if s.lower() == elem_to_remove.lower():
             replacement.extend(list_to_insert)
@@ -252,7 +253,7 @@ def round_up_to_closest_multiple(num: float, multiple_of: int) -> int:
 def percentify(d: float, decimal_places_to_round_to: int = 2) -> str:
     return f"{round(100*d, decimal_places_to_round_to)}%"
 
-def normalize_against_max_val(l: Iterable[float]) -> List[float]:
+def normalize_against_max_val(l: Iterable[float]) -> list[float]:
     max_val = max(l)
     return [i / max_val for i in l]
 

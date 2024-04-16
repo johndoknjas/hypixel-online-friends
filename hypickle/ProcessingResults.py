@@ -1,8 +1,9 @@
 """Contains functions for dealing with reading from the results folder."""
 
+from __future__ import annotations
 import os
 from pathlib import Path
-from typing import Optional, List, Dict
+from typing import Optional
 from copy import deepcopy
 
 from . import Utils
@@ -11,15 +12,15 @@ from .MyClasses import UUID_Plus_Time
 from . import hypixel
 from .MyClasses import args
 
-_all_dicts_standard_files: Optional[List[dict]] = None
-_all_dicts_additional_friends_files: Optional[List[dict]] = None
-_all_dicts_unique_uuids: Optional[List[dict]] = None
-_ign_uuid_pairs_in_results: Optional[Dict[str, str]] = None
-_uuid_ign_pairs_in_results: Optional[Dict[str, str]] = None
+_all_dicts_standard_files: Optional[list[dict]] = None
+_all_dicts_additional_friends_files: Optional[list[dict]] = None
+_all_dicts_unique_uuids: Optional[list[dict]] = None
+_ign_uuid_pairs_in_results: Optional[dict[str, str]] = None
+_uuid_ign_pairs_in_results: Optional[dict[str, str]] = None
 
 _NON_TRIVIAL_KEYS = ('friends', 'name', 'fkdr', 'star', 'pit_rank')
 
-def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
+def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> dict[str, str]:
     global _ign_uuid_pairs_in_results
 
     if not _ign_uuid_pairs_in_results:
@@ -28,7 +29,7 @@ def ign_uuid_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
             _ign_uuid_pairs_in_results.update(Utils.get_all_ign_uuid_pairs_in_dict(d))
     return deepcopy(_ign_uuid_pairs_in_results) if get_deepcopy else _ign_uuid_pairs_in_results
 
-def uuid_ign_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
+def uuid_ign_pairs_in_results(get_deepcopy: bool = False) -> dict[str, str]:
     global _uuid_ign_pairs_in_results
 
     if not _uuid_ign_pairs_in_results:
@@ -37,14 +38,14 @@ def uuid_ign_pairs_in_results(get_deepcopy: bool = False) -> Dict[str, str]:
             _uuid_ign_pairs_in_results.update(Utils.get_all_ign_uuid_pairs_in_dict(d, False, True))
     return deepcopy(_uuid_ign_pairs_in_results) if get_deepcopy else _uuid_ign_pairs_in_results
 
-def check_results(uuid: Optional[str], ign: Optional[str]) -> None:
+def check_results(uuid: str | None, ign: str | None) -> None:
     """Traverses through the results folder and prints some stats and info. If a uuid and ign are provided,
        then some specific info about that player will be outputted as well. Note that whether multiplayer
        files are included depends on the cli args."""
     assert type(uuid) is type(ign)
 
     print(f"\n\n{len(_get_all_unique_uuids_in_results())} total unique uuids recorded in the results folder.")
-    all_dicts: List[dict] = get_all_dicts_unique_uuids_in_results()
+    all_dicts: list[dict] = get_all_dicts_unique_uuids_in_results()
     print(f"{len(all_dicts)} total players with non-trivial data stored in the results folder (excluding additional friends files).")
 
     for k in _NON_TRIVIAL_KEYS:
@@ -59,7 +60,7 @@ def check_results(uuid: Optional[str], ign: Optional[str]) -> None:
                   f"{ign}'s friends list in in the results folder.")
     print('\n\n')
 
-def get_all_dicts_in_results(get_deepcopy: bool = False, get_additional_friends: bool = False) -> List[dict]:
+def get_all_dicts_in_results(get_deepcopy: bool = False, get_additional_friends: bool = False) -> list[dict]:
     """Returns a flat list of non-trivial dicts, for all dicts/nested dicts found in the results folder.
        Note that there can be multiple dicts with the same uuid."""
     global _all_dicts_standard_files, _all_dicts_additional_friends_files
@@ -78,7 +79,7 @@ def get_all_dicts_in_results(get_deepcopy: bool = False, get_additional_friends:
     return deepcopy(all_dicts) if get_deepcopy else all_dicts
 
 def get_all_dicts_unique_uuids_in_results(get_deepcopy: bool = False,
-                                          must_have_times_friended: bool = False) -> List[dict]:
+                                          must_have_times_friended: bool = False) -> list[dict]:
     """Returns a flat list of non-trivial dicts (no more than one per uuid), for all dicts/nested dicts found in the
     results folder (excluding additional friends files). If multiple dicts have the same uuid, the one with
     the biggest friends list will be kept."""
@@ -93,7 +94,7 @@ def get_all_dicts_unique_uuids_in_results(get_deepcopy: bool = False,
     return deepcopy(_all_dicts_unique_uuids) if get_deepcopy else _all_dicts_unique_uuids
 
 def get_best_f_list_for_player_in_results(uuid_or_ign: str,
-                                          must_have_times_friended: bool = False) -> List[UUID_Plus_Time]:
+                                          must_have_times_friended: bool = False) -> list[UUID_Plus_Time]:
     uuid = hypixel.get_uuid(uuid_or_ign)
     for d in get_all_dicts_unique_uuids_in_results(must_have_times_friended=must_have_times_friended):
         if d['uuid'] == uuid:
@@ -101,7 +102,7 @@ def get_best_f_list_for_player_in_results(uuid_or_ign: str,
             return [UUID_Plus_Time(f['uuid'], f.get('time')) for f in d.get('friends', [])]
     return []
 
-def update_list_if_applicable(lst: List[UUID_Plus_Time], new_elem: UUID_Plus_Time) -> None:
+def update_list_if_applicable(lst: list[UUID_Plus_Time], new_elem: UUID_Plus_Time) -> None:
     """If no element in lst refers to the same person as elem, then elem will be appended at the end.
        Otherwise, elem will replace its duplicate, if it is more recent than it.
        The reference to the list itself will be modified by this function."""
@@ -112,9 +113,9 @@ def update_list_if_applicable(lst: List[UUID_Plus_Time], new_elem: UUID_Plus_Tim
             return
     lst.append(new_elem)
 
-def get_all_additional_friends_for_player(uuid_or_ign: str) -> List[UUID_Plus_Time]:
+def get_all_additional_friends_for_player(uuid_or_ign: str) -> list[UUID_Plus_Time]:
     uuid = hypixel.get_uuid(uuid_or_ign)
-    additional_friends: List[UUID_Plus_Time] = []
+    additional_friends: list[UUID_Plus_Time] = []
     for d in get_all_dicts_in_results(get_additional_friends=True):
         if d['uuid'] != uuid:
             continue
@@ -139,11 +140,11 @@ def print_all_matching_uuids_or_igns(uuid_or_ign: str) -> None:
             hits.append(d[search_for])
     print()
 
-def _get_all_jsons_in_results(get_additional_friends: bool = False) -> List[dict]:
+def _get_all_jsons_in_results(get_additional_friends: bool = False) -> list[dict]:
     """Returns a list of dicts, where each dict represents the json each textfile stores."""
     if not os.path.isdir('results'):
         return []
-    all_jsons: List[dict] = []
+    all_jsons: list[dict] = []
     all_paths = sorted(Path('results').iterdir(), key=os.path.getmtime, reverse=True)
     all_files = [f.name for f in all_paths if _does_filename_meet_reqs(f.name, get_additional_friends)]
     for f in all_files:
@@ -163,10 +164,10 @@ def _does_filename_meet_reqs(f: str, for_additional_friends: bool = False) -> bo
     required_start = 'Additional friends of' if for_additional_friends else 'Friends of'
     return f.startswith(required_start) and f.endswith('.txt')
 
-def _get_only_non_trivial_keys_in_dict(dicts: List[dict]) -> List[dict]:
+def _get_only_non_trivial_keys_in_dict(dicts: list[dict]) -> list[dict]:
     return [d for d in dicts if any(k in d for k in _NON_TRIVIAL_KEYS)]
 
-def _get_all_unique_uuids_in_results() -> List[str]:
+def _get_all_unique_uuids_in_results() -> list[str]:
     """Returns all uuids written at some point in the results folder - most will be friends of friends."""
     all_dicts = []
     for d in (get_all_dicts_in_results(False, True) + get_all_dicts_in_results(False, False)):

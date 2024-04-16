@@ -1,5 +1,6 @@
 # Based off https://github.com/Plancke/hypixel-php/blob/master/src/util/games/bedwars/ExpCalculator.php
 
+from __future__ import annotations
 from math import floor
 
 LEVELS_PER_PRESTIGE = 100

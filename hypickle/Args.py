@@ -1,4 +1,4 @@
-from typing import List, Optional
+from __future__ import annotations
 import copy
 import re
 
@@ -6,7 +6,7 @@ from . import Utils
 from . import Files
 
 class Args:
-    def __init__(self, args: List[str]):
+    def __init__(self, args: list[str]):
         assert re.split(r'/|\\', args[0])[-1] in ('main.py', 'hypickle')
         args = [arg if arg.endswith('.txt') else arg.lower() for arg in args[1:]]
         self._ARGS = Files.apply_aliases(args)
@@ -29,13 +29,13 @@ class Args:
         Utils.print_list(self.get_args(False), prepended_msg="self._ARGS list after applying aliases: ")
         self._validation_checks()
 
-    def get_args(self, remove_keywords_and_dates: bool) -> List[str]:
+    def get_args(self, remove_keywords_and_dates: bool) -> list[str]:
         args = copy.copy(self._ARGS)
         if remove_keywords_and_dates:
             args = Utils.remove_date_strings(Utils.list_subtract(args, self._ARG_KEYWORDS))
         return args
 
-    def get_keywords(self) -> List[str]:
+    def get_keywords(self) -> list[str]:
         return list(self._ARG_KEYWORDS)
 
     def find_friends_of_friends(self) -> bool:
@@ -59,7 +59,7 @@ class Args:
     def just_uuids(self) -> bool:
         return 'justuuids' in self._ARGS
 
-    def date_cutoff(self) -> Optional[str]:
+    def date_cutoff(self) -> str | None:
         return Utils.get_date_string_if_exists(self._ARGS)
 
     def do_file_output(self) -> bool:

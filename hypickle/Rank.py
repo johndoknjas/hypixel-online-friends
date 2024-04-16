@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Tuple
+from __future__ import annotations
 from dataclasses import dataclass
 from copy import deepcopy
 
@@ -6,15 +6,15 @@ from .Colours import Hex, ColourSpecs, colour_print
 
 @dataclass
 class RankColours:
-    plus_colour: Optional[Hex]
+    plus_colour: Hex | None
     """Represents the colour of any '+' chars that may be present in the rank."""
-    player_name_brackets_colour: Optional[Hex]
+    player_name_brackets_colour: Hex | None
     """Represents the colour of the rank brackets and the player's name."""
-    rank_colour: Optional[Hex]
+    rank_colour: Hex | None
     """Represents the colour of the rank, excluding any potential '+' chars."""
 
 class RankMap:
-    _rank_map: Dict[Optional[str], Tuple[str, RankColours]] = {
+    _rank_map: dict[str | None, tuple[str, RankColours]] = {
         '§c[OWNER]': ('OWNER', RankColours(None, Hex.RED, Hex.RED)),
         'ADMIN': ('ADMIN', RankColours(None, Hex.RED, Hex.RED)),
         'GAME_MASTER': ('GM', RankColours(None, Hex.DARK_GREEN, Hex.DARK_GREEN)),
@@ -27,7 +27,7 @@ class RankMap:
         None: ('', RankColours(None, None, None))
     }
     @classmethod
-    def json_rank_info(cls, key: Optional[str]) -> Tuple[str, RankColours]:
+    def json_rank_info(cls, key: str | None) -> tuple[str, RankColours]:
         """Returns the display string for a rank (without the brackets), as well as a RankColours
            object detailing the colours to print in."""
         return deepcopy(cls._rank_map[key])
@@ -48,7 +48,7 @@ class Rank:
             return self._display_rank
         return f"[{self._display_rank}] "
 
-    def rank_colour(self) -> Optional[Hex]:
+    def rank_colour(self) -> Hex | None:
         if self._colours.rank_colour == Hex.UNKNOWN:
             assert self._display_rank == 'MVP++'
             self._colours.rank_colour = (
@@ -56,7 +56,7 @@ class Rank:
             )
         return self._colours.rank_colour
 
-    def plus_colour(self) -> Optional[Hex]:
+    def plus_colour(self) -> Hex | None:
         if self._colours.plus_colour == Hex.UNKNOWN:
             assert self._display_rank in ('MVP+', 'MVP++')
             json_plus_colour = self._json.get('rankPlusColor')
@@ -64,7 +64,7 @@ class Rank:
                                          next(c for c in Hex if json_plus_colour == c.name))
         return self._colours.plus_colour
 
-    def name_and_bracket_colour(self) -> Optional[Hex]:
+    def name_and_bracket_colour(self) -> Hex | None:
         if self._colours.player_name_brackets_colour == Hex.UNKNOWN:
             self._colours.player_name_brackets_colour = self.rank_colour()
         return self._colours.player_name_brackets_colour

@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 from . import Utils
 from . import hypixel
@@ -6,8 +6,8 @@ from .MyClasses import Specs
 from . import Files
 from .Player import Player
 
-def get_friends_from_user(friends_specs: Specs) -> List[Player]:
-    friends: List[Player] = []
+def get_friends_from_user(friends_specs: Specs) -> list[Player]:
+    friends: list[Player] = []
     INPUT_MSG = "Enter the igns/uuids of new friends to add, separated by spaces (or enter 'done' to stop): "
     for i, user_input in enumerate(inputs := Files.apply_aliases(input(INPUT_MSG).split())):
         if user_input.lower() in ('done', 'stop'):

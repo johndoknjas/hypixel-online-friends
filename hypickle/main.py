@@ -1,5 +1,6 @@
+from __future__ import annotations
 import sys
-from typing import List, Tuple, Optional
+from typing import Optional
 from itertools import permutations
 from copy import deepcopy
 
@@ -17,10 +18,10 @@ from . import bedwars
 from . import Graphing
 from .Graphing import ScatterplotInfo
 
-def intersect_player_lists(l1: List[Player], l2: List[Player]) -> List[Player]:
+def intersect_player_lists(l1: list[Player], l2: list[Player]) -> list[Player]:
     return [p for p in l1 if p.in_player_list(l2)]
 
-def combine_players(info_on_players: List[Player]) -> Player:
+def combine_players(info_on_players: list[Player]) -> Player:
     """This function runs through the Player list and adds/subtracts/intersects f lists. Whether a Player's f list
     is used to add/subtract/intersect depends on the bool value of their player.will_exclude_friends()
     and player.will_intersect() functions.
@@ -33,11 +34,11 @@ def combine_players(info_on_players: List[Player]) -> Player:
     info_on_players = deepcopy(info_on_players)
     playerNameForFileOutput = info_on_players[0].name()
     playerUUID = info_on_players[0].uuid()
-    playerFriends: List[Player] = info_on_players[0].friends()
+    playerFriends: list[Player] = info_on_players[0].friends()
     playerSpecs = info_on_players[0].specs()
     date_cutoff_friends = info_on_players[0].date_cutoff_for_friends()
 
-    exclude_friends: List[Player] = []
+    exclude_friends: list[Player] = []
     for player in info_on_players[1:]:
         if player.will_exclude_friends():
             if player.will_intersect():
@@ -61,7 +62,7 @@ def combine_players(info_on_players: List[Player]) -> Player:
     player.polish_friends_list(exclude_friends)
     return player
 
-def diff_f_lists(players: List[Player]) -> None:
+def diff_f_lists(players: list[Player]) -> None:
     """Runs through all pairs of players and outputs the diff of their f lists"""
     assert args().diff_f_lists()
     list_friends = input("Enter y to list out all the friends in each diff: ") in ('y', 'Y')
@@ -69,7 +70,7 @@ def diff_f_lists(players: List[Player]) -> None:
     for p1, p2 in permutations(players, 2):
         p1.diff_f_lists(p2, list_friends)
 
-def get_players_from_args() -> Tuple[List[Player], List[str]]:
+def get_players_from_args() -> tuple[list[Player], list[str]]:
     """The first item in the tuple will be a list of Players.
        The second item will likely be empty for most use cases. However, if the caller wants this feature,
        it will be a list if uuid strings, where it's intended for each uuid to be checked for when they
@@ -77,13 +78,13 @@ def get_players_from_args() -> Tuple[List[Player], List[str]]:
 
     specs = Specs.make_specs_object_and_initialize_common_specs()
     args_no_keywords_or_date = args().get_args(True)
-    players: List[Player] = []
+    players: list[Player] = []
     in_minus_symbol_section = False
     in_friended_when_section = False
     is_intersect_player = False
     FRIENDED_WHEN = 'friendedwhen'
     INTERSECT = 'intersect'
-    uuids_for_friended_when: List[str] = []
+    uuids_for_friended_when: list[str] = []
 
     for i, arg in enumerate(args_no_keywords_or_date):
         if in_minus_symbol_section or in_friended_when_section or is_intersect_player:
@@ -119,7 +120,7 @@ def get_players_from_args() -> Tuple[List[Player], List[str]]:
         else:
             hypixel_obj = hypixel.Player(arg)
             uuid = hypixel_obj.getUUID()
-            all_friends: List[UUID_Plus_Time] = []
+            all_friends: list[UUID_Plus_Time] = []
             standard_friends = ProcessingResults.get_best_f_list_for_player_in_results(
                 uuid, must_have_times_friended=FRIENDED_WHEN in args_no_keywords_or_date
             )
@@ -149,12 +150,12 @@ def get_players_from_args() -> Tuple[List[Player], List[str]]:
 
     return (players, uuids_for_friended_when)
 
-def output_player_jsons_to_file(players: List[Player]) -> None:
+def output_player_jsons_to_file(players: list[Player]) -> None:
     for player in players:
         Files.write_data_as_json_to_file(player.player_JSON(), "Player json for " + player.name(),
                                          "results/player-jsons")
 
-def friended_when_feature(players: List[Player], uuids_for_friended_when: List[str]) -> None:
+def friended_when_feature(players: list[Player], uuids_for_friended_when: list[str]) -> None:
     for player in players:
         for friend in player.friends():
             if friend.uuid() not in uuids_for_friended_when:
@@ -217,7 +218,7 @@ def do_mini_program() -> None:
     else:
         assert False
 
-def main(argv: Optional[List[str]] = None) -> None:
+def main(argv: Optional[list[str]] = None) -> None:
     """When called as a script, `argv` is left as None and `sys.argv` is used.
        If calling main() programatically from another python file though, pass the args
        you want via `argv`."""
