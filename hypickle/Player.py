@@ -7,7 +7,7 @@ import time
 
 from . import Utils
 from . import hypixel
-from .MyClasses import UUID_Plus_Time, Specs
+from .MyClasses import UUID_Plus_Time, Specs, args
 from . import Files
 from .Pit import PitStats
 from . import ProcessingResults
@@ -252,7 +252,7 @@ class Player:
         rank = None if (just_uuids := self.specs().just_uuids()) else self.network_rank()
 
         recent_game_msg = ''
-        if not just_uuids and (recent_game := next(iter(self.recent_games()), None)):
+        if args().output_recent_game() and (recent_game := next(iter(self.recent_games()), None)):
             ms_passed = time.time_ns() // 1_000_000 - (recent_game.get('ended') or recent_game['date'])
             recent_game_msg = (('Exited' if 'ended' in recent_game else 'Entered') +
                                f" {recent_game['gameType']} {round(ms_passed/60000, 2)} mins ago.\n")
