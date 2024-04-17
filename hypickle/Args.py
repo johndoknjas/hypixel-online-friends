@@ -22,7 +22,7 @@ class Args:
                               'pitpercent', 'pit%', 'pitplot', 'nwplot', 'bwplot', 'contains',
                               'trackargs', 'argsonline', 'newest', 'oldest',
                               'debugapi', 'showjsondiff', 'showjsonupdates',
-                              'norecentgame', 'norecentgames')
+                              'norecentgame', 'norecentgames', 'list', 'copyable')
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'friendedwhen', 'intersect').
@@ -136,10 +136,16 @@ class Args:
     def output_recent_game(self) -> bool:
         return all(x not in self._ARGS for x in ('norecentgame', 'norecentgames')) and not self.just_uuids()
 
+    def comma_sep_list(self) -> bool:
+        """Returns whether to print the uuids of each player's friends in comma-separated lists, followed
+           by the igns after that."""
+        return 'list' in self._ARGS or 'copyable' in self._ARGS
+
     def do_mini_program(self) -> bool:
         mini_programs = (self.update_aliases(), self.add_uuid_aliases(), self.print_aliases(),
                          self.contains_substr(), self.add_additional_friends(), self.get_player_json(),
-                         self.pit_percent(), self.pit_plot(), self.network_plot(), self.bedwars_plot())
+                         self.pit_percent(), self.pit_plot(), self.network_plot(), self.bedwars_plot(),
+                         self.comma_sep_list())
         assert (bool_sum := sum(1 for x in mini_programs if x)) <= 1
         return bool_sum == 1
 
@@ -153,11 +159,10 @@ class Args:
         assert not (self.sort_by_pit_rank() and self.sort_by_star())
         if any((self.update_aliases(), self.print_aliases(), self.pit_plot(), self.network_plot(),
                 self.bedwars_plot())):
-            assert len(self.get_args(False)) == 1 and not self.get_args(True)
+            assert not self.get_args(True) and len(self.get_args(False)) == 1
         if self.add_additional_friends():
             assert len(self.get_args(True)) == 1 and len(self.get_args(False)) == 2
-        if self.get_player_json() or self.pit_percent() or self.add_uuid_aliases():
-            assert len(self.get_args(True)) >= 1
-        if self.contains_substr() or self.add_uuid_aliases():
-            assert len(self.get_args(False)) >= 2
+        if any((self.get_player_json(), self.pit_percent(), self.add_uuid_aliases(),
+                self.comma_sep_list(), self.contains_substr())):
+            assert len(self.get_args(True)) >= 1 and len(self.get_args(False)) >= 2
         assert not (self.get_newest_friends() and self.get_oldest_friends())

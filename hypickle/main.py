@@ -73,7 +73,7 @@ def diff_f_lists(players: list[Player]) -> None:
 def get_players_from_args() -> tuple[list[Player], list[str]]:
     """The first item in the tuple will be a list of Players.
        The second item will likely be empty for most use cases. However, if the caller wants this feature,
-       it will be a list if uuid strings, where it's intended for each uuid to be checked for when they
+       it will be a list of uuid strings, where it's intended for each uuid to be checked for when they
        were friended by a Player in the first list."""
 
     specs = Specs.make_specs_object_and_initialize_common_specs()
@@ -215,6 +215,17 @@ def do_mini_program() -> None:
             ign_matches = sorted([ign for ign in ProcessingResults.ign_uuid_pairs_in_results()
                                   if substr in ign.lower()])
             print(f"\nPlayer name matches for '{substr}':\n" + '\n'.join(ign_matches) + '\n')
+    elif args().comma_sep_list():
+        for player in (players := get_players_from_args()[0]):
+            print(f"uuids of {player.name()}'s friends:")
+            for friend in player.friends():
+                print(f"{friend.uuid()}, ", end='')
+            print('\n')
+        for player in players:
+            print(f"igns of {player.name()}'s friends:")
+            for friend in player.friends():
+                print(f"{friend.name()}, ", end='', flush=True)
+            print('\n')
     else:
         assert False
 

@@ -37,7 +37,8 @@ def getJSON(typeOfRequest: str, uuid_or_ign: Optional[str], specific_api_key: Op
     global sleep_till, num_api_calls_made
 
     if sleep_till and (sleep_duration := (sleep_till - datetime.now()).total_seconds()) >= 0:
-        print(f"Sleeping until {sleep_till.strftime('%I:%M:%S %p')} for rate limiting.")
+        if not args().comma_sep_list():
+            print(f"Sleeping until {sleep_till.strftime('%I:%M:%S %p')} for rate limiting.")
         sleep(sleep_duration)
     sleep_till = None
 
