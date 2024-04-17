@@ -237,7 +237,7 @@ class Player:
         """Returns whether the player is already represented in this players list."""
         return any(self.represents_same_person(p) for p in players)
 
-    def get_stats_dict(self) -> dict:
+    def get_stats_dict(self) -> dict[str, str | float | int]:
         """Returns a dict with key-val pairs for uuid, name, fkdr, star, and pit_rank."""
         return {'uuid': self.uuid(), 'name': self.name(), 'fkdr': self.get_fkdr(),
                 'star': self.get_bw_star(), 'pit_rank': self.pit_rank_string()}

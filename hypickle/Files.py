@@ -4,6 +4,7 @@ and stuff in this same file."""
 from __future__ import annotations
 import os
 import os.path
+from pathlib import Path
 import json
 import time
 from typing import Optional, Iterable
@@ -14,10 +15,12 @@ from string import whitespace
 
 from . import Utils
 
-_ALIASES_FILENAME = "aliases.txt"
-_UUIDS_FILENAME = "uuids.txt"
+ALIASES_FILENAME = "aliases.txt"
+UUIDS_FILENAME = "uuids.txt"
+HYPICKLE_CACHE_FOLDER = "hypickle_cache"
 
-_ign_uuid_pairs: Optional[dict] = None
+_ign_uuid_pairs_uuids_txt: Optional[dict[str, str]] = None
+_ign_uuid_pairs_hypickle_cache: Optional[dict[str, str]] = None
 
 def write_data_as_json_to_file(data: dict, description: str, folder_name: str = "results") -> None:
     warning_msg = """About to output a player's friends list to a file. Note that for any additional
@@ -27,9 +30,11 @@ def write_data_as_json_to_file(data: dict, description: str, folder_name: str = 
     warning_msg = ' '.join(warning_msg.split()) + ' '
     if description.lower().startswith('friends of') and input(warning_msg).lower() != 'y':
         return
-    filename = create_file(description, folder_name)
-    with open(filename, "w") as f:
-        f.write(json.dumps(data, indent=4))
+    write_to_file(json.dumps(data, indent=4), description, folder_name)
+
+def write_to_file(text: str, description: str, folder_name: str) -> None:
+    with open(create_file(description, folder_name), "w") as f:
+        f.write(text)
 
 def create_file(description: str, folder_name: str) -> str:
     """Creates a file using the params and returns the name of the file, which can be used by the caller if desired."""
@@ -37,19 +42,36 @@ def create_file(description: str, folder_name: str) -> str:
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     return filename
 
-def ign_uuid_pairs_in_uuids_txt(do_deepcopy: bool = False) -> dict:
+def ign_uuid_pairs_in_uuids_txt(do_deepcopy: bool = False) -> dict[str, str]:
     """Retrieves pairs stored in the uuids.txt file as a dict - key ign, value uuid"""
-    global _ign_uuid_pairs
-    if _ign_uuid_pairs is not None:
-        return deepcopy(_ign_uuid_pairs) if do_deepcopy else _ign_uuid_pairs
-    _ign_uuid_pairs = {} # key ign, value uuid
-    if not os.path.isfile(_UUIDS_FILENAME):
+    global _ign_uuid_pairs_uuids_txt
+    if _ign_uuid_pairs_uuids_txt is None:
+        _ign_uuid_pairs_uuids_txt = read_pairs_from_file(UUIDS_FILENAME)
+        assert all(k == k.lower() for k in _ign_uuid_pairs_uuids_txt)
+    return deepcopy(_ign_uuid_pairs_uuids_txt) if do_deepcopy else _ign_uuid_pairs_uuids_txt
+
+def ign_uuid_pairs_in_hypickle_cache() -> dict[str, str]:
+    """Returns all pairs in files less than 30 mins old (since the current run began)."""
+    global _ign_uuid_pairs_hypickle_cache
+    if not os.path.isdir(HYPICKLE_CACHE_FOLDER):
         return {}
-    with open(_UUIDS_FILENAME) as file:
-        for line in file:
-            words = line.rstrip().split()
-            _ign_uuid_pairs[words[0].lower()] = words[1]
-    return deepcopy(_ign_uuid_pairs) if do_deepcopy else _ign_uuid_pairs
+    if _ign_uuid_pairs_hypickle_cache is None:
+        _ign_uuid_pairs_hypickle_cache = {}
+        filepaths = sorted(Path(HYPICKLE_CACHE_FOLDER).iterdir(), key=os.path.getmtime)
+        should_clean_cache = (
+            len(filepaths) > 50 and
+            input('Recommended to delete old files in the `hypickle_cache` folder - press y to do so: ')
+                  == 'y'
+        )
+        for p in filepaths:
+            assert p.name.startswith('ign_uuid_pair - ') and p.name.endswith('.txt') and len(p.name) == 39
+            if time.time() - os.path.getmtime(p) < 1800:
+                _ign_uuid_pairs_hypickle_cache.update(
+                    read_pairs_from_file(os.path.join(HYPICKLE_CACHE_FOLDER, p.name))
+                )
+            elif should_clean_cache:
+                p.unlink()
+    return _ign_uuid_pairs_hypickle_cache
 
 def read_json_textfile(filepath: str) -> dict:
     try:
@@ -65,15 +87,32 @@ def update_uuids_file(ign_uuid_pairs: dict[str, str]) -> None:
     If a uuid is found for an ign in uuids.txt that conflicts with a pair in the passed in param,
     it will be replaced. Also, this function will make a backup of uuids.txt before overwriting it."""
 
-    if os.path.isfile(_UUIDS_FILENAME):
-        shutil.copy(_UUIDS_FILENAME, create_file('uuids copy', 'old-uuids'))
+    if os.path.isfile(UUIDS_FILENAME):
+        shutil.copy(UUIDS_FILENAME, create_file('uuids copy', 'old-uuids'))
     pairs = ign_uuid_pairs_in_uuids_txt(do_deepcopy=True)
     pairs.update(ign_uuid_pairs)
-    with open(_UUIDS_FILENAME, "w") as file:
+    assert all(k == k.lower() for k in pairs)
+    write_pairs_to_file(pairs, UUIDS_FILENAME)
+    print(f"{UUIDS_FILENAME} now contains uuid-ign pairs for {len(pairs)} players.")
+
+def write_pairs_to_file(pairs: dict[str, str], filepath: str) -> None:
+    """If the file exists, it will be overwritten. Otherwise, it will be created and written to.
+       The format of the text will be one pair per line, with a space between each counterpart."""
+    with open(filepath, "w") as file:
         for key, value in pairs.items():
             file.write(f"{key} {value}\n")
-            assert key == key.lower()
-    print(f"{_UUIDS_FILENAME} now contains uuid-ign pairs for {len(pairs)} players.")
+
+def read_pairs_from_file(filepath: str) -> dict[str, str]:
+    """Each line should contain one pair, with the counterparts separated by a space.
+       If the file doesn't exist, an empty dict is returned."""
+    if not os.path.isfile(filepath):
+        return {}
+    pairs = {}
+    with open(filepath) as file:
+        for line in file:
+            words = line.rstrip().split()
+            pairs[words[0]] = words[1]
+    return pairs
 
 def assertions_for_aliases(alias: str, meaning: str, keywords: Iterable[str]) -> None:
     assert alias not in keywords and not Utils.contains_whitespace(alias)
@@ -130,9 +169,9 @@ def update_aliases(
     else:
         add_new_ign_uuid_aliases(aliases, ign_uuid_pairs, keywords)
 
-    if os.path.isfile(_ALIASES_FILENAME):
-        shutil.copy(_ALIASES_FILENAME, create_file('aliases copy', 'old-aliases'))
-    with open(_ALIASES_FILENAME, 'w') as file:
+    if os.path.isfile(ALIASES_FILENAME):
+        shutil.copy(ALIASES_FILENAME, create_file('aliases copy', 'old-aliases'))
+    with open(ALIASES_FILENAME, 'w') as file:
         for a,m in sorted(aliases.items()):
             file.write(f'"{a}" = "{m}"\n')
 
@@ -151,9 +190,9 @@ def get_aliases() -> dict[str, list[str]]:
     """ Returns a list representing the aliases stored in aliases.txt. Each element of this list
         will be a tuple, where the first element is a string (the alias), and the second element
         is a list of strings (what the alias stands for). """
-    if not os.path.isfile(_ALIASES_FILENAME):
+    if not os.path.isfile(ALIASES_FILENAME):
         return {}
-    with open(_ALIASES_FILENAME, 'r') as file:
+    with open(ALIASES_FILENAME, 'r') as file:
         lines: list[str] = file.read().splitlines()
     aliases: dict[str, list[str]] = {}
     for line in lines:

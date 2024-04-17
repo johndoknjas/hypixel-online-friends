@@ -101,7 +101,8 @@ def get_uuid(uuid_or_ign: str, call_api_last_resort: bool = True) -> str:
     if Utils.is_uuid(uuid_or_ign):
         return uuid_or_ign
     ign = uuid_or_ign
-    possible_uuid = Files.ign_uuid_pairs_in_uuids_txt().get(ign, ign)
+    possible_uuid = Files.ign_uuid_pairs_in_uuids_txt().get(ign,
+                    Files.ign_uuid_pairs_in_hypickle_cache().get(ign, ign))
     if Utils.is_uuid(possible_uuid):
         if Player(possible_uuid).getName().lower() != ign:
             raise RuntimeError(f"NOTE: {ign} is no longer the ign of the player with uuid {possible_uuid}")
@@ -123,6 +124,11 @@ class Player:
         self.recent_games_visible: Optional[bool] = None
         """Recent games may not be visible if the player has turned off the api setting, or if they haven't
            played a game in roughly 3 days it seems."""
+        if Utils.is_ign(uuid_or_ign):
+            # An ign was passed in, which means storing the uuid in the cache might help save
+            # an api call in the near future:
+            Files.write_to_file(f"{self.getName().lower()} {self.getUUID()}",
+                                "ign_uuid_pair", Files.HYPICKLE_CACHE_FOLDER)
 
     def getName(self, extra_safety_check=True) -> str:
         """ Just return player's name. """
