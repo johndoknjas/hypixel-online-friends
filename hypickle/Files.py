@@ -58,20 +58,26 @@ def ign_uuid_pairs_in_hypickle_cache() -> dict[str, str]:
     if _ign_uuid_pairs_hypickle_cache is None:
         _ign_uuid_pairs_hypickle_cache = {}
         filepaths = sorted(Path(HYPICKLE_CACHE_FOLDER).iterdir(), key=os.path.getmtime)
+        seconds_obsolete = 1800
         should_clean_cache = (
-            len(filepaths) > 50 and
+            sum(1 for p in filepaths if modified_secs_ago(p) >= seconds_obsolete) > 50 and
             input('Recommended to delete old files in the `hypickle_cache` folder - press y to do so: ')
                   == 'y'
         )
         for p in filepaths:
             assert p.name.startswith('ign_uuid_pair - ') and p.name.endswith('.txt') and len(p.name) == 39
-            if time.time() - os.path.getmtime(p) < 1800:
+            if modified_secs_ago(p) < seconds_obsolete:
                 _ign_uuid_pairs_hypickle_cache.update(
                     read_pairs_from_file(os.path.join(HYPICKLE_CACHE_FOLDER, p.name))
                 )
             elif should_clean_cache:
                 p.unlink()
+    assert all(k == k.lower() and v == v.lower() for k,v in _ign_uuid_pairs_hypickle_cache.items())
     return _ign_uuid_pairs_hypickle_cache
+
+def update_hypickle_cache(ign: str, uuid: str):
+    _ign_uuid_pairs_hypickle_cache[ign := ign.lower()] = uuid
+    write_to_file(f"{ign} {uuid}", "ign_uuid_pair", HYPICKLE_CACHE_FOLDER)
 
 def read_json_textfile(filepath: str) -> dict:
     try:
@@ -215,3 +221,6 @@ def apply_aliases(lst: list[str]) -> list[str]:
         lst = Utils.replace_in_list(lst, alias, aliases[alias])
     # If lst got updated, keep recursing (as some aliases may have aliases of their own):
     return apply_aliases(lst) if lst != old_lst else lst
+
+def modified_secs_ago(p: Path) -> int:
+    return time.time() - os.path.getmtime(p)
