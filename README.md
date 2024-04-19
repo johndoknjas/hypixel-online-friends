@@ -43,8 +43,8 @@ Open the root directory of the project in the terminal, and then:
   - `pylint *.py` will review the code for style.
   - `pydeps hypickle` will output a dependency graph of the project's modules.
   - `python my-linter.py` is a basic script I wrote that mainly attempts to find functions which are never/rarely used.
-  - `pytest tests.py` runs a few basic automated tests. To run manual tests (output to
-    the screen needs to be judged by the tester), run `python tests.py`.
+  - `pytest tests.py` runs a few basic automated tests. Note that this requires installing `vulture`,
+    `mypy`, and `vermin`. To run manual tests (i.e., the output to the screen needs to be judged by the tester), run `python tests.py`.
   - `vermin hypickle` deduces the oldest version of python that works to run the project. The expected output is 3.8, corresponding with `requires-python = ">= 3.8"` in `pyproject.toml`.
 
 ### Acknowledgements:

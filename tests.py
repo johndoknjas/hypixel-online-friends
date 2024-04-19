@@ -1,5 +1,6 @@
 from __future__ import annotations
 import pytest
+import vulture
 
 from hypickle.MyClasses import Specs
 from hypickle import leveling, Colours
@@ -63,6 +64,12 @@ class Tests:
             leveling.getTotalExpToLevelFloor(1.00001)
         with pytest.raises(AssertionError):
             leveling.getTotalExpToLevelFloor(1.9999)
+
+    def test_vulture(self):
+        v = vulture.Vulture()
+        v.scavenge(['.'])
+        assert not v.get_unused_code()
+        # https://stackoverflow.com/a/59564370/7743427
 
 if __name__ == '__main__':
     non_automated_tests()
