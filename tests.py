@@ -1,6 +1,6 @@
 from __future__ import annotations
 import pytest
-import vulture
+import vulture # type: ignore
 
 from hypickle.MyClasses import Specs
 from hypickle import leveling, Colours

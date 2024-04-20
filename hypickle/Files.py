@@ -76,7 +76,7 @@ def ign_uuid_pairs_in_hypickle_cache() -> dict[str, str]:
     return _ign_uuid_pairs_hypickle_cache
 
 def update_hypickle_cache(ign: str, uuid: str):
-    _ign_uuid_pairs_hypickle_cache[ign := ign.lower()] = uuid
+    ign_uuid_pairs_in_hypickle_cache()[ign := ign.lower()] = uuid
     write_to_file(f"{ign} {uuid}", "ign_uuid_pair", HYPICKLE_CACHE_FOLDER)
 
 def read_json_textfile(filepath: str) -> dict:
@@ -222,5 +222,5 @@ def apply_aliases(lst: list[str]) -> list[str]:
     # If lst got updated, keep recursing (as some aliases may have aliases of their own):
     return apply_aliases(lst) if lst != old_lst else lst
 
-def modified_secs_ago(p: Path) -> int:
+def modified_secs_ago(p: Path) -> float:
     return time.time() - os.path.getmtime(p)

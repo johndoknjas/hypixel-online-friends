@@ -37,7 +37,7 @@ with the `hypickle` script (explained below).
 ### Developer commands:
 
 Open the root directory of the project in the terminal, and then:
-  - `python3 main.py *args*` allows you to test any local changes you've made to the project.
+  - `python main.py *args*` allows you to test any local changes you've made to the project.
   - `vulture .` will find unused code.
   - `mypy .` will typecheck.
   - `pylint *.py` will review the code for style.
