@@ -1,10 +1,7 @@
-from __future__ import annotations
-
 """ Simple Hypixel-API in Python, by Snuggle | 2017 to 2021 (https://github.com/Snuggle/hypixel.py/blob/main/hypixel.py)
     Modifications made by John (late 2022 to current) """
-__version__ = '0.8.0'
-# pylint: disable=C0103
 
+from __future__ import annotations
 from random import choice
 from time import time, sleep
 from datetime import datetime, timedelta

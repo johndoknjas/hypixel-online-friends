@@ -36,6 +36,10 @@
     # Consider making a report class instead of report dicts. The class could have a function that makes and
       returns a dict.
 
+    # For the future annotations test in `tests.py`, update it so that it's still fine if one docstring
+      comes before the future annotations statement, but no more than one. See
+      https://stackoverflow.com/questions/38688504/from-future-imports-must-occur-at-the-beginning-of-the-file-what-defines
+
     # Make `tests.py` run whenever pushing to master on github. And try to run it on windows and linux
       via github actions?
 
