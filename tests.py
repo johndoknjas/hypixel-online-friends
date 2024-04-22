@@ -1,6 +1,7 @@
 from __future__ import annotations
 import subprocess
 from subprocess import PIPE
+import glob
 import pytest
 import vulture # type: ignore
 import mypy.api
@@ -95,6 +96,24 @@ class Tests:
             [line.strip() for line in result.stdout.splitlines()]
         )
         assert (result.returncode, result.stderr) == (0, '')
+
+    def test_future_annotations(self):
+        for filename in glob.iglob('**/*.py', recursive=True):
+            assert filename.endswith(".py")
+            with open(filename) as file:
+                first_code_line = next(
+                    (line.rstrip('\n') for line in file.readlines() if is_code_line(line)), None
+                )
+                if filename in (r"hypickle/__init__.py", r"hypickle\__init__.py"):
+                    assert first_code_line is None
+                else:
+                    assert first_code_line == "from __future__ import annotations"
+
+# Helpers:
+
+def is_code_line(line: str) -> bool:
+    return (bool(line.strip()) and not line.lstrip().startswith(('#', '"""')) and
+            not line.rstrip().endswith('"""'))
 
 if __name__ == '__main__':
     non_automated_tests()

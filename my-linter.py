@@ -29,22 +29,10 @@ def output_funcs_with_no_arrow(lines: list[str], funcs: list[Func]) -> None:
         if all('->' not in line for line in lines[func.line_index:func.line_index+3]):
             print(f"{func} possibly does not have a '->'")
 
-def is_code_line(line: str) -> bool:
-    return (bool(line.strip()) and not line.lstrip().startswith(('#', '"""')) and
-            not line.rstrip().endswith('"""'))
-
-def assert_future_annotations(filename: str) -> None:
-    if not filename.endswith(".py"):
-        return
-    with open(filename) as file:
-        first_code_line = next((line.rstrip('\n') for line in file.readlines() if is_code_line(line)), None)
-        assert first_code_line in (None, "from __future__ import annotations")
-
 def main() -> None:
     lines: list[str] = []
     for filename in glob.iglob('**/*.py', recursive=True):
-        assert_future_annotations(filename)
-        if not filename.endswith(".py") or filename == "tests.py":
+        if filename == "tests.py":
             continue
         with open(filename) as file:
             lines.extend(file.read().splitlines())

@@ -36,10 +36,8 @@
     # Consider making a report class instead of report dicts. The class could have a function that makes and
       returns a dict.
 
-    # Make `tests.py` run whenever pushing to master on github. Also move the future
-      annotations check in `my-linter.py` into `tests.py`.
-        # `my-linter` could be mainly for things that require me to manually read the output. I.e., possibly
-          unused functions.
+    # Make `tests.py` run whenever pushing to master on github. And try to run it on windows and linux
+      via github actions?
 
     # Consider sleeping in the while loop for perpetual passes, to ensure only one per min (at most) is done.
       # The point of this would be to avoid doing repetitive output so often.
