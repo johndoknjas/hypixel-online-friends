@@ -76,7 +76,7 @@ def ign_uuid_pairs_in_hypickle_cache() -> dict[str, str]:
     return _ign_uuid_pairs_hypickle_cache
 
 def update_hypickle_cache(ign: str, uuid: str):
-    ign_uuid_pairs_in_hypickle_cache()[ign := ign.lower()] = uuid
+    ign_uuid_pairs_in_hypickle_cache()[(ign := ign.lower())] = uuid
     write_to_file(f"{ign} {uuid}", "ign_uuid_pair", HYPICKLE_CACHE_FOLDER)
 
 def read_json_textfile(filepath: str) -> dict:

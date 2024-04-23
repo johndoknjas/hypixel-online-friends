@@ -28,7 +28,7 @@ class ScatterplotInfo:
         return poly_string
 
 def output_scatterplots(info_for_figs: Iterable[ScatterplotInfo]) -> None:
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt # type: ignore
     import mplcursors # type: ignore
     for i, fig_info in enumerate(info_for_figs):
         f = plt.figure(i+1)

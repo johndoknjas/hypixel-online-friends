@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 import re
 import os.path
-import requests
+import requests # type: ignore
 
 from .MyClasses import UUID_Plus_Time, args
 from . import Files

@@ -40,9 +40,6 @@
       comes before the future annotations statement, but no more than one. See
       https://stackoverflow.com/questions/38688504/from-future-imports-must-occur-at-the-beginning-of-the-file-what-defines
 
-    # Make `tests.py` run whenever pushing to master on github. And try to run it on windows and linux
-      via github actions?
-
     # Consider sleeping in the while loop for perpetual passes, to ensure only one per min (at most) is done.
       # The point of this would be to avoid doing repetitive output so often.
 
