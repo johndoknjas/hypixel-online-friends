@@ -16,6 +16,10 @@
     # Run pylint as a test in `tests.py`, where you assert certain error codes aren't raised.
       For flake8, you can update the `run-tests` file to include more error codes there as well.
 
+    # https://github.com/actions/setup-python/issues/808
+      When python 3.8 and 3.9 reliably work on macos for github runners, remove the exclusion
+      of them in `run-tests.py`.
+
     # Can include some linters mentioned here in your tests as well (e.g., bandit):
       https://realpython.com/python-code-quality/
 
