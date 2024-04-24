@@ -13,6 +13,12 @@
     # For arg players, you could display the date of their last login (if available through the api).
       # And for friends too, at least when doing the 'all' feature (since only makes sense for offline ones).
 
+    # Run pylint as a test in `tests.py`, where you assert certain error codes aren't raised.
+      For flake8, you can update the `run-tests` file to include more error codes there as well.
+
+    # Can include some linters mentioned here in your tests as well (e.g., bandit):
+      https://realpython.com/python-code-quality/
+
     # https://hypixel.fandom.com/wiki/Ranks
       Consider handling the other 'Special' ranks (only handle 'YOUTUBE' right now).
 

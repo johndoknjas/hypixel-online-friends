@@ -233,6 +233,8 @@ def main(argv: Optional[list[str]] = None) -> None:
     """When called as a script, `argv` is left as None and `sys.argv` is used.
        If calling main() programatically from another python file though, pass the args
        you want via `argv`."""
+    if not __debug__:
+        raise RuntimeError("Python isn't running in the default debug mode.")
     MyClasses.set_args(argv if argv is not None else sys.argv)
 
     if args().do_mini_program():
