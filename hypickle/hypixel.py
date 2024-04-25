@@ -132,10 +132,12 @@ class Player:
         if not extra_safety_check:
             return self.JSON['displayname']
         sanitized_name = re.sub("[^A-Za-z0-9_]", "", self.JSON['displayname'])
-        # Removes any leading whitespace, and only keeps alphanumerics and underscores.
+        # Only keeps alphanumerics and underscores.
         if self.JSON['displayname'] != sanitized_name:
             raise RuntimeError("Potentially unsafe character in ign - sanitized version is " + sanitized_name
             + ". To disable this safety check, call this function with getName(extra_safety_check=False).")
+        if not Utils.is_ign(sanitized_name):
+            raise RuntimeError("Player's name is not a valid ign.")
         return sanitized_name
 
     def getUUID(self) -> str:
