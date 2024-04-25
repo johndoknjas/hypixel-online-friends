@@ -23,6 +23,16 @@
     # Can include some linters mentioned here in your tests as well (e.g., bandit):
       https://realpython.com/python-code-quality/
 
+    # Could estimate the amount of memory returned from each call in getJSON, using this:
+      https://stackoverflow.com/a/10387636/7743427
+      Make a folder where each file is the estimated memory used during a given day. Then
+      add a feature that outputs this info to the user.
+        - If the total memory usage within the past x days exceeds some amount of GBs, you could
+          output this to the user when they run the program normally. But don't keep
+          outputting this message every time they run the program afterwards.
+        - And if memory usage during a single run of the program exceeds a certain amount, you
+          could tell the user and ask them to enter 'y' to continue.
+
     # https://hypixel.fandom.com/wiki/Ranks
       Consider handling the other 'Special' ranks (only handle 'YOUTUBE' right now).
 
