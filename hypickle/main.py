@@ -182,7 +182,7 @@ def do_mini_program() -> None:
         output_player_jsons_to_file(get_players_from_args()[0])
     elif args().pit_percent():
         for arg in args().get_args(True):
-            Pit.PitStats(Pit.get_xp_req_for_rank(arg)).print_info()
+            Pit.PitStats(Pit.get_xp_req_for_rank(arg) if '-' in arg else int(arg)).print_info()
     elif args().pit_plot():
         fig1 = ScatterplotInfo(Pit.xp_percent_levels(), range(1, 121), 'Levels',
                                'XP % Through a Prestige', 'Level')
