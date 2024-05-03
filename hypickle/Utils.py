@@ -8,6 +8,7 @@ from collections import OrderedDict
 from copy import deepcopy
 import math
 from pprint import pprint
+import itertools
 
 def list_subtract(main_list: list, subtract_elems: Iterable) -> list:
     subtract_set = set(subtract_elems)
@@ -192,13 +193,8 @@ def get_current_date() -> str:
 def replace_in_list(lst: list[str], elem_to_remove: str, list_to_insert: list[str]) -> list[str]:
     """Returns a new list, where any occurrences of `elem_to_remove` (case-insensitive) in `lst` are
        replaced with the elements in `list_to_insert`. `lst` will not be modified."""
-    replacement: list[str] = []
-    for s in lst:
-        if s.lower() == elem_to_remove.lower():
-            replacement.extend(list_to_insert)
-        else:
-            replacement.append(s)
-    return replacement
+    elem_to_remove = elem_to_remove.lower()
+    return list(itertools.chain(*(list_to_insert if s.lower() == elem_to_remove else [s] for s in lst)))
 
 def contains_whitespace(s: str) -> bool:
     return s != remove_whitespace(s)
