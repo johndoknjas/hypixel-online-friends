@@ -75,7 +75,7 @@ def ign_uuid_pairs_in_hypickle_cache() -> dict[str, str]:
     assert all(k == k.lower() and v == v.lower() for k,v in _ign_uuid_pairs_hypickle_cache.items())
     return _ign_uuid_pairs_hypickle_cache
 
-def update_hypickle_cache(ign: str, uuid: str):
+def update_hypickle_cache(ign: str, uuid: str) -> None:
     ign_uuid_pairs_in_hypickle_cache()[(ign := ign.lower())] = uuid
     write_to_file(f"{ign} {uuid}", "ign_uuid_pair", HYPICKLE_CACHE_FOLDER)
 

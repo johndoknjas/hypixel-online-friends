@@ -58,7 +58,7 @@ def get_xp_req_for_rank(pit_rank: str) -> int:
     return total_xp_reqs_for_levels(pres)[lvl-1]
 
 class PitStats:
-    def __init__(self, pit_xp: int, playtime_kills_deaths: Optional[tuple[int,int,int]] = None):
+    def __init__(self, pit_xp: int, playtime_kills_deaths: Optional[tuple[int,int,int]] = None) -> None:
         """note: playtime measured in mins"""
         assert pit_xp >= 0
         self._pit_xp = pit_xp

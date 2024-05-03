@@ -3,7 +3,7 @@ from typing import Iterable
 
 class ScatterplotInfo:
     def __init__(self, x_vals: Iterable[float], y_vals: Iterable[float],
-                 title: str, x_label: str, y_label: str):
+                 title: str, x_label: str, y_label: str) -> None:
         self.x_vals, self.y_vals, self.title = list(x_vals), list(y_vals), title
         self.x_label, self.y_label = x_label, y_label
 

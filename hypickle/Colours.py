@@ -39,7 +39,7 @@ assert (13,13,10) == (len(PIT_PRES_HEXES), len(PIT_LVL_HEXES), len(BW_PRES_HEXES
 
 class ColourSpecs:
     def __init__(self, text: str, text_colour: Hex, bg_colour: Optional[Hex] = None,
-                 bold: bool = False, blink: bool = False):
+                 bold: bool = False, blink: bool = False) -> None:
         self.text, self.style = text, rich.style.Style(color=text_colour.value, bold=bold, blink=blink,
                                                        bgcolor = bg_colour.value if bg_colour else None)
 

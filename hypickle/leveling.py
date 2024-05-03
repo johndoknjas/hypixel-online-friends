@@ -8,7 +8,7 @@ from typing import Optional, Callable
 class QuadraticFunc:
     def __init__(self, a: float, b: float, c: float,
                  req_for_x_vals: Optional[Callable[[float], bool]] = None,
-                 req_for_y_vals: Optional[Callable[[float], bool]] = None):
+                 req_for_y_vals: Optional[Callable[[float], bool]] = None) -> None:
         "Represents some function: y = ax^2 + bx + c"
         self.a, self.b, self.c = a, b, c
         self.req_for_x_vals, self.req_for_y_vals = req_for_x_vals, req_for_y_vals

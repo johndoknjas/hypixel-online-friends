@@ -24,7 +24,7 @@ class UUID_Plus_Time:
     """This class encapsulates a UUID and a time (unix epoch), likely representing when
     the player was friended to the parent player."""
 
-    def __init__(self, uuid: str, time_val: str | float | int | None):
+    def __init__(self, uuid: str, time_val: str | float | int | None) -> None:
         """If `time_val` isn't None, it must be either a date string, or the
            unix epoch time in seconds or milliseconds."""
         self._uuid: str = uuid
@@ -91,7 +91,7 @@ class Specs:
         return playerSpecs
 
     def __init__(self, just_uuids: bool, player_must_be_online: bool,
-                 friends_specs: Specs | None, degrees_from_original_player: int):
+                 friends_specs: Specs | None, degrees_from_original_player: int) -> None:
         assert Specs._common_specs['set flag']
         self._just_uuids = just_uuids
         self._player_must_be_online = player_must_be_online
