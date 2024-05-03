@@ -22,7 +22,8 @@ class Args:
                               'pitpercent', 'pit%', 'pitplot', 'nwplot', 'bwplot', 'contains',
                               'trackargs', 'argsonline', 'newest', 'oldest',
                               'debugapi', 'showjsondiff', 'showjsonupdates',
-                              'norecentgame', 'norecentgames', 'list', 'copyable')
+                              'norecentgame', 'norecentgames', 'list', 'copyable',
+                              'help', 'features')
         # These keywords are possible options the user can specify for using the program. All of these are
         # 'non-positional'; i.e., it doesn't matter where they appear in the user's command line argument list.
         # For 'positional' arguments, there are fewer (e.g., '-', 'friendedwhen', 'intersect').
@@ -141,11 +142,14 @@ class Args:
            by the igns after that."""
         return 'list' in self._ARGS or 'copyable' in self._ARGS
 
+    def list_features(self) -> bool:
+        return 'help' in self._ARGS or 'features' in self._ARGS
+
     def do_mini_program(self) -> bool:
         mini_programs = (self.update_aliases(), self.add_uuid_aliases(), self.print_aliases(),
                          self.contains_substr(), self.add_additional_friends(), self.get_player_json(),
                          self.pit_percent(), self.pit_plot(), self.network_plot(), self.bedwars_plot(),
-                         self.comma_sep_list())
+                         self.comma_sep_list(), self.list_features())
         assert (bool_sum := sum(1 for x in mini_programs if x)) <= 1
         return bool_sum == 1
 
@@ -158,7 +162,7 @@ class Args:
             assert not self.get_newest_friends() and not self.get_oldest_friends()
         assert not (self.sort_by_pit_rank() and self.sort_by_star())
         if any((self.update_aliases(), self.print_aliases(), self.pit_plot(), self.network_plot(),
-                self.bedwars_plot())):
+                self.bedwars_plot(), self.list_features())):
             assert not self.get_args(True) and len(self.get_args(False)) == 1
         if self.add_additional_friends():
             assert len(self.get_args(True)) == 1 and len(self.get_args(False)) == 2

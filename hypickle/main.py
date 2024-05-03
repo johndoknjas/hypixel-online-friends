@@ -226,6 +226,8 @@ def do_mini_program() -> None:
             for friend in player.friends():
                 print(f"{friend.name()}, ", end='', flush=True)
             print('\n')
+    elif args().list_features():
+        print(*sorted(args().get_keywords()), sep='\n')
     else:
         assert False
 
