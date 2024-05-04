@@ -23,6 +23,10 @@
     # Can include some linters mentioned here in your tests as well (e.g., bandit):
       https://realpython.com/python-code-quality/
 
+    # Saw 'Exited PIT -0.01 mins ago' (on May 3). Did a bug fix in April (commit 29587138) that seemed to
+      resolve this, but maybe it can still occasionally come up if hypixel is slightly off in how they
+      track time compared to my computer. If another -0.01 comes up in the future, consider investigating.
+
     # Could estimate the amount of memory returned from each call in getJSON, using this:
       https://stackoverflow.com/a/10387636/7743427
       Make a folder where each file is the estimated memory used during a given day. Then
