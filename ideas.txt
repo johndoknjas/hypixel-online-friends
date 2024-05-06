@@ -16,6 +16,11 @@
     # Run pylint as a test in `tests.py`, where you assert certain error codes aren't raised.
       For flake8, you can update the `run-tests` file to include more error codes there as well.
 
+    # Update the vermin test in lintception to allow the user to test for an exact entire output message.
+      Then, add this expected message in a .lintception file for this project.
+        - Also once lintception is updated with allowing the user to specify certain files that should
+          be empty, specify the __init__.py in the hypickle folder.
+
     # https://github.com/actions/setup-python/issues/808
       When python 3.8 and 3.9 reliably work on macos for github runners, remove the exclusion
       of them in `run-tests.py`.
@@ -51,11 +56,6 @@
       kind of format your player-name project does).
         - Can also output whether any friends (on a normal program run) appear on any leaderboards,
           and if so which.
-
-    # For the `my-linter.py` script, consider adding a way to only count a function call if it's
-      non-recursive.
-        # E.g., could track the lines of all the functions in the project, and then if the latest function
-          a call is after is the same function as the one being called, it's likely recursive (or a global call).
 
     # Consider making a report class instead of report dicts. The class could have a function that makes and
       returns a dict.
