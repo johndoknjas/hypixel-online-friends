@@ -21,10 +21,6 @@
         - Also once lintception is updated with allowing the user to specify certain files that should
           be empty, specify the __init__.py in the hypickle folder.
 
-    # https://github.com/actions/setup-python/issues/808
-      When python 3.8 and 3.9 reliably work on macos for github runners, remove the exclusion
-      of them in `run-tests.py`.
-
     # Can include some linters mentioned here in your tests as well (e.g., bandit):
       https://realpython.com/python-code-quality/
 
