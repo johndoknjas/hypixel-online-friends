@@ -170,3 +170,5 @@ class Args:
                 self.comma_sep_list(), self.contains_substr())):
             assert len(self.get_args(True)) >= 1 and len(self.get_args(False)) >= 2
         assert not (self.get_newest_friends() and self.get_oldest_friends())
+        if self.track_if_arg_players_online():
+            assert self.just_online_friends()

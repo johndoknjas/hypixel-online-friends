@@ -336,6 +336,8 @@ class Player:
             assert self.root_player()
             for player in self._players_used_to_combine:
                 online_status = 'online' if player.hypixel_object().isOnline((True,)*3) else 'offline'
+                if online_status == 'online':
+                    print('\a')
                 player.print_dict_report(player.get_stats_dict(), f"this arg player is {online_status}")
             print()
 
