@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from datetime import datetime
-import time
+from time import sleep, mktime
 from typing import Optional, Iterable, Any, Type
 from collections import OrderedDict
 from copy import deepcopy
@@ -47,7 +47,7 @@ def kdr_division(kills: int, deaths: int) -> float:
     return kills / deaths if deaths else float(kills)
 
 def date_to_epoch(date_string: str, in_seconds: bool) -> float:
-    epoch = time.mktime(datetime.strptime(date_string, '%Y-%m-%d').timetuple())
+    epoch = mktime(datetime.strptime(date_string, '%Y-%m-%d').timetuple())
     return epoch * 1000 if not in_seconds else epoch
 
 def epoch_to_date(epoch: float, epoch_in_seconds: bool) -> str:
@@ -285,3 +285,4 @@ def speak(text: str) -> None:
         talker.setProperty('rate', 160)
     talker.say(text)
     talker.runAndWait()
+    sleep(0.5)
