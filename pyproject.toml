@@ -16,6 +16,7 @@ dependencies = [
   "rich",
   "deepdiff",
   "mplcursors",
+  "pyttsx3",
 ]
 readme = "README.md"
 

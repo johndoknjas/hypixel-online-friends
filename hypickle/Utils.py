@@ -9,6 +9,8 @@ from copy import deepcopy
 import math
 from pprint import pprint
 import itertools
+import pyttsx3 # type: ignore
+talker: Optional[pyttsx3.Engine | Any] = None
 
 def list_subtract(main_list: list, subtract_elems: Iterable) -> list:
     subtract_set = set(subtract_elems)
@@ -272,3 +274,14 @@ def content_in_file(filename: str) -> bool:
     """Returns True if there is at least one non-whitespace character in the file."""
     with open(filename, 'r') as f:
         return f.read().strip() != ''
+
+def speak(text: str) -> None:
+    """Uses pyttsx3 to do text to speech."""
+    global talker
+    if talker is None:
+        talker = pyttsx3.init()
+        talker.setProperty('voice', talker.getProperty('voices')[1].id)
+        talker.setProperty('volume', 0.2)
+        talker.setProperty('rate', 160)
+    talker.say(text)
+    talker.runAndWait()

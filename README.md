@@ -8,8 +8,7 @@ To install, run the following command:
 
 `pip install hypickle`
 
-Besides installing the script, this will also automatically install its dependencies (the libraries `requests`,
-`rich`, `mplcursors`, `deepdiff`, and any of their own dependencies).
+Besides installing the script, this will also automatically install its dependencies (the libraries `requests`, `rich`, `mplcursors`, `deepdiff`, `pyttsx3`, and any of their own dependencies).
 
 Then, create a new folder that will be used to store persistent information (such as friends lists you create).
 In this folder, make a textfile called 'api-key.txt', and paste your hypixel api key as the first line.
