@@ -242,7 +242,7 @@ class Player:
         return {'uuid': self.uuid(), 'name': self.name(), 'fkdr': self.get_fkdr(),
                 'star': self.get_bw_star(), 'pit_rank': self.pit_rank_string()}
 
-    def print_dict_report(self, report: dict, extra_text: str = '') -> None:
+    def print_dict_report(self, report: dict, output_online_status: bool = False) -> None:
         report = deepcopy(report)
         assert all(isinstance(v, (str,float,int)) for v in report.values())
         possible_keys = ('name', 'fkdr', 'star', 'pit_rank', 'uuid', 'time')
@@ -287,7 +287,10 @@ class Player:
                 time_friended = date_obj.strftime('%b ') + date_obj.strftime('%d/%y').lstrip('0')
             print(f" friended {time_friended}".ljust(20), end='')
         print(recent_game_msg, end='')
-        print(extra_text, end='')
+        if output_online_status:
+            if is_online := self.hypixel_object().isOnline((True,)*3):
+                Utils.speak(f"{self.name()} is online")
+            print(f"this arg player is {'online' if is_online else 'offline'}", end='')
         if not just_uuids and (updated_json := self.hypixel_object().updated_json) is not None:
             print(f" (updated player json obtained {updated_json[1].strftime('%I:%M:%S %p')})", end='')
         print()
@@ -335,10 +338,7 @@ class Player:
         if self._players_used_to_combine:
             assert self.root_player()
             for player in self._players_used_to_combine:
-                online_status = 'online' if player.hypixel_object().isOnline((True,)*3) else 'offline'
-                if online_status == 'online':
-                    Utils.speak(f"{player.name()} is online")
-                player.print_dict_report(player.get_stats_dict(), f"this arg player is {online_status}")
+                player.print_dict_report(player.get_stats_dict(), True)
             print()
 
         report.setdefault('friends', [])

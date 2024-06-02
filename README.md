@@ -1,6 +1,6 @@
 # hypickle
 
-A script that outputs realtime stats for custom lists of friends you create.
+A script that outputs realtime hypixel stats for custom lists of friends you create.
 
 ### Installation:
 

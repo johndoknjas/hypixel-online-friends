@@ -9,7 +9,7 @@ version = "1.1.5"
 authors = [
   { name="John Doknjas", email="jdoknjas@sfu.ca" },
 ]
-description = "A script that outputs realtime stats for custom lists of friends you create."
+description = "A script that outputs realtime hypixel stats for custom lists of friends you create."
 keywords = ["hypickle", "hypixel", "pit", "bedwars", "friends", "stats", "api"]
 dependencies = [
   "requests",
