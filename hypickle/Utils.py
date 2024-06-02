@@ -285,4 +285,3 @@ def speak(text: str) -> None:
         talker.setProperty('rate', 160)
     talker.say(text)
     talker.runAndWait()
-    sleep(0.5)

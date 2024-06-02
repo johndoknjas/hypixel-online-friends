@@ -288,9 +288,11 @@ class Player:
             print(f" friended {time_friended}".ljust(20), end='')
         print(recent_game_msg, end='')
         if output_online_status:
-            if is_online := self.hypixel_object().isOnline((True,)*3):
-                Utils.speak(f"{self.name()} is online")
+            is_online = self.hypixel_object().isOnline((True,)*3)
             print(f"this arg player is {'online' if is_online else 'offline'}", end='')
+            if is_online:
+                Utils.speak(f"{self.name()} is online" +
+                            (f" and {recent_game_msg}" if recent_game_msg else ''))
         if not just_uuids and (updated_json := self.hypixel_object().updated_json) is not None:
             print(f" (updated player json obtained {updated_json[1].strftime('%I:%M:%S %p')})", end='')
         print()

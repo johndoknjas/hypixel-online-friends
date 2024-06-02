@@ -21,8 +21,6 @@
         - Also once lintception is updated with allowing the user to specify certain files that should
           be empty, specify the __init__.py in the hypickle folder.
 
-    # If an arg player is online, output a voice message for their most recent game as well.
-
     # If an arg player is online and their recentgames list has a new first dict, voice-output that
       they've entered/exited a game since the last check.
         # Would have to keep track of the result from the previous call to the recentgames endpoint.
