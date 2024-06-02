@@ -210,7 +210,7 @@ class Player:
         return Utils.nested_get(self.JSON, ('stats', 'Pit', 'pit_stats_ptl', 'deaths'), 0, int)
 
     def getNetworkXP(self) -> int:
-        xp = self.JSON['networkExp']
+        xp = self.JSON.get('networkExp', 0)
         assert int(xp) == xp
         return int(xp)
 
