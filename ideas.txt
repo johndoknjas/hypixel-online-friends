@@ -21,9 +21,18 @@
         - Also once lintception is updated with allowing the user to specify certain files that should
           be empty, specify the __init__.py in the hypickle folder.
 
-    # If an arg player is online and their recentgames list has a new first dict, voice-output that
-      they've entered/exited a game since the last check.
-        # Would have to keep track of the result from the previous call to the recentgames endpoint.
+    # Only voice output a message for an online arg player if they have a new first dict in their
+      recentgames list, compared to the previous call to the endpoint.
+        - So, this will output once for any player who's online, and then subsequently only when
+          they enter/exit a game. Avoids the issue of continuously outputting a message for a player who's afk.
+        - Would have to keep track of the result from the previous call to the recentgames endpoint,
+          and make sure this previous call was not done right before somehow. E.g., the previous call
+          should have been done on the previous pass.
+        - For players whose online status is known but their recent games aren't displayed, just
+          output a voice message once that they're online (like what would be done for others) and
+          then just wouldn't output a message afterwards while they're online.
+        - If an arg player who was formerly online has gone offline, could consider outputting
+          a voice message stating that.
 
     # Can include some linters mentioned here in your tests as well (e.g., bandit):
       https://realpython.com/python-code-quality/
