@@ -55,7 +55,12 @@ def getJSON(typeOfRequest: str, uuid_or_ign: Optional[str], specific_api_key: Op
             f'typeOfRequest: {typeOfRequest}\nthere was a problem with response.json()'
         ) from e
 
-    if 'RateLimit-Remaining' in responseHeaders and int(responseHeaders['RateLimit-Remaining']) <= 1:
+    if ('RateLimit-Remaining' in responseHeaders and int(responseHeaders['RateLimit-Remaining']) <= 1
+        and int(responseHeaders['RateLimit-Reset']) < 295):
+        # The < 295 condition is to not sleep when starting a new rate limit period, since it seems
+        # there's a bug in the api where the first response header gives a `RateLimit-Remaining` val that
+        # carries over from the previous period.
+        # Made an issue: https://github.com/HypixelDev/PublicAPI/issues/646
         sleep_till = datetime.now() + timedelta(seconds=int(responseHeaders['RateLimit-Reset'])+1)
 
     if not responseJSON['success']:
