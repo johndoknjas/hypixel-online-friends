@@ -74,8 +74,10 @@ def is_uuid(uuid_or_ign: str) -> bool:
     """This function returns whether 'uuid_or_ign' is a uuid.
        Precondition: uuid_or_ign must be either a uuid or ign."""
 
-    assert isinstance(uuid_or_ign, str) and (len(uuid_or_ign) in (32, 36) or len(uuid_or_ign) <= 16)
-    return len(uuid_or_ign) in (32, 36)
+    if len(uuid_or_ign) == 36:
+        raise ValueError("uuid has dashes, prefer the format without it.")
+    assert isinstance(uuid_or_ign, str) and (len(uuid_or_ign) == 32 or len(uuid_or_ign) <= 16)
+    return len(uuid_or_ign) == 32
 
 def is_ign(uuid_or_ign: str) -> bool:
     """This function returns whether 'uuid_or_ign' is an ign.

@@ -123,6 +123,8 @@ def read_pairs_from_file(filepath: str) -> dict[str, str]:
 def assertions_for_aliases(alias: str, meaning: str, keywords: Iterable[str]) -> None:
     assert alias not in keywords and not Utils.contains_whitespace(alias)
     assert '.txt' not in meaning and '.txt' not in alias
+    if len(meaning) == 36:
+        raise RuntimeError("Please enter a uuid without dashes.")
 
 def get_new_aliases_from_user(aliases: dict[str, str], keywords: Iterable[str]) -> None:
     """Asks the user for new aliases, and updates the `aliases` parameter accordingly."""
