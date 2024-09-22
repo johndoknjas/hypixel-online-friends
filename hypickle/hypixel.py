@@ -18,6 +18,7 @@ from .Rank import Rank
 
 TIME_STARTED: float = time()
 num_api_calls_made: int = 0
+_api_key: str | None = None
 
 def make_request_url(typeOfRequest: str, uuid_or_ign: str | None) -> str:
     assert (typeOfRequest == 'leaderboards') == (uuid_or_ign is None)
@@ -73,17 +74,21 @@ def getJSON(typeOfRequest: str, uuid_or_ign: Optional[str], specific_api_key: Op
         return responseJSON
 
 def _get_api_key() -> str:
-    """ This function returns one of the key(s) in `api-key.txt`. If the file doesn't exist, it will ask the
-        user for an api key and write it to the new file. """
+    """This function returns the latest api key in `api-key.txt`. If the file doesn't exist, it will ask the
+       user for an api key and write it to the new file."""
+    global _api_key
+    if _api_key is not None:
+        return _api_key
     FILENAME = 'api-key.txt'
-    if not os.path.isfile(FILENAME) or not Utils.content_in_file(FILENAME):
-        print("The script needs a hypixel api key. To get one, you can follow the first part of this guide: https://gist.github.com/camnwalter/c0156c68b1e2a21ec0b084c6f04b63f0#how-to-get-a-new-api-key-after-the-hypixel-api-changes")
+    if (not os.path.isfile(FILENAME) or not Utils.content_in_file(FILENAME) or
+        not _validate_api_key(Files.get_nth_line(FILENAME, -1))):
+        print("The script needs a hypixel api key. You can get one from hypixel here: ", end='')
+        print("https://developer.hypixel.net/dashboard")
         while not _validate_api_key(api_key := input("Please enter your api key: ").strip()):
             print('Sorry, that api key is invalid.')
-        with open(FILENAME, 'w') as file:
-            file.write(api_key)
-    with open(FILENAME) as file:
-        return choice([x for line in file if (x := line.strip())])
+        with open(FILENAME, 'a') as file:
+            file.write(f'\n{api_key}')
+    return (_api_key := Files.get_nth_line(FILENAME, -1))
 
 def _validate_api_key(key: str) -> bool:
     try:

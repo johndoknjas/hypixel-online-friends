@@ -224,3 +224,10 @@ def apply_aliases(lst: list[str]) -> list[str]:
 
 def modified_secs_ago(p: Path) -> float:
     return time.time() - os.path.getmtime(p)
+
+def get_nth_line(filepath: str, i: int) -> str:
+    """Returns the ith line (not including whitespace-only lines). The line returned will have trailing
+       whitespace removed, if it contains any.
+       Note that i = 0 would mean the first line, i = -1 would mean the last."""
+    with open(filepath, 'r') as f:
+        return [line.rstrip() for line in f if line.strip()][i]
