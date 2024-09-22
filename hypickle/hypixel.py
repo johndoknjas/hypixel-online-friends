@@ -56,7 +56,7 @@ def getJSON(typeOfRequest: str, uuid_or_ign: Optional[str], specific_api_key: Op
             f'typeOfRequest: {typeOfRequest}\nthere was a problem with response.json()'
         ) from e
 
-    if ('RateLimit-Remaining' in responseHeaders and int(responseHeaders['RateLimit-Remaining']) <= 1
+    if ('RateLimit-Remaining' in responseHeaders and int(responseHeaders['RateLimit-Remaining']) <= 2
         and int(responseHeaders['RateLimit-Reset']) < 295):
         # The < 295 condition is to not sleep when starting a new rate limit period, since it seems
         # there's a bug in the api where the first response header gives a `RateLimit-Remaining` val that
