@@ -85,7 +85,7 @@ def _get_api_key() -> str:
         print("The script needs a hypixel api key. You can get one from hypixel here: ", end='')
         print("https://developer.hypixel.net/dashboard")
         while not _validate_api_key(api_key := input("Please enter your api key: ").strip()):
-            print('Sorry, that api key is invalid.')
+            print("Sorry, either that api key is invalid, or you've reached the daily developer request limit.")
         with open(FILENAME, 'a') as file:
             file.write(f'\n{api_key}')
     return (_api_key := Files.get_nth_line(FILENAME, -1))
@@ -94,7 +94,7 @@ def _validate_api_key(key: str) -> bool:
     try:
         getJSON('leaderboards', None, specific_api_key=key)
     except HypixelAPIError as e:
-        if "'cause': 'Invalid API key'" in repr(e):
+        if "Invalid API key" in repr(e) or "Daily developer key throttle" in repr(e):
             return False
         raise RuntimeError('Unexpected error') from e
     return True
