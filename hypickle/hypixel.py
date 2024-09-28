@@ -2,7 +2,6 @@
     Modifications made by John (late 2022 to current) """
 
 from __future__ import annotations
-from random import choice
 from time import time, sleep
 from datetime import datetime, timedelta
 from typing import Optional
