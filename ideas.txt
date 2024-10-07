@@ -1,5 +1,14 @@
 # CONTINUE HERE - todos:
 
+    # could ask the user to enter 'dev' (or not enter 'app') for dev keys.
+      # store "dev" on the line for the api key in the textfile.
+      # Then on each request, if the key is a dev, increment an int on this line in the textfile
+        that keeps track of the number of total requests by the key.
+      # Then, if the dev key is some % through its total request limit, could not do perpetual passes,
+        or not as many or something.
+      # Can also output at the beginning of the program how far through its limit a key is.
+      # To find the total request limit for a dev key, experiment with a new dev key and track its #requests.
+
     # Consider including network levels when outputting dict reports.
 
     # For bw stars >= 1000, print in the actual colours they should be, rather than yellow and blinking.
